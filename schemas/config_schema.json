@@ -1,10 +1,11 @@
 {
     "title": "Rendering Pipeline config.",
     "description": "Definition of scene- and object-configurations to build Blender scenes",
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "required": [
         "global_scene",
-        "part_scenes"
+        "parts"
     ],
     "properties": {
         "global_scene": {
@@ -21,14 +22,14 @@
                     "description": "Filepath to a gltf file that defines the global scene"
                 },
                 "lights": {
-                    "$ref": "/schemas/lights"
+                    "$ref": "/schemas/config_schema.json#/$defs/lights"
                 },
                 "cameras": {
-                    "$ref": "/schemas/cameras"
+                    "$ref": "/schemas/config_schema.json#/$defs/cameras"
                 }
             }
         },
-        "part_scenes": {
+        "parts": {
             "type": "array",
             "description": "Scene definition that is applied to this assembly or single part",
             "items": {
@@ -56,16 +57,16 @@
                         "description": "The hierarchy of this part"
                     },
                     "lights": {
-                        "$ref": "/schemas/lights"
+                        "$ref": "/schemas/config_schema.json#/$defs/lights"
                     },
                     "cameras": {
-                        "$ref": "/schemas/cameras"
+                        "$ref": "/schemas/config_schema.json#/$defs/cameras"
                     },
                     "single_parts": {
                         "type": "array",
                         "description": "The single parts this assembly is assembled of",
                         "items": {
-                            "$ref": "/schemas/single_part"
+                            "$ref": "/schemas/config_schema.json#/$defs/single_part"
                         }
                     }
                 }
@@ -95,7 +96,7 @@
                 "type": "array",
                 "description": "A list of camera definitions",
                 "items": {
-                    "$ref": "/schemas/camera"
+                    "$ref": "/schemas/config_schema.json#/$defs/camera"
                 }
             },
             "camera": {
@@ -113,10 +114,10 @@
                         "description": "The camera type. (orthographic, perspective)"
                     },
                     "position": {
-                        "$ref": "/schemas/point_3d"
+                        "$ref": "/schemas/config_schema.json#/$defs/point_3d"
                     },
                     "direction": {
-                        "$ref": "/schemas/point_3d"
+                        "$ref": "/schemas/config_schema.json#/$defs/point_3d"
                     }
                 }
             },
@@ -125,7 +126,7 @@
                 "type": "array",
                 "description": "A list of light definitions",
                 "items": {
-                    "$ref": "/schemas/light"
+                    "$ref": "/schemas/config_schema.json#/$defs/light"
                 }
             },
             "light": {
@@ -135,7 +136,6 @@
                 "required": [
                     "light_type",
                     "position",
-                    "direction",
                     "color",
                     "intensity"
                 ],
@@ -145,13 +145,13 @@
                         "description": "The light type"
                     },
                     "position": {
-                        "$ref": "/schemas/point_3d"
+                        "$ref": "/schemas/config_schema.json#/$defs/point_3d"
                     },
                     "direction": {
-                        "$ref": "/schemas/point_3d"
+                        "$ref": "/schemas/config_schema.json#/$defs/point_3d"
                     },
                     "color": {
-                        "$ref": "/schemas/color_rgb"
+                        "$ref": "/schemas/config_schema.json#/$defs/color_rgb"
                     },
                     "intensity": {
                         "type": "number",
