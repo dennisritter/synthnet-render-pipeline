@@ -22,10 +22,10 @@
                     "description": "Filepath to a gltf file that defines the global scene"
                 },
                 "lights": {
-                    "$ref": "/schemas/config_schema.json#/$defs/lights"
+                    "$ref": "/schemas/lights"
                 },
                 "cameras": {
-                    "$ref": "/schemas/config_schema.json#/$defs/cameras"
+                    "$ref": "/schemas/cameras"
                 }
             }
         },
@@ -57,16 +57,16 @@
                         "description": "The hierarchy of this part"
                     },
                     "lights": {
-                        "$ref": "/schemas/config_schema.json#/$defs/lights"
+                        "$ref": "/schemas/lights"
                     },
                     "cameras": {
-                        "$ref": "/schemas/config_schema.json#/$defs/cameras"
+                        "$ref": "/schemas/cameras"
                     },
                     "single_parts": {
                         "type": "array",
                         "description": "The single parts this assembly is assembled of",
                         "items": {
-                            "$ref": "/schemas/config_schema.json#/$defs/single_part"
+                            "$ref": "/schemas/single_part"
                         }
                     }
                 }
@@ -96,7 +96,7 @@
                 "type": "array",
                 "description": "A list of camera definitions",
                 "items": {
-                    "$ref": "/schemas/config_schema.json#/$defs/camera"
+                    "$ref": "/schemas/camera"
                 }
             },
             "camera": {
@@ -114,10 +114,10 @@
                         "description": "The camera type. (orthographic, perspective)"
                     },
                     "position": {
-                        "$ref": "/schemas/config_schema.json#/$defs/point_3d"
+                        "$ref": "/schemas/point_3d"
                     },
                     "direction": {
-                        "$ref": "/schemas/config_schema.json#/$defs/point_3d"
+                        "$ref": "/schemas/point_3d"
                     }
                 }
             },
@@ -126,7 +126,7 @@
                 "type": "array",
                 "description": "A list of light definitions",
                 "items": {
-                    "$ref": "/schemas/config_schema.json#/$defs/light"
+                    "$ref": "/schemas/light"
                 }
             },
             "light": {
@@ -145,13 +145,13 @@
                         "description": "The light type"
                     },
                     "position": {
-                        "$ref": "/schemas/config_schema.json#/$defs/point_3d"
+                        "$ref": "/schemas/point_3d"
                     },
                     "direction": {
-                        "$ref": "/schemas/config_schema.json#/$defs/point_3d"
+                        "$ref": "/schemas/point_3d"
                     },
                     "color": {
-                        "$ref": "/schemas/config_schema.json#/$defs/color_rgb"
+                        "$ref": "/schemas/color_rgb"
                     },
                     "intensity": {
                         "type": "number",
