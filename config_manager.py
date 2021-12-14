@@ -32,12 +32,12 @@ def load_config(config_path: str):
 def get_base_config():
     """ Returns a minimal, empty base config that validates against the schema.
     """
-    CFG_BASE_DEFAULT_PATH = './data/configs/cfg_base_default.json'
+    CFG_BASE_DEFAULT_PATH = './cfg/cfg_base_default.json'
     return load_config(CFG_BASE_DEFAULT_PATH)
 
 
 # Just a quick test whether loading and validation work with the examples
-# cfg_global = load_config('./data/configs/cfg_example_global_scene.json')
-# cfg_part_scenes = load_config('./data/configs/cfg_example_part_scenes.json')
+# cfg_global = load_config('./cfg/cfg_example_global_scene.json')
+# cfg_part_scenes = load_config('./cfg/cfg_example_part_scenes.json')
 # cfg_base_default = get_base_config()
 # print(cfg_base_default)

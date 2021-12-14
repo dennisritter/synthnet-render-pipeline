@@ -1,0 +1,90 @@
+{
+    "$id": "https://example.com/schemas",
+    "global_scene": {
+        "gltf_path": "",
+        "lights": [
+            {
+                "light_type": "spot",
+                "position": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "direction": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "color": [
+                    255,
+                    255,
+                    255
+                ],
+                "intensity": 1.0
+            },
+            {
+                "light_type": "ambient",
+                "position": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "color": [
+                    255,
+                    255,
+                    255
+                ],
+                "intensity": 1.0
+            }
+        ],
+        "cameras": [
+            {
+                "camera_type": "perspective",
+                "position": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "direction": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            {
+                "camera_type": "perspective",
+                "position": [
+                    2.0,
+                    2.0,
+                    2.0
+                ],
+                "direction": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            }
+        ]
+    },
+    "parts": [
+        {
+            "part_id": "1.2.33-00",
+            "part_name": "Baugruppe_xyz",
+            "part_hierarchy": "1.2",
+            "lights": [],
+            "cameras": [],
+            "single_parts": [
+                {
+                    "part_id": "1-1-1",
+                    "part_name": "Schraube-1mm",
+                    "material": "steel"
+                },
+                {
+                    "part_id": "2-2-2",
+                    "part_name": "Riemen-xyz",
+                    "material": "rubber"
+                }
+            ]
+        }
+    ]
+}
