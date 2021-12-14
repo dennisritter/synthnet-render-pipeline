@@ -210,8 +210,8 @@ cython_debug/
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode
 
 # CUSTOM
-data
+data/*
 !data/configs/cfg_example_global_scene.json
 !data/configs/cfg_example_part_scenes.json
 !data/configs/cfg_example_part_scenes.json
-out
+out/*
