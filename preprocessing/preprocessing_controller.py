@@ -25,7 +25,6 @@ class PreprocessingController:
         envmap_def_mode: str,
     ):
 
-        # TODO
         ## Validate parameters
         # validate metadata_file
         assert isinstance(metadata_file, str)
@@ -53,7 +52,7 @@ class PreprocessingController:
         assert isinstance(envmap_def_mode, str)
         assert envmap_def_mode in self.ENVMAP_DEF_MODES
 
-        ## Assign props
+        ## Assign options
         self.metadata_file = metadata_file
         self.blender_file = blender_file
         self.output_dir = output_dir
