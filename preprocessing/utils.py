@@ -4,8 +4,17 @@ import pandas as pd
 
 def prepare_metadata(metadata_file: str):
     raw_in = pd.read_excel(metadata_file)
+
+    # Replace ' ' (space) by '_' underscore
+    for p in raw_in.loc[:, 'Teilenummer']:
+        raw_in['Teilenummer'] = raw_in['Teilenummer'].replace([p], str(p).replace(' ', '_'))
     part_ids = raw_in.loc[:, 'Teilenummer']
+
+    # Replace ' ' (space) by '_' underscore
+    for name in raw_in.loc[:, 'Benennung']:
+        raw_in['Benennung'] = raw_in['Benennung'].replace([name], str(name).replace(' ', '_'))
     part_names = raw_in.loc[:, 'Benennung']
+
     part_hierarchy = raw_in.loc[:, 'Pos.-Nr.']
     part_materials = raw_in.loc[:, 'Werkstoff']
     part_is_spare = []
