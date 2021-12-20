@@ -4,6 +4,8 @@ import os
 # blender api
 import bpy
 
+def clear_scene():
+    bpy.ops.wm.read_homefile(use_empty=True)
 
 def load_gltf(file_path):
     bpy.ops.import_scene.gltf(filepath=file_path)
@@ -20,9 +22,10 @@ def render(args, output_directory):
 
     # render loop
     for obj in scene.objects:
+        print(obj.name, obj.type)
         if obj.type == 'CAMERA':
             bpy.context.scene.camera = obj
-            file = os.path.join(output_directory, obj.name)
+            file = os.path.join(output_directory, args.file_name + "_" + obj.name)
             bpy.context.scene.render.filepath = file
             bpy.ops.render.render(write_still=True)
 
@@ -51,6 +54,11 @@ if __name__ == '__main__':
     input_directory = args.input_directory
     output_directory = args.output_directory
     for f in os.listdir(input_directory):
+        if not f.endswith(".glb"):
+            continue
+        print("Rendering {0}".format(f))
+        clear_scene()
+        args.file_name = f
         load_gltf(os.path.join(input_directory, f))
         render(args, output_directory)
 
