@@ -4,7 +4,7 @@ import logging
 import pandas as pd
 
 from preprocessing.utils import prepare_metadata
-from preprocessing import parse_parts
+from preprocessing.parse_parts import parse_parts
 from preprocessing import define_cameras, define_lights, define_materials, define_envmaps
 
 LOGGER = logging.getLogger(__name__)
@@ -72,4 +72,4 @@ class PreprocessingController:
 
         # all parts to render and each single_part it is assembled of
         # { part_id  part_name part_hierarchy single_parts [{part_id, part_name, material}] }
-        self.parts = []
+        self.parts = parse_parts(self.metadata)
