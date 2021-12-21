@@ -166,7 +166,7 @@
                 "required": [
                     "part_id",
                     "part_name",
-                    "material"
+                    "part_material"
                 ],
                 "properties": {
                     "part_id": {
@@ -177,7 +177,7 @@
                         "type": "string",
                         "description": "The name of this part"
                     },
-                    "material": {
+                    "part_material": {
                         "type": "string",
                         "description": "The material of this single part"
                     }
