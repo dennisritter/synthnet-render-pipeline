@@ -73,3 +73,5 @@ class PreprocessingController:
         # all parts to render and each single_part it is assembled of
         # { part_id  part_name part_hierarchy single_parts [{part_id, part_name, material}] }
         self.parts = parse_parts(self.metadata)
+
+        print(self.parts[12])
