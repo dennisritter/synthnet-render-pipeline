@@ -40,5 +40,7 @@ class Part:
         # self.lights = lights
         # self.envmaps = envmaps
 
-    def add_single_part(self, single_part: SinglePart):
-        pass
+    def __eq__(self, other):
+        if not isinstance(other, Part):
+            return NotImplementedError
+        return self.id == other.id

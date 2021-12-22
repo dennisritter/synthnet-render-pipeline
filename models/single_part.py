@@ -22,3 +22,8 @@ class SinglePart:
         self.id = id
         self.name = name
         self.material = material
+
+    def __eq__(self, other):
+        if not isinstance(other, SinglePart):
+            return NotImplementedError
+        return self.id == other.id
