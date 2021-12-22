@@ -43,4 +43,5 @@ class Part:
     def __eq__(self, other):
         if not isinstance(other, Part):
             return NotImplementedError
+
         return self.id == other.id

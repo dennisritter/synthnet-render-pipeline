@@ -31,9 +31,8 @@ def get_unique_single_parts(metadata: 'pd.DataFrame', parent_part: Part):
     # If parent_part has no subparts, it is a single part itself
     # so add it to the single_parts list if it is not added already
     if len(subparts) == 0:
-        single_part_ids = [sp.id for sp in single_parts_unique]
-        if parent_part.id not in single_part_ids:
-            single_part = SinglePart(id=parent_part.id, name=parent_part.name)
+        single_part = SinglePart(id=parent_part.id, name=parent_part.name)
+        if single_part not in single_parts_unique:
             single_parts_unique.append(single_part)
 
     # If paren_part has subparts, determine their subparts by calling this function again
@@ -48,8 +47,7 @@ def get_unique_single_parts(metadata: 'pd.DataFrame', parent_part: Part):
             )
             single_parts = get_unique_single_parts(metadata, parent_part=part)
             for single_part in single_parts:
-                single_part_ids = [sp.id for sp in single_parts_unique]
-                if single_part.id not in single_part_ids:
+                if single_part not in single_parts_unique:
                     single_parts_unique.append(single_part)
 
     LOGGER.debug(f'PARENT: {parent_part.id}')
@@ -92,12 +90,10 @@ def parse_parts(metadata: 'pd.DataFrame'):
 
         # Check if part is duplicate
         # True -> skip this part, remember in duplicate list
-        # False -> Add to part list
-        part_ids = [p.id for p in parts]
-        if part.id in part_ids:
+        # False -> Add to part to parts
+        if part in parts:
             part_duplicates.append(part)
             continue
-        parts.append(part)
 
         # Get single parts for current part
         LOGGER.debug('# ' * 10)
@@ -109,7 +105,7 @@ def parse_parts(metadata: 'pd.DataFrame'):
         parts.append(part)
 
     tend = timer_utils.time_since(tstart)
-    LOGGER.info(f'--Returning {len(parts)} part_objs')
+    LOGGER.info(f'--Returning {len(parts)} parts')
     LOGGER.info(f'--Ignoring {len(part_duplicates)} duplicates')
     LOGGER.debug('--Part Duplicate IDs')
     LOGGER.debug(f'{[p.id for p in part_duplicates]}')
