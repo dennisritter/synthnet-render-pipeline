@@ -27,3 +27,9 @@ class SinglePart:
         if not isinstance(other, SinglePart):
             return NotImplementedError
         return self.id == other.id
+
+    def __str__(self):
+        result_str = f'{self.__class__}\n'
+        for key, value in self.__dict__.items():
+            result_str += f'    {str(key)}: {str(value)}\n'
+        return result_str
