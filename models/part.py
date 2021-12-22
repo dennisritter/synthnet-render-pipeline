@@ -1,11 +1,5 @@
 """ Takes Metadata, blender file and configuration arguments to prepare a configuration file for GLTF-Scene-Exports of machine parts."""
-import os
 import logging
-import pandas as pd
-
-from preprocessing.utils import prepare_metadata
-from preprocessing.parse_parts import parse_parts
-from preprocessing import define_cameras, define_lights, define_materials, define_envmaps
 
 LOGGER = logging.getLogger(__name__)
 
@@ -43,3 +37,6 @@ class Part:
         self.cameras = cameras
         self.lights = lights
         self.envmaps = envmaps
+
+    def add_single_part(self, single_part: SinglePart):
+        pass
