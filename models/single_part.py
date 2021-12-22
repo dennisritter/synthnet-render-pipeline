@@ -1,4 +1,4 @@
-""" Takes Metadata, blender file and configuration arguments to prepare a configuration file for GLTF-Scene-Exports of machine parts."""
+""" Class model of a single part. (A part that has no sub-parts)"""
 import logging
 
 LOGGER = logging.getLogger(__name__)
