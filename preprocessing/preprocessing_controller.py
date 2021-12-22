@@ -70,8 +70,6 @@ class PreprocessingController:
         # cols: part_id, part_name, part_hierarchy, part_material, part_is_spare
         self.metadata = prepare_metadata(metadata_file)
 
-        # all parts to render and each single_part it is assembled of
-        # { part_id  part_name part_hierarchy single_parts [{part_id, part_name, material}] }
+        # List of all Parts to render
+        # See models.part
         self.parts = parse_parts(self.metadata)
-
-        print(self.parts[12])
