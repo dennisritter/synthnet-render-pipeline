@@ -72,9 +72,10 @@ def parse_parts(metadata: 'pd.DataFrame'):
     """
     tstart = timer_utils.time_now()
     LOGGER.info('\n')
-    LOGGER.info('Parsing Metadata...')
-    LOGGER.debug(f'{metadata.info()}')
-    LOGGER.debug(f'{metadata.describe()}')
+    LOGGER.info('- ' * 20)
+    LOGGER.info('Parsing unique Parts from metadata.xlsx')
+    # LOGGER.debug(f'{metadata.info()}')
+    # LOGGER.debug(f'{metadata.describe()}')
 
     parts = []
     part_duplicates = []
@@ -110,4 +111,5 @@ def parse_parts(metadata: 'pd.DataFrame'):
     LOGGER.debug('--Part Duplicate IDs')
     LOGGER.debug(f'{[p.id for p in part_duplicates]}')
     LOGGER.info(f'Done in {tend}')
+    LOGGER.info('- ' * 20)
     return parts
