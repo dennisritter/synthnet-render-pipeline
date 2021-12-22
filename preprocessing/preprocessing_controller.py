@@ -1,10 +1,13 @@
 """ Takes Metadata, blender file and configuration arguments to prepare a configuration file for GLTF-Scene-Exports of machine parts."""
 import os
+import logging
 import pandas as pd
 
 from preprocessing.utils import prepare_metadata
-from preprocessing import parse_parts
+from preprocessing.parse_parts import parse_parts
 from preprocessing import define_cameras, define_lights, define_materials, define_envmaps
+
+LOGGER = logging.getLogger(__name__)
 
 
 class PreprocessingController:
@@ -67,6 +70,6 @@ class PreprocessingController:
         # cols: part_id, part_name, part_hierarchy, part_material, part_is_spare
         self.metadata = prepare_metadata(metadata_file)
 
-        # all parts to render and each single_part it is assembled of
-        # { part_id  part_name part_hierarchy single_parts [{part_id, part_name, material}] }
-        self.parts = []
+        # List of all Parts to render
+        # See models.part
+        self.parts = parse_parts(self.metadata)
