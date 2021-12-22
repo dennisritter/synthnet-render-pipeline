@@ -1,5 +1,7 @@
-""" Takes Metadata, blender file and configuration arguments to prepare a configuration file for GLTF-Scene-Exports of machine parts."""
+""" Class model of a part."""
 import logging
+
+from models.single_part import SinglePart
 
 LOGGER = logging.getLogger(__name__)
 
@@ -13,9 +15,9 @@ class Part:
         hierarchy: str,
         is_spare: bool = False,
         single_parts: list = [],
-        cameras: list = [],
-        lights: list = [],
-        envmaps: list = [],
+        # cameras: list = [],
+        # lights: list = [],
+        # envmaps: list = [],
     ):
 
         ## Validate parameters
@@ -24,9 +26,9 @@ class Part:
         assert isinstance(hierarchy, str)
         assert isinstance(is_spare, bool)
         assert isinstance(single_parts, list)
-        assert isinstance(cameras, list)
-        assert isinstance(lights, list)
-        assert isinstance(envmaps, list)
+        # assert isinstance(cameras, list)
+        # assert isinstance(lights, list)
+        # assert isinstance(envmaps, list)
 
         ## Assign properties
         self.id = id
@@ -34,9 +36,9 @@ class Part:
         self.hierarchy = hierarchy
         self.is_spare = is_spare
         self.single_parts = single_parts
-        self.cameras = cameras
-        self.lights = lights
-        self.envmaps = envmaps
+        # self.cameras = cameras
+        # self.lights = lights
+        # self.envmaps = envmaps
 
     def add_single_part(self, single_part: SinglePart):
         pass
