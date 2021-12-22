@@ -11,23 +11,25 @@ LOGGER = logging.getLogger(__name__)
 
 def get_unique_single_parts(metadata: 'pd.DataFrame', parent_part: Part):
     """ Recursively iterates over children of the given parent_part until parent_part is a 
-        single_part (has no child parts). Returns a list of the parent_parts' single_part children 
-        or the parent_part itself if parent_part is a single_part already.  
+        single_part (has no sub-parts). 
+
+        Returns a list of the parent_parts' single parts or the parent_part itself 
+        if parent_part is a single_part already.
 
         Args:
             metadata (pandas.DataFrame):
                 A Pandas DataFrame containing cols [part_id, part_name, part_hierarchy, 
                 part_material, part_is_spare]. Each row represents a part.
-            parent_part (dict): The part to identify included single_parts for.
+            parent_part (Part): The part to identify included single_parts for.
     
     """
-    # All single_parts of parent_part are going to be stored here
-    single_parts_unique = []
 
     # Hierarchy Example: '1.2.5'
     # Every part that starts with the same hierarchy as parent_part and continue with a '.' are direct subparts of parent_part
     subparts = metadata.loc[metadata['part_hierarchy'].str.startswith(parent_part.hierarchy + '.')]
 
+    # All single_parts of parent_part are going to be stored here
+    single_parts_unique = []
     # If parent_part has no subparts, it is a single part itself
     # so add it to the single_parts list if it is not added already
     if len(subparts) == 0:
@@ -59,10 +61,10 @@ def get_unique_single_parts(metadata: 'pd.DataFrame', parent_part: Part):
 
 
 def parse_parts(metadata: 'pd.DataFrame'):
-    """ Returns list of Parts and each included SinglePart (unique)  as a list of Part objects.
+    """ Returns list of Parts and each included SinglePart (unique) as a list of Part objects.
 
-        - Each part (key: part_id) is added only once (no duplicates)
-        - Each SinglePart (key: part_id) of a Part is added only once (no duplicates)
+        - Each part is added only once (no duplicates, key = Part.id)
+        - Each SinglePart of a Part is added only once (SinglePart.id)
         
         Args:
             metadata (pandas.DataFrame):
@@ -74,8 +76,6 @@ def parse_parts(metadata: 'pd.DataFrame'):
     LOGGER.info('\n')
     LOGGER.info('- ' * 20)
     LOGGER.info('Parsing unique Parts from metadata.xlsx')
-    # LOGGER.debug(f'{metadata.info()}')
-    # LOGGER.debug(f'{metadata.describe()}')
 
     parts = []
     part_duplicates = []
@@ -90,8 +90,6 @@ def parse_parts(metadata: 'pd.DataFrame'):
         )
 
         # Check if part is duplicate
-        # True -> skip this part, remember in duplicate list
-        # False -> Add to part to parts
         if part in parts:
             part_duplicates.append(part)
             continue
