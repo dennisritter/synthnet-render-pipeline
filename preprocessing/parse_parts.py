@@ -112,4 +112,5 @@ def parse_parts(metadata: 'pd.DataFrame'):
     LOGGER.debug(f'{[p.id for p in part_duplicates]}')
     LOGGER.info(f'Done in {tend}')
     LOGGER.info('- ' * 20)
+
     return parts
