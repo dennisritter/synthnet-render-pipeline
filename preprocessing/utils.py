@@ -16,7 +16,10 @@ def prepare_metadata(metadata_file: str):
     part_names = raw_in.loc[:, 'Benennung']
 
     part_hierarchy = raw_in.loc[:, 'Pos.-Nr.']
+
     part_materials = raw_in.loc[:, 'Werkstoff']
+    part_materials.fillna('-', inplace=True)
+
     part_is_spare = []
 
     # Change Bem. values to Boolean that denotes whether part is spare or not
