@@ -72,11 +72,6 @@ def parse_parts(metadata: 'pd.DataFrame'):
                 part_material, part_is_spare]. Each row represents a part.
 
     """
-    tstart = timer_utils.time_now()
-    LOGGER.info('\n')
-    LOGGER.info('- ' * 20)
-    LOGGER.info('Parsing unique Parts from metadata.xlsx')
-
     parts = []
     part_duplicates = []
 
@@ -103,12 +98,9 @@ def parse_parts(metadata: 'pd.DataFrame'):
 
         parts.append(part)
 
-    tend = timer_utils.time_since(tstart)
-    LOGGER.info(f'--Returning {len(parts)} parts')
-    LOGGER.info(f'--Ignoring {len(part_duplicates)} duplicates')
+    LOGGER.debug(f'--Returning {len(parts)} parts')
+    LOGGER.debug(f'--Ignoring {len(part_duplicates)} duplicates')
     LOGGER.debug('--Part Duplicate IDs')
     LOGGER.debug(f'{[p.id for p in part_duplicates]}')
-    LOGGER.info(f'Done in {tend}')
-    LOGGER.info('- ' * 20)
 
     return parts
