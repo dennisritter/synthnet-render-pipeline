@@ -4,7 +4,7 @@ import math
 import random
 
 
-def sphere_sampling_random(n_samples=100):
+def sphere_random(n_samples=100):
     """
     Generate random samples on the unit sphere
     :param number_of_samples:
