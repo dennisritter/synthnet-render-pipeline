@@ -3,7 +3,8 @@ import os
 import logging
 import pandas as pd
 
-from preprocessing.utils import prepare_metadata
+from preprocessing.utils.metadata import prepare_metadata
+from preprocessing.utils.sampling import sphere_sampling_random
 from preprocessing.parse_parts import parse_parts
 from preprocessing import define_cameras, define_lights, define_materials, define_envmaps
 from utils import timer_utils

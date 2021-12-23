@@ -38,5 +38,5 @@ def prepare_metadata(metadata_file: str):
             'part_material': part_materials,
             'part_is_spare': part_is_spare
         })
-    return df
     # print(f'Item example:\n{df.iloc[42]}')
+    return df
