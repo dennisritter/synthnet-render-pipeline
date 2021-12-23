@@ -52,6 +52,7 @@ def main(**kwargs):
         material_def_mode,
         envmap_def_mode,
     )
+    ppc.assign_materials()
 
 
 if __name__ == '__main__':
