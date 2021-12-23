@@ -3,9 +3,10 @@ import os
 import logging
 import pandas as pd
 
-from preprocessing.utils import prepare_metadata
+from preprocessing.utils.metadata import prepare_metadata
 from preprocessing.parse_parts import parse_parts
 from preprocessing import define_cameras, define_lights, define_materials, define_envmaps
+from models.global_scene import GlobalScene
 from utils import timer_utils
 
 LOGGER = logging.getLogger(__name__)
@@ -13,7 +14,7 @@ LOG_DELIM = '- ' * 20
 
 
 class PreprocessingController:
-    CAMERA_DEF_MODES = ['global-static']
+    CAMERA_DEF_MODES = ['global-random', 'global-uniform', 'part-random', 'part-uniform']
     LIGHT_DEF_MODES = ['global-static']
     MATERIAL_DEF_MODES = ['static']
     ENVMAP_DEF_MODES = ['global-static']
@@ -72,6 +73,11 @@ class PreprocessingController:
         # cols: part_id, part_name, part_hierarchy, part_material, part_is_spare
         self.metadata = prepare_metadata(metadata_file)
 
+        # Add empty GlobalScene
+        #   GlobalScene holds cameras and/or lights that are used if we
+        #   don't specify cameras/lights for each part respectively
+        self.global_scene = GlobalScene()
+
         tstart = timer_utils.time_now()
         LOGGER.info(LOG_DELIM)
         LOGGER.info(f'Parsing unique Parts and SingleParts from {metadata_file}')
@@ -97,7 +103,27 @@ class PreprocessingController:
         LOGGER.info(LOG_DELIM)
 
     def assign_cameras(self):
-        pass
+        tstart = timer_utils.time_now()
+        LOGGER.info(LOG_DELIM)
+        LOGGER.info(f'Assigning cameras [mode={self.camera_def_mode}]')
+
+        # Add cameras with random pos to GlobalScene
+        if self.camera_def_mode == 'global-random':
+            cameras = define_cameras.get_cameras_random(self.n_images)
+            self.global_scene.cameras = cameras
+
+        # if self.camera_def_mode == 'global-uniform':
+        #     pass
+
+        # if self.camera_def_mode == 'part-random':
+        #     pass
+
+        # if self.camera_def_mode == 'part-uniform':
+        #     pass
+
+        tend = timer_utils.time_since(tstart)
+        LOGGER.info(f'Done in {tend}')
+        LOGGER.info(LOG_DELIM)
 
     def assign_lights(self):
         pass
