@@ -1,6 +1,6 @@
 python preprocessing.py \
---metadata_file './data/drucker.xlsx' \
---blender_file './data/drucker.blend' \
+--metadata_file './data/drucker-example/drucker.xlsx' \
+--blender_file './data/drucker-example/drucker.blend' \
 --output_dir './out/test' \
 --n_images 5 \
 --camera_def_mode 'global-static' \
