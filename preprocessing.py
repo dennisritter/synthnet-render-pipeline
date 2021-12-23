@@ -53,6 +53,7 @@ def main(**kwargs):
         envmap_def_mode,
     )
     ppc.assign_materials()
+    ppc.assign_cameras()
 
 
 if __name__ == '__main__':
