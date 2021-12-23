@@ -1,5 +1,5 @@
 python preprocessing.py \
---metadata_file './data/drucker.xlsx' \
+--metadata_file './data/drucker_oberflaeche.xlsx' \
 --blender_file './data/drucker.blend' \
 --output_dir './out/test' \
 --n_images 5 \
