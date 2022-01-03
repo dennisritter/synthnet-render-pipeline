@@ -12,3 +12,13 @@ def export_part_objs(parts: list, blend_file: str, out_dir: str):
             blend_file (str): Path to blender file of the machine
             out_dir (str): Where to store exported OBJ files 
     """
+
+    # 1. Load Blend file
+    # iter parts
+    # find parts in blend file
+    # export obj if id found
+    # Check parts that are not found/exported
+
+    # ? what if not found
+    # ? filename mapping
+    # ? write filename into part config
