@@ -3,15 +3,14 @@ import logging
 
 LOGGER = logging.getLogger(__name__)
 
-CAMERA_TYPES = ['PERSP', 'ORTHO', 'PANO']
+CAMERA_TYPES = ['persp', 'ortho', 'pano']
 
 
 class Camera:
-
     def __init__(
         self,
         position: list,
-        type: str = 'PERSP',
+        type_camera: str = 'persp',
         focal_length: float = 50.0,
         target: list = [0, 0, 0],
     ):
@@ -21,8 +20,8 @@ class Camera:
         assert isinstance(position, list)
         assert len(position) == 3
         # Validate type
-        assert isinstance(type, str)
-        assert type in CAMERA_TYPES
+        assert isinstance(type_camera, str)
+        assert type_camera.lower() in CAMERA_TYPES
         # Validate focal_length
         assert isinstance(focal_length, float)
         assert focal_length > 0
@@ -32,7 +31,7 @@ class Camera:
 
         ## Assign properties
         self.position = position
-        self.type = type
+        self.type_camera = type_camera
         self.focal_length = focal_length
         self.target = target
 
