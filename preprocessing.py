@@ -4,7 +4,7 @@ from types import SimpleNamespace
 import logging
 import click
 
-from utils import logger_utils, timer_utils
+from utils import logger_utils, timer_utils, filesystem_utils
 from preprocessing.preprocessing_controller import PreprocessingController
 
 
@@ -13,7 +13,8 @@ from preprocessing.preprocessing_controller import PreprocessingController
 @click.command()
 @click.option('-metaf', '--metadata_file', help='Path to metadata file (machine-metadata.xlsx)')
 @click.option('-blendf', '--blender_file', help='Path to blender file (machine.blend)')
-@click.option('-out', '--output_dir', help='Output root directory', default='./gltf-export-configurations')
+@click.option('-out', '--output_dir', help='Output root directory', default='./out')
+@click.option('-desc', '--run_description', help='Description for this run', default='nodesc')
 @click.option('-n', '--n_images', help='Number of images to render for each part', default=10)
 @click.option('-cams', '--camera_def_mode', help='Camera definition mode', default='global-static')
 @click.option('-lights', '--light_def_mode', help='Light definition mode', default='global-static')
@@ -26,16 +27,24 @@ def main(**kwargs):
     metadata_file = args.metadata_file
     blender_file = args.blender_file
     output_dir = args.output_dir
+    run_description = args.run_description
     n_images = args.n_images
     camera_def_mode = args.camera_def_mode
     light_def_mode = args.light_def_mode
     material_def_mode = args.material_def_mode
     envmap_def_mode = args.envmap_def_mode
 
+    # Get Run ID and create output root folder for this run
+    run_id = filesystem_utils.get_run_id(outdir=output_dir)
+    run_dir = f'{output_dir}/{run_id}-{run_description}'
+    output_dir = run_dir
+    os.makedirs(output_dir, exist_ok=True)
+
     # Init Logger
     LOGGER = logging.getLogger(__name__)
-    os.makedirs(output_dir, exist_ok=True)
-    logger_utils.init_logger(output_path=output_dir)
+    log_dir = f'{output_dir}/logs'
+    os.makedirs(log_dir, exist_ok=True)
+    logger_utils.init_logger(output_path=log_dir)
 
     # Print run args
     LOGGER.info('\n')
