@@ -5,7 +5,6 @@ LOGGER = logging.getLogger(__name__)
 
 
 class GlobalScene:
-
     def __init__(
         self,
         cameras: list = [],

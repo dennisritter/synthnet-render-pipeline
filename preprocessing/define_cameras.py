@@ -3,11 +3,11 @@ import preprocessing.utils.sampling as sampling
 from models.camera import Camera
 
 
-def get_cameras_random(n: int):
-    cam_positions = sampling.sphere_random(n)
+def get_cameras_uniform(n: int):
+    cam_positions = sampling.sphere_uniform(n)
     return [Camera(position=cam_pos) for cam_pos in cam_positions]
 
 
-def get_cameras_uniform(n: int):
+def get_cameras_equidistant(n: int):
     pass
-    # TODO: Add preprocessing.utils.sampling.sphere_uniform function
+    # TODO: Add preprocessing.utils.sampling.sphere_equidistant function

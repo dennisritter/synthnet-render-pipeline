@@ -14,8 +14,8 @@ LOG_DELIM = '- ' * 20
 
 
 class PreprocessingController:
-    CAMERA_DEF_MODES = ['global-random', 'global-uniform', 'part-random', 'part-uniform']
-    LIGHT_DEF_MODES = ['global-static']
+    CAMERA_DEF_MODES = ['global-sphere-uniform', 'part-sphere-uniform']
+    LIGHT_DEF_MODES = ['global-range-uniform', 'part-range-uniform']
     MATERIAL_DEF_MODES = ['static']
     ENVMAP_DEF_MODES = ['global-static']
 
@@ -80,7 +80,8 @@ class PreprocessingController:
 
         tstart = timer_utils.time_now()
         LOGGER.info(LOG_DELIM)
-        LOGGER.info(f'Parsing unique Parts and SingleParts from {metadata_file}')
+        LOGGER.info(
+            f'Parsing unique Parts and SingleParts from {metadata_file}')
         # List of all Parts to render
         self.parts = parse_parts(self.metadata)
         tend = timer_utils.time_since(tstart)
@@ -94,31 +95,28 @@ class PreprocessingController:
         LOGGER.info(LOG_DELIM)
         LOGGER.info(f'Assigning materials [mode={self.material_def_mode}]')
 
-        # static: Read metadata materials and apply our materials depending on a static metadata_material:our_material map
+        # static: Read metadata materials and apply our materials depending
+        # on a static metadata_material:our_material map
         if self.material_def_mode == 'static':
-            self.parts = define_materials.assign_materials_static(self.parts, self.metadata)
+            self.parts = define_materials.assign_materials_static(
+                self.parts, self.metadata)
 
         tend = timer_utils.time_since(tstart)
         LOGGER.info(f'Done in {tend}')
         LOGGER.info(LOG_DELIM)
 
     def assign_cameras(self):
+        """ Assign Cameras to single parts depending on self.camera-def_mode. """
         tstart = timer_utils.time_now()
         LOGGER.info(LOG_DELIM)
         LOGGER.info(f'Assigning cameras [mode={self.camera_def_mode}]')
 
-        # Add cameras with random pos to GlobalScene
-        if self.camera_def_mode == 'global-random':
-            cameras = define_cameras.get_cameras_random(self.n_images)
+        # Add cameras with random uniform pos to GlobalScene
+        if self.camera_def_mode == 'global-sphere-uniform':
+            cameras = define_cameras.get_cameras_uniform(self.n_images)
             self.global_scene.cameras = cameras
 
-        # if self.camera_def_mode == 'global-uniform':
-        #     pass
-
-        # if self.camera_def_mode == 'part-random':
-        #     pass
-
-        # if self.camera_def_mode == 'part-uniform':
+        # if self.camera_def_mode == 'part-uniform-sphere':
         #     pass
 
         tend = timer_utils.time_since(tstart)
@@ -126,7 +124,20 @@ class PreprocessingController:
         LOGGER.info(LOG_DELIM)
 
     def assign_lights(self):
-        pass
+        """ Assign lights to single parts depending on self.light_def_mode. """
+        tstart = timer_utils.time_now()
+        LOGGER.info(LOG_DELIM)
+        LOGGER.info(f'Assigning lights [mode={self.light_def_mode}]')
+
+        # Add cameras with random pos to GlobalScene
+        if self.light_def_mode == 'global-range-uniform':
+            lights = define_lights.get_lights_range(self.n_images)
+            self.global_scene.lights = lights
+
+        tend = timer_utils.time_since(tstart)
+        LOGGER.info(f'Done in {tend}')
+        LOGGER.info(LOG_DELIM)
 
     def assign_envmaps(self):
+        """ Assign Environment Maps to single parts depending on self.envmap_def_mode. """
         pass

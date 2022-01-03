@@ -54,6 +54,7 @@ def main(**kwargs):
     )
     ppc.assign_materials()
     ppc.assign_cameras()
+    ppc.assign_lights()
 
 
 if __name__ == '__main__':
