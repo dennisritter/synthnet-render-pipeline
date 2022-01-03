@@ -12,7 +12,7 @@ from preprocessing.preprocessing_controller import PreprocessingController
 # TODO: Improve option definitions -> metavar, show_default, type, required
 @click.command()
 @click.option('-metaf', '--metadata_file', help='Path to metadata file (machine-metadata.xlsx)')
-@click.option('-blendf', '--blender_file', help='Path to blender file (machine.blend)')
+@click.option('-blendf', '--blend_file', help='Path to blender file (machine.blend)')
 @click.option('-out', '--output_dir', help='Output root directory', default='./out')
 @click.option('-desc', '--run_description', help='Description for this run', default='nodesc')
 @click.option('-n', '--n_images', help='Number of images to render for each part', default=10)
@@ -25,7 +25,7 @@ def main(**kwargs):
     args = SimpleNamespace(**kwargs)
 
     metadata_file = args.metadata_file
-    blender_file = args.blender_file
+    blend_file = args.blend_file
     output_dir = args.output_dir
     run_description = args.run_description
     n_images = args.n_images
@@ -52,14 +52,14 @@ def main(**kwargs):
     LOGGER.info(args)
 
     ppc = PreprocessingController(
-        metadata_file,
-        blender_file,
-        output_dir,
-        n_images,
-        camera_def_mode,
-        light_def_mode,
-        material_def_mode,
-        envmap_def_mode,
+        metadata_file=metadata_file,
+        blend_file=blend_file,
+        output_dir=output_dir,
+        n_images=n_images,
+        camera_def_mode=camera_def_mode,
+        light_def_mode=light_def_mode,
+        material_def_mode=material_def_mode,
+        envmap_def_mode=envmap_def_mode,
     )
     ppc.assign_materials()
     ppc.assign_cameras()

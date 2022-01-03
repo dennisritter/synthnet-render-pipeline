@@ -1,6 +1,6 @@
 python preprocessing.py \
 --metadata_file './data/drucker-example/drucker.xlsx' \
---blender_file './data/drucker-example/drucker.blend' \
+--blend_file './data/drucker-example/drucker.blend' \
 --output_dir './out' \
 --run_description 'testrun' \
 --n_images 5 \

@@ -5,7 +5,7 @@ import pandas as pd
 
 from preprocessing.utils.metadata import prepare_metadata
 from preprocessing.parse_parts import parse_parts
-from preprocessing import define_cameras, define_lights, define_materials, define_envmaps
+from preprocessing import define_cameras, define_lights, define_materials, define_envmaps, export_objs
 from models.global_scene import GlobalScene
 from utils import timer_utils
 
@@ -22,7 +22,7 @@ class PreprocessingController:
     def __init__(
         self,
         metadata_file: str,
-        blender_file: str,
+        blend_file: str,
         output_dir: str,
         n_images: int,
         camera_def_mode: str,
@@ -35,9 +35,9 @@ class PreprocessingController:
         # validate metadata_file
         assert isinstance(metadata_file, str)
         assert os.path.isfile(metadata_file)
-        # validate blender_file
-        assert isinstance(blender_file, str)
-        assert os.path.isfile(blender_file)
+        # validate blend_file
+        assert isinstance(blend_file, str)
+        assert os.path.isfile(blend_file)
         # validate output_dir
         assert isinstance(output_dir, str)
         os.makedirs(output_dir, exist_ok=True)
@@ -60,7 +60,7 @@ class PreprocessingController:
 
         ## Assign options
         self.metadata_file = metadata_file
-        self.blender_file = blender_file
+        self.blend_file = blend_file
         self.output_dir = output_dir
         self.n_images = n_images
         self.camera_def_mode = camera_def_mode.lower()
@@ -141,3 +141,12 @@ class PreprocessingController:
     def assign_envmaps(self):
         """ Assign Environment Maps to single parts depending on self.envmap_def_mode. """
         pass
+
+    def export_part_objs(self):
+        """ Export OBJ file for each part in self.parts """
+        obj_dir = f'{self.output_dir}/part_objs'
+        export_objs.export_part_objs(
+            parts=self.parts,
+            blend_file=self.blend_file,
+            out_dir=obj_dir,
+        )
