@@ -24,6 +24,7 @@ class PreprocessingController:
         metadata_file: str,
         blender_file: str,
         output_dir: str,
+        run_name: str,
         n_images: int,
         camera_def_mode: str,
         light_def_mode: str,
