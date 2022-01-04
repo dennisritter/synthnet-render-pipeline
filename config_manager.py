@@ -18,7 +18,7 @@ def load_config(config_path: str):
         Args:
             config_path (str): Path to the config.json
     """
-    SCHEMA_REL_PATH = './schemas/config_schema.json'
+    SCHEMA_REL_PATH = './schemas/ecfg_schema_v1.json'
     with open(SCHEMA_REL_PATH, 'r', encoding='UTF-8') as json_file:
         cfg_schema = json.loads(json_file.read())
 
