@@ -4,22 +4,23 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "required": [
-        "global_scene",
+        "global_scenes",
         "parts"
     ],
     "properties": {
         "global_scenes": {
             "type": "array",
+            "description": "Scene definitions that are used for all parts",
             "items": {
                 "$ref": "/schemas/scene"
             }
         },
         "parts": {
             "type": "array",
-            "description": "Scene definition that is applied to this part",
+            "description": "List of machine parts to render/export gltfs",
             "items": {
                 "type": "object",
-                "description": "A scene description for a part",
+                "description": "A machine part",
                 "required": [
                     "id",
                     "name",
@@ -42,7 +43,7 @@
                     },
                     "single_parts": {
                         "type": "array",
-                        "description": "The single parts this assembly is assembled of",
+                        "description": "The single parts this assembly is assembled of or the part itself if it's a single part",
                         "items": {
                             "$ref": "/schemas/single_part"
                         }
@@ -89,20 +90,25 @@
                 "type": "object",
                 "description": "A Camera, defined by it's properties",
                 "required": [
-                    "camera_type",
                     "position",
-                    "direction"
+                    "type_camera",
+                    "target",
+                    "focal_length"
                 ],
                 "properties": {
-                    "camera_type": {
-                        "type": "string",
-                        "description": "The camera type. (orthographic, perspective)"
-                    },
                     "position": {
                         "$ref": "/schemas/point_3d"
                     },
-                    "direction": {
+                    "type_camera": {
+                        "type": "string",
+                        "description": "The camera type. CAMERA_TYPES = ['persp', 'ortho', 'pano']"
+                    },
+                    "target": {
                         "$ref": "/schemas/point_3d"
+                    },
+                    "focal_lenght": {
+                        "type": "float",
+                        "description": "Focal length setting of the camera"
                     }
                 }
             },
@@ -119,28 +125,25 @@
                 "type": "object",
                 "description": "A light, defined by it's properties",
                 "required": [
-                    "light_type",
+                    "type_light",
                     "position",
-                    "color",
-                    "intensity"
+                    "intensity",
+                    "target"
                 ],
                 "properties": {
-                    "light_type": {
+                    "type_light": {
                         "type": "string",
                         "description": "The light type"
                     },
                     "position": {
                         "$ref": "/schemas/point_3d"
                     },
-                    "direction": {
+                    "target": {
                         "$ref": "/schemas/point_3d"
-                    },
-                    "color": {
-                        "$ref": "/schemas/color_rgb"
                     },
                     "intensity": {
                         "type": "number",
-                        "description": "The light intensity"
+                        "description": "The lights intensity"
                     }
                 }
             },
@@ -152,10 +155,10 @@
             "scene": {
                 "$id": "/schemas/scene",
                 "type": "object",
-                "description": "A Scene description",
+                "description": "A Scene definition",
                 "required": [
                     "lights",
-                    "cameras",
+                    "camera",
                     "envmap"
                 ],
                 "properties": {
@@ -175,20 +178,20 @@
                 "type": "object",
                 "description": "The single parts of of this assembly",
                 "required": [
-                    "part_id",
-                    "part_name",
-                    "part_material"
+                    "id",
+                    "name",
+                    "material"
                 ],
                 "properties": {
-                    "part_id": {
+                    "id": {
                         "type": "string",
                         "description": "The part identifier"
                     },
-                    "part_name": {
+                    "name": {
                         "type": "string",
                         "description": "The name of this part"
                     },
-                    "part_material": {
+                    "material": {
                         "type": "string",
                         "description": "The material of this single part"
                     }
