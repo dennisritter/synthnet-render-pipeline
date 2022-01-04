@@ -1,6 +1,7 @@
 """ Takes Metadata, blender file and configuration arguments to prepare a configuration file for GLTF-Scene-Exports of machine parts."""
 import os
 import logging
+import json
 import pandas as pd
 
 from preprocessing.utils.metadata import prepare_metadata
@@ -80,8 +81,7 @@ class PreprocessingController:
 
         tstart = timer_utils.time_now()
         LOGGER.info(LOG_DELIM)
-        LOGGER.info(
-            f'Parsing unique Parts and SingleParts from {metadata_file}')
+        LOGGER.info(f'Parsing unique Parts and SingleParts from {metadata_file}')
         # List of all Parts to render
         self.parts = parse_parts(self.metadata)
         tend = timer_utils.time_since(tstart)
@@ -98,8 +98,7 @@ class PreprocessingController:
         # static: Read metadata materials and apply our materials depending
         # on a static metadata_material:our_material map
         if self.material_def_mode == 'static':
-            self.parts = define_materials.assign_materials_static(
-                self.parts, self.metadata)
+            self.parts = define_materials.assign_materials_static(self.parts, self.metadata)
 
         tend = timer_utils.time_since(tstart)
         LOGGER.info(f'Done in {tend}')
@@ -141,3 +140,10 @@ class PreprocessingController:
     def assign_envmaps(self):
         """ Assign Environment Maps to single parts depending on self.envmap_def_mode. """
         pass
+
+    def get_render_config(self):
+        global_scene_json = json.dumps(self.global_scene, default=lambda o: o.__dict__, indent=4)
+        parts_json = [json.dumps(part, default=lambda o: o.__dict__, indent=4) for part in self.parts]
+
+        rcfg = {"global_scene": global_scene_json, "parts": parts_json}
+        return rcfg
