@@ -4,16 +4,20 @@ from models.light import Light
 import numpy as np
 
 
-def get_lights_range(
+# TODO: add number of lights/setup support
+def get_lightsetups_range_uniform(
         n: int,
         xrange=(-1.0, 1.0),
         yrange=(-1.0, 1.0),
         zrange=(1.0, 1.0),
 ):
+    lightsetups = []
     light_positions = sampling.range_uniform(
         n_samples=n,
         xrange=xrange,
         yrange=yrange,
         zrange=zrange,
     )
-    return [Light(position=light_pos.tolist()) for light_pos in light_positions]
+    for light_pos in light_positions:
+        lightsetups.append([Light(position=light_pos.tolist())])
+    return lightsetups

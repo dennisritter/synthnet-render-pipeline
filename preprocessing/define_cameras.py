@@ -3,7 +3,7 @@ import preprocessing.utils.sampling as sampling
 from models.camera import Camera
 
 
-def get_cameras_uniform(n: int):
+def get_cameras_sphere_uniform(n: int):
     cam_positions = sampling.sphere_uniform(n)
     return [Camera(position=cam_pos) for cam_pos in cam_positions]
 

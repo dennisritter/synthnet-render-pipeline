@@ -47,16 +47,9 @@ def range_uniform(
             yrange: min and max value for y coordinate
             zrange: min and max value for z coordinate
     """
-    randx = np.random.uniform(low=xrange[0],
-                              high=xrange[1],
-                              size=(n_samples, 1))
-    randy = np.random.uniform(low=yrange[0],
-                              high=yrange[1],
-                              size=(n_samples, 1))
-    randz = np.random.uniform(low=zrange[0],
-                              high=zrange[1],
-                              size=(n_samples, 1))
+    randx = np.random.uniform(low=xrange[0], high=xrange[1], size=(n_samples, 1))
+    randy = np.random.uniform(low=yrange[0], high=yrange[1], size=(n_samples, 1))
+    randz = np.random.uniform(low=zrange[0], high=zrange[1], size=(n_samples, 1))
 
-    print(randx)
     points = np.concatenate((randx, randy, randz), axis=1)
     return points

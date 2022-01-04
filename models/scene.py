@@ -1,25 +1,31 @@
 """ Class model of a single part. (A part that has no sub-parts)"""
 import logging
+from models.camera import Camera
 
 LOGGER = logging.getLogger(__name__)
 
 
-class GlobalScene:
+class Scene:
+
     def __init__(
         self,
-        cameras: list = [],
-        lights: list = [],
+        camera,
+        lights,
+        envmap,
     ):
 
         ## Validate parameters
         # Validate cameras
         assert isinstance(lights, list)
         # Validate lights
-        assert isinstance(cameras, list)
+        assert isinstance(camera, Camera)
+        # Validate lights
+        assert isinstance(envmap, str)
 
         ## Assign properties
-        self.cameras = cameras
+        self.camera = camera
         self.lights = lights
+        self.envmap = envmap
 
     def __str__(self):
         result_str = f'{self.__class__}\n'
