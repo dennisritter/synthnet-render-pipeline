@@ -141,22 +141,22 @@ class PreprocessingController:
         """ Assign Environment Maps to single parts depending on self.envmap_def_mode. """
         pass
 
-    def export_rcfg_json(self, filename: str = 'rcfg.json'):
+    def export_ecfg_json(self, filename: str = 'ecfg.json'):
 
         assert isinstance(filename, str)
         assert filename.endswith('.json')
 
-        rcfg = {"global_scene": self.global_scene, "parts": self.parts}
+        ecfg = {"global_scene": self.global_scene, "parts": self.parts}
         with open(f'{self.output_dir}/{filename}', 'w') as f:
             json.dump(
-                rcfg,
+                ecfg,
                 f,
                 default=lambda o: o.__dict__,
                 indent=4,
                 sort_keys=True,
             )
 
-    def get_rcfg_json(self):
+    def get_ecfg_json(self):
         return json.dumps(
             {
                 "global_scene": self.global_scene,

@@ -66,7 +66,7 @@ def main(**kwargs):
     ppc.assign_cameras()
     ppc.assign_lights()
 
-    ppc.export_rcfg_json()
+    ppc.export_ecfg_json(filename='ecfg.json')
 
 
 if __name__ == '__main__':
