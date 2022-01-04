@@ -4,6 +4,8 @@ import os
 # blender api
 import bpy
 
+def clear_scene():
+    bpy.ops.wm.read_homefile(use_empty=True)
 
 def load_gltf(file_path):
     bpy.ops.import_scene.gltf(filepath=file_path)
@@ -19,12 +21,14 @@ def render(args, output_directory):
 
 
     # render loop
+    idx = 0
     for obj in scene.objects:
         if obj.type == 'CAMERA':
             bpy.context.scene.camera = obj
-            file = os.path.join(output_directory, obj.name)
+            file = os.path.join(output_directory, args.file_name + "_" + str(idx))
             bpy.context.scene.render.filepath = file
             bpy.ops.render.render(write_still=True)
+            idx += 1
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -41,7 +45,7 @@ def get_args():
     parser.add_argument('-ry', '--resolution_y', help="Resolution in Y", default=512)
     parser.add_argument('-oq', '--output_quality', help="Output Quality in range[1, 100]", default=100)
     parser.add_argument('-of', '--output_format', help="Output Format for images", default="JPEG")
-    parser.add_argument('-e', '--engine', type=str, required=False, default="BLENDER_EEVEE", help="rendering engine") #TODO add other engine options for blender (CYCLES)
+    parser.add_argument('-e', '--engine', type=str, required=False, default="CYCLES", help="rendering engine")
     parsed_script_args, _ = parser.parse_known_args(script_args)
     return parsed_script_args
 
@@ -51,6 +55,10 @@ if __name__ == '__main__':
     input_directory = args.input_directory
     output_directory = args.output_directory
     for f in os.listdir(input_directory):
+        if not f.endswith(".glb"):
+            continue
+        clear_scene()
+        args.file_name = f.split(".")[0]
         load_gltf(os.path.join(input_directory, f))
         render(args, output_directory)
 
