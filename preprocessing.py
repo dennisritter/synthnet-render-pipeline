@@ -1,3 +1,4 @@
+import json
 import sys
 import os
 from types import SimpleNamespace
@@ -64,6 +65,8 @@ def main(**kwargs):
     ppc.assign_materials()
     ppc.assign_cameras()
     ppc.assign_lights()
+
+    ppc.export_rcfg_json()
 
 
 if __name__ == '__main__':

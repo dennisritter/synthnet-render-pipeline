@@ -141,12 +141,31 @@ class PreprocessingController:
         """ Assign Environment Maps to single parts depending on self.envmap_def_mode. """
         pass
 
-    def get_render_config(self):
-        global_scene_json = json.dumps(self.global_scene, default=lambda o: o.__dict__, indent=4)
-        parts_json = [json.dumps(part, default=lambda o: o.__dict__, indent=4) for part in self.parts]
+    def export_rcfg_json(self, filename: str = 'rcfg.json'):
 
-        rcfg = {"global_scene": global_scene_json, "parts": parts_json}
-        return rcfg
+        assert isinstance(filename, str)
+        assert filename.endswith('.json')
+
+        rcfg = {"global_scene": self.global_scene, "parts": self.parts}
+        with open(f'{self.output_dir}/{filename}', 'w') as f:
+            json.dump(
+                rcfg,
+                f,
+                default=lambda o: o.__dict__,
+                indent=4,
+                sort_keys=True,
+            )
+
+    def get_rcfg_json(self):
+        return json.dumps(
+            {
+                "global_scene": self.global_scene,
+                "parts": self.parts
+            },
+            default=lambda o: o.__dict__,
+            indent=4,
+            sort_keys=True,
+        )
 
     # TODO: Implement using blender as a module
     # ? NOTE: Couldn't manage to build Blender on my machines to use it as a python module (Ubuntu 18.04, WSL2 Ubuntu 18.04)
