@@ -177,8 +177,8 @@ class PreprocessingController:
         assert isinstance(filename, str)
         assert filename.endswith('.json')
 
-        ecfg = {"global_scenes": self.global_scenes, "parts": self.parts}
-
+        self.val_ecfg_json()
+        ecfg = self.get_ecfg_json()
         with open(f'{self.output_dir}/{filename}', 'w') as f:
             json.dump(
                 ecfg,
@@ -187,8 +187,6 @@ class PreprocessingController:
                 indent=4,
                 sort_keys=True,
             )
-        # TODO: call before export to abort if not following schema
-        self.val_ecfg_json()
 
     def get_ecfg_json(self):
 
