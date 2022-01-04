@@ -1,6 +1,6 @@
 {
-    "title": "Rendering Pipeline config.",
-    "description": "Definition of scene- and object-configurations to build Blender scenes",
+    "title": "GLTF Export Configuration.",
+    "description": "Definition of scene- and object-configurations to build scenes that are exported as GLTF files",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "required": [
@@ -17,10 +17,6 @@
                 "gltf_path"
             ],
             "properties": {
-                "gltf_path": {
-                    "type": "string",
-                    "description": "Filepath to a gltf file that defines the global scene"
-                },
                 "lights": {
                     "$ref": "/schemas/lights"
                 },
