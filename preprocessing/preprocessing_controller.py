@@ -178,7 +178,7 @@ class PreprocessingController:
         assert filename.endswith('.json')
 
         self.val_ecfg_json()
-        ecfg = self.get_ecfg_json()
+        ecfg = json.loads(self.get_ecfg_json())
         with open(f'{self.output_dir}/{filename}', 'w') as f:
             json.dump(
                 ecfg,
