@@ -1,5 +1,5 @@
 {
-    "title": "GLTF Export Configuration V1.",
+    "title": "GLTF Export Configuration.",
     "description": "Definition of scene- and object-configurations to build scenes that are exported as GLTF files",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
@@ -8,10 +8,21 @@
         "parts"
     ],
     "properties": {
-        "global_scenes": {
-            "type": "array",
-            "items": {
-                "$ref": "/schemas/scene"
+        "global_scene": {
+            "type": "object",
+            "description": "Scene definition that is applied to all part_scenes",
+            "required": [
+                "lights",
+                "cameras",
+                "envmaps"
+            ],
+            "properties": {
+                "lights": {
+                    "$ref": "/schemas/lights"
+                },
+                "cameras": {
+                    "$ref": "/schemas/cameras"
+                }
             }
         },
         "parts": {
@@ -24,34 +35,35 @@
                     "id",
                     "name",
                     "hierarchy",
-                    "single_parts",
-                    "scenes"
+                    "lights",
+                    "cameras",
+                    "envmaps",
+                    "single_parts"
                 ],
                 "properties": {
-                    "id": {
+                    "part_id": {
                         "type": "string",
                         "description": "The identifier for this part"
                     },
-                    "name": {
+                    "part_name": {
                         "type": "string",
                         "description": "The part's name"
                     },
-                    "hierarchy": {
+                    "part_hierarchy": {
                         "type": "string",
                         "description": "The hierarchy of this part"
+                    },
+                    "lights": {
+                        "$ref": "/schemas/lights"
+                    },
+                    "cameras": {
+                        "$ref": "/schemas/cameras"
                     },
                     "single_parts": {
                         "type": "array",
                         "description": "The single parts this assembly is assembled of",
                         "items": {
                             "$ref": "/schemas/single_part"
-                        }
-                    },
-                    "scenes": {
-                        "type": "array",
-                        "description": "Scene definitions for this part",
-                        "items": {
-                            "$ref": "/schemas/scene"
                         }
                     }
                 }
@@ -141,32 +153,6 @@
                     "intensity": {
                         "type": "number",
                         "description": "The light intensity"
-                    }
-                }
-            },
-            "envmap": {
-                "$id": "/schemas/envmap",
-                "type": "string",
-                "description": "File path to an environment map"
-            },
-            "scene": {
-                "$id": "/schemas/scene",
-                "type": "object",
-                "description": "A Scene description",
-                "required": [
-                    "lights",
-                    "cameras",
-                    "envmap"
-                ],
-                "properties": {
-                    "lights": {
-                        "$ref": "/schemas/lights"
-                    },
-                    "camera": {
-                        "$ref": "/schemas/camera"
-                    },
-                    "envmap": {
-                        "$ref": "/schemas/envmap"
                     }
                 }
             },
