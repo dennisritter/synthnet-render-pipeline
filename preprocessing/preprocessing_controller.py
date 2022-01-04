@@ -1,11 +1,12 @@
 """ Takes Metadata, blender file and configuration arguments to prepare a configuration file for GLTF-Scene-Exports of machine parts."""
 import os
 import logging
+import json
 import pandas as pd
 
 from preprocessing.utils.metadata import prepare_metadata
 from preprocessing.parse_parts import parse_parts
-from preprocessing import define_cameras, define_lights, define_materials, define_envmaps
+from preprocessing import define_cameras, define_lights, define_materials, define_envmaps, export_objs
 from models.global_scene import GlobalScene
 from utils import timer_utils
 
@@ -22,7 +23,7 @@ class PreprocessingController:
     def __init__(
         self,
         metadata_file: str,
-        blender_file: str,
+        blend_file: str,
         output_dir: str,
         n_images: int,
         camera_def_mode: str,
@@ -35,9 +36,9 @@ class PreprocessingController:
         # validate metadata_file
         assert isinstance(metadata_file, str)
         assert os.path.isfile(metadata_file)
-        # validate blender_file
-        assert isinstance(blender_file, str)
-        assert os.path.isfile(blender_file)
+        # validate blend_file
+        assert isinstance(blend_file, str)
+        assert os.path.isfile(blend_file)
         # validate output_dir
         assert isinstance(output_dir, str)
         os.makedirs(output_dir, exist_ok=True)
@@ -60,7 +61,7 @@ class PreprocessingController:
 
         ## Assign options
         self.metadata_file = metadata_file
-        self.blender_file = blender_file
+        self.blend_file = blend_file
         self.output_dir = output_dir
         self.n_images = n_images
         self.camera_def_mode = camera_def_mode.lower()
@@ -80,8 +81,7 @@ class PreprocessingController:
 
         tstart = timer_utils.time_now()
         LOGGER.info(LOG_DELIM)
-        LOGGER.info(
-            f'Parsing unique Parts and SingleParts from {metadata_file}')
+        LOGGER.info(f'Parsing unique Parts and SingleParts from {metadata_file}')
         # List of all Parts to render
         self.parts = parse_parts(self.metadata)
         tend = timer_utils.time_since(tstart)
@@ -98,8 +98,7 @@ class PreprocessingController:
         # static: Read metadata materials and apply our materials depending
         # on a static metadata_material:our_material map
         if self.material_def_mode == 'static':
-            self.parts = define_materials.assign_materials_static(
-                self.parts, self.metadata)
+            self.parts = define_materials.assign_materials_static(self.parts, self.metadata)
 
         tend = timer_utils.time_since(tstart)
         LOGGER.info(f'Done in {tend}')
@@ -141,3 +140,40 @@ class PreprocessingController:
     def assign_envmaps(self):
         """ Assign Environment Maps to single parts depending on self.envmap_def_mode. """
         pass
+
+    def export_ecfg_json(self, filename: str = 'ecfg.json'):
+
+        assert isinstance(filename, str)
+        assert filename.endswith('.json')
+
+        ecfg = {"global_scene": self.global_scene, "parts": self.parts}
+        with open(f'{self.output_dir}/{filename}', 'w') as f:
+            json.dump(
+                ecfg,
+                f,
+                default=lambda o: o.__dict__,
+                indent=4,
+                sort_keys=True,
+            )
+
+    def get_ecfg_json(self):
+        return json.dumps(
+            {
+                "global_scene": self.global_scene,
+                "parts": self.parts
+            },
+            default=lambda o: o.__dict__,
+            indent=4,
+            sort_keys=True,
+        )
+
+    # TODO: Implement using blender as a module
+    # ? NOTE: Couldn't manage to build Blender on my machines to use it as a python module (Ubuntu 18.04, WSL2 Ubuntu 18.04)
+    # def export_part_objs(self):
+    #     """ Export OBJ file for each part in self.parts """
+    #     obj_dir = f'{self.output_dir}/part_objs'
+    #     export_objs.export_part_objs(
+    #         parts=self.parts,
+    #         blend_file=self.blend_file,
+    #         out_dir=obj_dir,
+    #     )
