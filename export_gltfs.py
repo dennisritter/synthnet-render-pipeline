@@ -6,6 +6,26 @@ import json
 import argparse
 import os
 
+def apply_material(ob, material_id):
+    """
+    Apply material to given ob by material id
+    Args:
+        ob: object in scene to apply material to
+        material_id: name of material in scene to apply
+    Returns:
+    """
+    # Get material
+    mat = bpy.data.materials.get(material_id)
+    if mat is None:
+        # create material
+        mat = bpy.data.materials.new(name=material_id)
+    # Assign it to object
+    if ob.data.materials:
+        # assign to 1st material slot
+        ob.data.materials[0] = mat
+    else:
+        # no slots
+        ob.data.materials.append(mat)
 
 def create_light(name, data):
     """
@@ -105,16 +125,6 @@ def _export_gltfs(settings, output_directory):
                 # check if obj is unique
                 if not obj_name in all_objects.keys():
                     all_objects[obj_name] = obj
-    # export all colletions and all objects as gltf
-    #print(len(all_objects.keys()))
-    #print(len(all_collections.keys()))
-
-    #print(all_objects.keys())
-    #print(all_collections.keys())
-
-    # TODO create cameras and lights and apply materials
-
-    # TODO export gltf files
 
 def generate_scene(file_path, part):
     # reset scene
@@ -126,12 +136,29 @@ def generate_scene(file_path, part):
         create_camera("camera{0}".format(idx), cam_data)
     for idx, light_data in enumerate(part["lights"]):
         create_light("light{0}".format(idx), light_data)
+    for idx, node_data in enumerate(part["single_parts"]):
+        ob_name = node_data["part_id"]
+        material_id = node_data["material"]
+        if not ob_name in bpy.data.objects.keys():
+            print(ob_name + " does not exist!")
+            continue
+        print("Materials in scene are {0}".format(bpy.data.materials.keys()))
+        if not material_id in bpy.data.materials.keys():
+            print(material_id + " does not exist!")
+            continue
+        apply_material(bpy.data.objects[ob_name], material_id)
+    
 
 
 def export_gltfs(config, output_directory):
     # get basic variables
     obj_dir = config["global_scene"]["obj_path"]
     default_file = config["global_scene"]["gltf_path"]
+    materials_file = config["global_scene"]["materials_path"]
+
+    #import materials 
+    print(materials_file)
+    bpy.ops.import_scene.fbx(filepath=materials_file)
 
     parts = []
     for part in config["parts"]:
@@ -150,7 +177,6 @@ def export_gltfs(config, output_directory):
             export_lights=True
         )
         parts.append(part["part_id"])
-    print(parts)
     # handle objects with default settings
     for obj in os.listdir(obj_dir):
         id, ext = obj.split(".")
@@ -194,6 +220,4 @@ if __name__ == '__main__':
     output_directory = args.output_directory
     with open(config_file) as cfile:
         settings = json.load(cfile)
-    print(settings)
     export_gltfs(settings, output_directory)
-
