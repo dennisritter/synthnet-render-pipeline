@@ -100,7 +100,6 @@ class PreprocessingController:
         self.parts = parse_parts(self.metadata)
         tend = timer_utils.time_since(tstart)
         LOGGER.info(f'Done in {tend}')
-        LOGGER.info(LOG_DELIM)
 
     def assign_materials(self):
         """ Assign materials to single parts depending on self.material_def_mode. """
@@ -116,7 +115,6 @@ class PreprocessingController:
 
         tend = timer_utils.time_since(tstart)
         LOGGER.info(f'Done in {tend}')
-        LOGGER.info(LOG_DELIM)
 
     def _sample_cameras(self, n_images: int):
         """ Assign Cameras to single parts depending on self.camera-def_mode. """
@@ -130,7 +128,6 @@ class PreprocessingController:
 
         tend = timer_utils.time_since(tstart)
         LOGGER.info(f'Done in {tend}')
-        LOGGER.info(LOG_DELIM)
 
         return cameras
 
@@ -148,7 +145,6 @@ class PreprocessingController:
 
         tend = timer_utils.time_since(tstart)
         LOGGER.info(f'Done in {tend}')
-        LOGGER.info(LOG_DELIM)
 
         return lights
 
@@ -173,9 +169,14 @@ class PreprocessingController:
             pass
 
     def export_ecfg_json(self, filename: str = 'ecfg.json'):
+        tstart = timer_utils.time_now()
+        ecfg_path = f'{self.output_dir}/{filename}'
 
         assert isinstance(filename, str)
         assert filename.endswith('.json')
+
+        LOGGER.info(LOG_DELIM)
+        LOGGER.info(f'Exporting ecfg [path={ecfg_path}]')
 
         self.val_ecfg_json()
         ecfg = json.loads(self.get_ecfg_json())
@@ -187,6 +188,8 @@ class PreprocessingController:
                 indent=4,
                 sort_keys=True,
             )
+        tend = timer_utils.time_since(tstart)
+        LOGGER.info(f'Done in {tend}')
 
     def get_ecfg_json(self):
 

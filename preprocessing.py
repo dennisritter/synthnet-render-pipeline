@@ -8,6 +8,8 @@ import click
 from utils import logger_utils, timer_utils, filesystem_utils
 from preprocessing.preprocessing_controller import PreprocessingController
 
+LOG_DELIM = '* ' * 20
+
 
 # yapf: disable
 # TODO: Improve option definitions -> metavar, show_default, type, required
@@ -52,8 +54,8 @@ def main(**kwargs):
     logger_utils.init_logger(output_path=log_dir)
 
     # Print run args
-    LOGGER.info('\n')
-    LOGGER.info('Preprocessing options:')
+    tstart = timer_utils.time_now()
+    LOGGER.info('Start preprocessing with options:')
     LOGGER.info(args)
 
     ppc = PreprocessingController(
@@ -72,6 +74,9 @@ def main(**kwargs):
     ppc.build_scenes()
 
     ppc.export_ecfg_json(filename='ecfg_v1.json')
+
+    tend = timer_utils.time_since(tstart)
+    LOGGER.info(f'Preprocessing finished in {tend}')
 
 
 if __name__ == '__main__':
