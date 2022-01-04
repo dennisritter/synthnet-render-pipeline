@@ -18,10 +18,11 @@ from preprocessing.preprocessing_controller import PreprocessingController
 @click.option('-out', '--output_dir', help='Output root directory', default='./out')
 @click.option('-desc', '--run_description', help='Description for this run', default='nodesc')
 @click.option('-n', '--n_images', help='Number of images to render for each part', default=10)
-@click.option('-cams', '--camera_def_mode', help='Camera definition mode', default='global-static')
-@click.option('-lights', '--light_def_mode', help='Light definition mode', default='global-static')
-@click.option('-mats', '--material_def_mode', help='Material definition mode', default='static')
-@click.option('-envmaps', '--envmap_def_mode', help='Environment Map definition mode', default='global-static')
+@click.option('-scene_mode', '--scene_mode', help='Camera definition mode', default='global')
+@click.option('-cams_mode', '--camera_def_mode', help='Camera definition mode')
+@click.option('-lights_mode', '--light_def_mode', help='Light definition mode')
+@click.option('-mats_mode', '--material_def_mode', help='Material definition mode')
+@click.option('-envmaps_mode', '--envmap_def_mode', help='Environment Map definition mode')
 # yapf: enable
 def main(**kwargs):
     args = SimpleNamespace(**kwargs)
@@ -32,6 +33,7 @@ def main(**kwargs):
     output_dir = args.output_dir
     run_description = args.run_description
     n_images = args.n_images
+    scene_mode = args.scene_mode
     camera_def_mode = args.camera_def_mode
     light_def_mode = args.light_def_mode
     material_def_mode = args.material_def_mode
@@ -60,16 +62,16 @@ def main(**kwargs):
         ecfg_schema_file=ecfg_schema_file,
         output_dir=output_dir,
         n_images=n_images,
+        scene_mode=scene_mode,
         camera_def_mode=camera_def_mode,
         light_def_mode=light_def_mode,
         material_def_mode=material_def_mode,
         envmap_def_mode=envmap_def_mode,
     )
     ppc.assign_materials()
-    ppc.assign_cameras()
-    ppc.assign_lights()
+    ppc.build_scenes()
 
-    ppc.export_ecfg_json(filename='ecfg.json')
+    ppc.export_ecfg_json(filename='ecfg_v1.json')
 
 
 if __name__ == '__main__':
