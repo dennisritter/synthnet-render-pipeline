@@ -28,7 +28,7 @@ class PreprocessingController:
         self,
         metadata_file: str,
         blend_file: str,
-        ecfg_schema_file: str,
+        rcfg_schema_file: str,
         output_dir: str,
         n_images: int,
         scene_mode: str,
@@ -46,8 +46,8 @@ class PreprocessingController:
         assert isinstance(blend_file, str)
         assert os.path.isfile(blend_file)
         # Validate gltf export config validation JSON Schema file
-        assert isinstance(ecfg_schema_file, str)
-        assert os.path.isfile(ecfg_schema_file)
+        assert isinstance(rcfg_schema_file, str)
+        assert os.path.isfile(rcfg_schema_file)
         # validate output_dir
         assert isinstance(output_dir, str)
         os.makedirs(output_dir, exist_ok=True)
@@ -74,7 +74,7 @@ class PreprocessingController:
         ## Assign options
         self.metadata_file = metadata_file
         self.blend_file = blend_file
-        self.ecfg_schema_file = ecfg_schema_file
+        self.rcfg_schema_file = rcfg_schema_file
         self.output_dir = output_dir
         self.n_images = n_images
         self.scene_mode = scene_mode.lower()
@@ -88,10 +88,9 @@ class PreprocessingController:
         # cols: part_id, part_name, part_hierarchy, part_material, part_is_spare
         self.metadata = prepare_metadata(metadata_file)
 
-        # Add empty Scene
-        #   Scene holds cameras and/or lights that are used if we
-        #   don't specify cameras/lights for each part respectively
-        self.global_scenes = []
+        # A scene described by Cameras, Lights and envmaps and render_setups, that is used for
+        # all parts
+        self.global_scene = Scene()
 
         tstart = timer_utils.time_now()
         LOGGER.info(LOG_DELIM)
@@ -133,7 +132,7 @@ class PreprocessingController:
 
     # TODO: Add functionality to specify a range for number of lights per scene
     #       => Add param n_lights_per_scene: Tuple = (1, 1)
-    def _sample_lightsetups(self, n_images: int):
+    def _sample_lights(self, n_images: int):
         """ Sample lightsetups depending on self.light_def_mode. """
         tstart = timer_utils.time_now()
         LOGGER.info(LOG_DELIM)
@@ -141,7 +140,7 @@ class PreprocessingController:
 
         # Add lights with random pos to Scene
         if self.light_def_mode == 'range-uniform':
-            lights = define_lights.get_lightsetups_range_uniform(n_images)
+            lights = define_lights.get_lights_range_uniform(n_images)
 
         tend = timer_utils.time_since(tstart)
         LOGGER.info(f'Done in {tend}')
@@ -152,37 +151,70 @@ class PreprocessingController:
         """ Assign Environment Maps to single parts depending on self.envmap_def_mode. """
         pass
 
+    # TODO: Refactor / WIP
+    # TODO: Add parameter to better define lightsetups?
+    # TODO: Add parameter(s) to specify how to combine items of cameras, lights, envmaps.
+    def _compose_render_setups(self, cameras: list, lights: list, envmaps: list):
+        """ Compose Render Setups from lists of cameras, lights and envmaps.
+
+            Returns a dictionary that contains camera_i, lights_i and envmaps_fname keys, 
+            which reference an item in the respective list by its index (camera, lights) or filename (envmaps).
+
+            Args:
+                cameras (list): List of cameras 
+                lights (list): List of lights
+                envmaps (list): List of envmaps (filenames)
+        
+        """
+        render_setups = []
+        for i, _ in enumerate(cameras):
+            render_setup = {
+                "camera_i": i,
+                "lights_i": [i],
+                "envmap_fname": "",
+            }
+            render_setups.append(render_setup)
+        return render_setups
+
     # TODO: Add envmap support
     def build_scenes(self):
         if self.scene_mode == 'global':
             # Build scenes to use for each part
-            cameras = self._sample_cameras(self.n_images)
-            lightsetups = self._sample_lightsetups(self.n_images)
-            for i in range(0, self.n_images):
-                camera = cameras[i]
-                lights = lightsetups[i]
-                scene = Scene(camera=camera, lights=lights, envmap='')
-                self.global_scenes.append(scene)
-            pass
+            # TODO: Add arguments for number of cameras and lights
+            n_cameras = self.n_images
+            n_lights = self.n_images
+
+            cameras = self._sample_cameras(n_cameras)
+            lights = self._sample_lights(n_lights)
+            envmaps = []  # self.assign_envmaps()
+            render_setups = self._compose_render_setups(
+                cameras=cameras,
+                lights=lights,
+                envmaps=envmaps,
+            )
+            self.global_scene.cameras = cameras
+            self.global_scene.lights = lights
+            self.global_scene.envmaps = envmaps
+            self.global_scene.render_setups = render_setups
         if self.scene_mode == 'part':
             # Build scenes of for each part exclusively
             pass
 
-    def export_ecfg_json(self, filename: str = 'ecfg.json'):
+    def export_rcfg_json(self, filename: str = 'rcfg.json'):
         tstart = timer_utils.time_now()
-        ecfg_path = f'{self.output_dir}/{filename}'
+        rcfg_path = f'{self.output_dir}/{filename}'
 
         assert isinstance(filename, str)
         assert filename.endswith('.json')
 
         LOGGER.info(LOG_DELIM)
-        LOGGER.info(f'Exporting ecfg [path={ecfg_path}]')
+        LOGGER.info(f'Exporting rcfg [path={rcfg_path}]')
 
-        self.val_ecfg_json()
-        ecfg = json.loads(self.get_ecfg_json())
+        self.val_rcfg_json()
+        rcfg = json.loads(self.get_rcfg_json())
         with open(f'{self.output_dir}/{filename}', 'w') as f:
             json.dump(
-                ecfg,
+                rcfg,
                 f,
                 default=lambda o: o.__dict__,
                 indent=4,
@@ -191,11 +223,11 @@ class PreprocessingController:
         tend = timer_utils.time_since(tstart)
         LOGGER.info(f'Done in {tend}')
 
-    def get_ecfg_json(self):
+    def get_rcfg_json(self):
 
         return json.dumps(
             {
-                "global_scenes": self.global_scenes,
+                "global_scene": self.global_scene,
                 "parts": self.parts
             },
             default=lambda o: o.__dict__,
@@ -203,14 +235,14 @@ class PreprocessingController:
             sort_keys=True,
         )
 
-    def val_ecfg_json(self):
-        with open(self.ecfg_schema_file, 'r', encoding='UTF-8') as json_file:
-            ecfg_schema = json.loads(json_file.read())
-        ecfg = self.get_ecfg_json()
+    def val_rcfg_json(self):
+        with open(self.rcfg_schema_file, 'r', encoding='UTF-8') as json_file:
+            rcfg_schema = json.loads(json_file.read())
+        rcfg = self.get_rcfg_json()
         try:
             jsonschema.validate(
-                instance=json.loads(ecfg),
-                schema=ecfg_schema,
+                instance=json.loads(rcfg),
+                schema=rcfg_schema,
             )
         except jsonschema.exceptions.ValidationError as err:
             LOGGER.error('Schema validation Error:', err)
