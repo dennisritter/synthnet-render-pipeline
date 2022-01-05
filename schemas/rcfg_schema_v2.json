@@ -147,29 +147,73 @@
                     }
                 }
             },
+            "envmaps": {
+                "$id": "/schemas/envmaps",
+                "type": "array",
+                "description": "File path to an environment map",
+                "items": {
+                    "$ref": "/schemas/envmap"
+                }
+            },
             "envmap": {
                 "$id": "/schemas/envmap",
                 "type": "string",
-                "description": "File path to an environment map"
+                "description": "Filename (unique) of an environment map"
+            },
+            "render_setups": {
+                "$ref": "/schemas/render_setups",
+                "type": "array",
+                "description": "List of render descriptins that contain references to cameras, lights and envmaps stored in respective lists.",
+                "items": {
+                    "$ref": "schemas/render_setup"
+                }
+            },
+            "render_setup": {
+                "$ref": "/schemas/render_setup",
+                "type": "object",
+                "description": "Describes a render setup. References a camera, lights and envmap used for a rendering",
+                "required": [
+                    "camera_i",
+                    "lights_i",
+                    "envmap_fname"
+                ],
+                "properties": {
+                    "camera_i": {
+                        "type": "integer",
+                        "description": "Index of a camera in the scenes' camera list"
+                    },
+                    "lights_i": {
+                        "type": "integer",
+                        "description": "Indices of lights in the scenes' list of lights"
+                    },
+                    "envmap_fname": {
+                        "type": "string",
+                        "description": "filename of an environment map"
+                    }
+                }
             },
             "scene": {
                 "$id": "/schemas/scene",
                 "type": "object",
-                "description": "A Scene definition",
+                "description": "A Scene definition that contains lists of all cameras, lights and envmaps referenced by their respective indices in the list of render_setups",
                 "required": [
                     "lights",
-                    "camera",
-                    "envmap"
+                    "cameras",
+                    "envmaps",
+                    "render_setups"
                 ],
                 "properties": {
                     "lights": {
                         "$ref": "/schemas/lights"
                     },
                     "camera": {
-                        "$ref": "/schemas/camera"
+                        "$ref": "/schemas/cameras"
                     },
-                    "envmap": {
-                        "$ref": "/schemas/envmap"
+                    "envmaps": {
+                        "$ref": "/schemas/envmaps"
+                    },
+                    "render_setups": {
+                        "$ref": "/schemas/render_setups"
                     }
                 }
             },
