@@ -73,7 +73,7 @@ def main(**kwargs):
     ppc.assign_materials()
     ppc.build_scenes()
 
-    ppc.export_ecfg_json(filename='ecfg_v1.json')
+    ppc.export_ecfg_json(filename='rcfg_v2.json')
 
     tend = timer_utils.time_since(tstart)
     LOGGER.info(f'Preprocessing finished in {tend}')
