@@ -6,26 +6,29 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Scene:
-
     def __init__(
         self,
-        camera,
-        lights,
-        envmap,
+        cameras: list = [],
+        lights: list = [],
+        envmaps: list = [],
+        render_setups: list = [],
     ):
 
         ## Validate parameters
         # Validate cameras
         assert isinstance(lights, list)
         # Validate lights
-        assert isinstance(camera, Camera)
-        # Validate lights
-        assert isinstance(envmap, str)
+        assert isinstance(cameras, list)
+        # Validate envmaps
+        assert isinstance(envmaps, list)
+        # Validate render_setups
+        assert isinstance(render_setups, list)
 
         ## Assign properties
-        self.camera = camera
+        self.camera = cameras
         self.lights = lights
-        self.envmap = envmap
+        self.envmap = envmaps
+        self.render_setups = render_setups
 
     def __str__(self):
         result_str = f'{self.__class__}\n'
