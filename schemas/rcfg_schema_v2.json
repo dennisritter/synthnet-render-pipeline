@@ -4,11 +4,11 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "required": [
-        "global_scenes",
+        "global_scene",
         "parts"
     ],
     "properties": {
-        "global_scenes": {
+        "global_scene": {
             "type": "array",
             "description": "Scene definitions that are used for all parts",
             "items": {
