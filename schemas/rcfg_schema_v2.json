@@ -9,11 +9,9 @@
     ],
     "properties": {
         "global_scene": {
-            "type": "array",
+            "type": "object",
             "description": "Scene definitions that are used for all parts",
-            "items": {
-                "$ref": "/schemas/scene"
-            }
+            "$ref": "/schemas/scene"
         },
         "parts": {
             "type": "array",
@@ -161,15 +159,15 @@
                 "description": "Filename (unique) of an environment map"
             },
             "render_setups": {
-                "$ref": "/schemas/render_setups",
+                "$id": "/schemas/render_setups",
                 "type": "array",
                 "description": "List of render descriptins that contain references to cameras, lights and envmaps stored in respective lists.",
                 "items": {
-                    "$ref": "schemas/render_setup"
+                    "$ref": "/schemas/render_setup"
                 }
             },
             "render_setup": {
-                "$ref": "/schemas/render_setup",
+                "$id": "/schemas/render_setup",
                 "type": "object",
                 "description": "Describes a render setup. References a camera, lights and envmap used for a rendering",
                 "required": [
@@ -183,7 +181,7 @@
                         "description": "Index of a camera in the scenes' camera list"
                     },
                     "lights_i": {
-                        "type": "integer",
+                        "type": "array",
                         "description": "Indices of lights in the scenes' list of lights"
                     },
                     "envmap_fname": {
@@ -206,7 +204,7 @@
                     "lights": {
                         "$ref": "/schemas/lights"
                     },
-                    "camera": {
+                    "cameras": {
                         "$ref": "/schemas/cameras"
                     },
                     "envmaps": {
