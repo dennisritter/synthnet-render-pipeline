@@ -25,9 +25,9 @@ class Scene:
         assert isinstance(render_setups, list)
 
         ## Assign properties
-        self.camera = cameras
+        self.cameras = cameras
         self.lights = lights
-        self.envmap = envmaps
+        self.envmaps = envmaps
         self.render_setups = render_setups
 
     def __str__(self):
