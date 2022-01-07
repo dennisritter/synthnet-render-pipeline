@@ -24,7 +24,7 @@ Also check the [example run script](./scripts/run_preprocessing_example.sh)
 
 ---
 ### GLTF Export
-The [GLTF Export]() reads the RCFG created by the preprocessing step and a structured .blend file of a machine. Then it uses the [Blender API](https://docs.blender.org/api/current/index.html) to create cameras and lights, assigns materials to single parts and loads environment maps according to the RCFG. Further, an animation is created where keyframes define which of the created scene parts are used for one render. Finally, a GLTF file including all scene components and the *render animation keyframes* is exported.
+The [GLTF Export (Add link)]() reads the RCFG created by the preprocessing step and a structured .blend file of a machine. Then it uses the [Blender API](https://docs.blender.org/api/current/index.html) to create cameras and lights, assigns materials to single parts and loads environment maps according to the RCFG. Further, an animation is created where keyframes define which of the created scene parts are used for one render. Finally, a GLTF file including all scene components and the *render animation keyframes* is exported.
 
 See the example shell script below
 ```shell
@@ -32,7 +32,7 @@ blender -b -P ./export_gltfs.py -- --config /path/to/config --output_directory p
 ```
 ---
 ### Rendering
-The [Rendering]() process reads GLTF files exported by the *GLTF Export* and simply renders the images as defined by the *render animation keyframes*.
+The [Rendering (Add link)]() process reads GLTF files exported by the *GLTF Export* and simply renders the images as defined by the *render animation keyframes*.
 
 See the example shell script below
 ```shell
