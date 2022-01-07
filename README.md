@@ -14,13 +14,13 @@ A full process, from preprocessing to rendered images involves three essential s
 3. **Rendering** to read each parts GLTF files and render multiple images from it.
 
 ### Preprocessing
-The [preprocessing](./preprocessing.py) script creates a render configuration according to a [json schema](./schemas/rcfg_schema_v2). The created RCFG lists every machine part that must be rendered and defines all lights, cameras, materials and environment maps used. Further it defines render setups, that describe which of the scene components are used for each particular render.
+The [preprocessing](./preprocessing.py) script creates a render configuration according to a [json schema](./schemas/rcfg_schema_v2.json). The created RCFG lists every machine part that must be rendered and defines all lights, cameras, materials and environment maps used. Further it defines render setups, that describe which of the scene components are used for each particular render.
 
 Run the command below to see all options for the preprocessing script.
 ```shell
 python preprocessing.py --help
 ```
-Also check the [example run script](./scripts/run_preprocessing_example)
+Also check the [example run script](./scripts/run_preprocessing_example.sh)
 
 ---
 ### GLTF Export
