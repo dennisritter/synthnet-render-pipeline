@@ -1,5 +1,3 @@
-import json
-import sys
 import os
 from types import SimpleNamespace
 import logging
@@ -11,27 +9,85 @@ from preprocessing.preprocessing_controller import PreprocessingController
 LOG_DELIM = '* ' * 20
 
 
-# yapf: disable
-# TODO: Improve option definitions -> metavar, show_default, type, required
 @click.command()
-@click.option('-metaf', '--metadata_file', help='Path to metadata file (machine-metadata.xlsx)')
-@click.option('-blendf', '--blend_file', help='Path to blender file (machine.blend)')
-@click.option('-rcfgf', '--rcfg_schema_file', help='Path to gtlf export config json schema file (jsonschema.json)')
-@click.option('-out', '--output_dir', help='Output root directory', default='./out')
-@click.option('-desc', '--run_description', help='Description for this run', default='nodesc')
-@click.option('-n', '--n_images', help='Number of images to render for each part', default=10)
-@click.option('-scene_mode', '--scene_mode', help='Camera definition mode', default='global')
-@click.option('-cams_mode', '--camera_def_mode', help='Camera definition mode')
-@click.option('-lights_mode', '--light_def_mode', help='Light definition mode')
-@click.option('-mats_mode', '--material_def_mode', help='Material definition mode')
-@click.option('-envmaps_mode', '--envmap_def_mode', help='Environment Map definition mode')
-# yapf: enable
+@click.option(
+    '--metadata_file',
+    help='Path to xlsx metadata file (machine-metadata.xlsx)',
+    type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True),
+    required=True,
+)
+@click.option(
+    '--blend_file',
+    help='Path to blender file (machine.blend)',
+    type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True),
+    required=True,
+)
+@click.option(
+    '--output_dir',
+    help='Output root directory (created if not existent)',
+    type=click.Path(exists=False, file_okay=False, dir_okay=True),
+    show_default=True,
+    default='./out',
+)
+@click.option(
+    '--run_description',
+    help='Description for this run. Value will be appendes to the output run directory (<id>-<run_description>)',
+    type=click.STRING,
+    show_default=True,
+    default='nodesc',
+)
+@click.option(
+    '--n_images',
+    help='Number of images to render for each part',
+    type=click.INT,
+    show_default=True,
+    default=10,
+)
+@click.option(
+    '--scene_mode',
+    help='Camera definition mode',
+    type=click.Choice(choices=PreprocessingController.SCENE_MODES),
+    show_default=True,
+    show_choices=True,
+    default=PreprocessingController.SCENE_MODES[0],
+)
+@click.option(
+    '--camera_def_mode',
+    help='Camera definition mode',
+    type=click.Choice(choices=PreprocessingController.CAMERA_DEF_MODES),
+    show_default=True,
+    show_choices=True,
+    default=PreprocessingController.CAMERA_DEF_MODES[0],
+)
+@click.option(
+    '--light_def_mode',
+    help='Light definition mode',
+    type=click.Choice(choices=PreprocessingController.LIGHT_DEF_MODES),
+    show_default=True,
+    show_choices=True,
+    default=PreprocessingController.LIGHT_DEF_MODES[0],
+)
+@click.option(
+    '--material_def_mode',
+    help='Material definition mode',
+    type=click.Choice(choices=PreprocessingController.MATERIAL_DEF_MODES),
+    show_default=True,
+    show_choices=True,
+    default=PreprocessingController.MATERIAL_DEF_MODES[0],
+)
+@click.option(
+    '--envmap_def_mode',
+    help='Environment Map definition mode',
+    type=click.Choice(choices=PreprocessingController.ENVMAP_DEF_MODES),
+    show_default=True,
+    show_choices=True,
+    default=PreprocessingController.ENVMAP_DEF_MODES[0],
+)
 def main(**kwargs):
     args = SimpleNamespace(**kwargs)
 
     metadata_file = args.metadata_file
     blend_file = args.blend_file
-    rcfg_schema_file = args.rcfg_schema_file
     output_dir = args.output_dir
     run_description = args.run_description
     n_images = args.n_images
@@ -58,10 +114,10 @@ def main(**kwargs):
     LOGGER.info('Start preprocessing with options:')
     LOGGER.info(args)
 
+    ##### Start Actual Preprocessing
     ppc = PreprocessingController(
         metadata_file=metadata_file,
         blend_file=blend_file,
-        rcfg_schema_file=rcfg_schema_file,
         output_dir=output_dir,
         n_images=n_images,
         scene_mode=scene_mode,
@@ -72,9 +128,9 @@ def main(**kwargs):
     )
     ppc.assign_materials()
     ppc.build_scenes()
-
     ppc.export_rcfg_json(filename='rcfg_v2.json')
 
+    # Log preprocessing time
     tend = timer_utils.time_since(tstart)
     LOGGER.info(f'Preprocessing finished in {tend}')
 
