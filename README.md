@@ -9,7 +9,7 @@ TODO: Add tutorial
 ## Usage
 
 A full process, from preprocessing to rendered images involves three essential steps.
-1. **Preprocessing** to create a *render configuration* JSON file (RCFG).
+1. **Preprocessing** to create the render configuration JSON file (RCFG).
 2. **GLTF Export** to export GLTF files that describes a scene for each machine part according to the RCFG.
 3. **Rendering** to read each parts GLTF files and render multiple images from it.
 
