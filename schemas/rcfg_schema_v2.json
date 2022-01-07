@@ -1,5 +1,5 @@
 {
-    "title": "GLTF Export Configuration V1.",
+    "title": "GLTF Rendering Configuration V2.",
     "description": "Definition of scene- and object-configurations to build scenes that are exported as GLTF files",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
