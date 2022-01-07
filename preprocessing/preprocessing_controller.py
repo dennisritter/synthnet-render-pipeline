@@ -16,6 +16,8 @@ from utils import timer_utils
 LOGGER = logging.getLogger(__name__)
 LOG_DELIM = '- ' * 20
 
+RCFG_VAL_SCHEMA_FILE = './schemas/rcfg_schema_v2.json'
+
 
 class PreprocessingController:
     SCENE_MODES = ['global', 'part']
@@ -28,7 +30,6 @@ class PreprocessingController:
         self,
         metadata_file: str,
         blend_file: str,
-        rcfg_schema_file: str,
         output_dir: str,
         n_images: int,
         scene_mode: str,
@@ -45,9 +46,6 @@ class PreprocessingController:
         # validate blend_file
         assert isinstance(blend_file, str)
         assert os.path.isfile(blend_file)
-        # Validate gltf export config validation JSON Schema file
-        assert isinstance(rcfg_schema_file, str)
-        assert os.path.isfile(rcfg_schema_file)
         # validate output_dir
         assert isinstance(output_dir, str)
         os.makedirs(output_dir, exist_ok=True)
@@ -74,7 +72,6 @@ class PreprocessingController:
         ## Assign options
         self.metadata_file = metadata_file
         self.blend_file = blend_file
-        self.rcfg_schema_file = rcfg_schema_file
         self.output_dir = output_dir
         self.n_images = n_images
         self.scene_mode = scene_mode.lower()
@@ -236,7 +233,7 @@ class PreprocessingController:
         )
 
     def val_rcfg_json(self):
-        with open(self.rcfg_schema_file, 'r', encoding='UTF-8') as json_file:
+        with open(RCFG_VAL_SCHEMA_FILE, 'r', encoding='UTF-8') as json_file:
             rcfg_schema = json.loads(json_file.read())
         rcfg = self.get_rcfg_json()
         try:
