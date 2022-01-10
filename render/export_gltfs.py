@@ -96,7 +96,8 @@ class SceneExporter():
             lights_indices = render["lights"]
             env_map = render["envmap"]
 
-            for idx in camera_index
+            for idx in camera_index:
+                pass
 
 
     def run(self):
