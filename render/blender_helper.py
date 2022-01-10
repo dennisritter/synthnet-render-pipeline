@@ -2,11 +2,15 @@ import bpy
 import random
 import mathutils
 
+def set_keyframe(ob:object, attr_path: str, frame: int):
+    ob.keyframe_insert(data_path=attr_path, frame=frame)
+
 def show(obj):
-    obj.hide_render = False
+    obj.hide_set(False)
 
 def hide_all():
-    bpy.data.objects.hide_render = True
+    for ob in bpy.data.objects:
+        ob.hide_set(True)
 
 def get_object_by_name(name):
     return bpy.data.objects[name]
