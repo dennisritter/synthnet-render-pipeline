@@ -97,20 +97,22 @@ class SceneExporter():
             # hide all
             self.helper.hide_all()
             # get relevant objects
-            obj_name = render["obj"]
+            bpy_ob = self.helper.get_object_by_name(render["obj"]["id"])
             camera_index = render["camera_i"]
             lights_indices = render["lights_i"]
             env_map = render["envmap_fname"]
             cameras = bpy_scene_description["cameras"]
             lights = bpy_scene_description["lights"]
+            # make object visible or active
+            self.helper.show(bpy_ob)
             # make camera active or visible
             self.helper.show(cameras[camera_index])
             # make lights visible
             for idx in lights_indices:
                 self.helper.show(lights[idx])
-            #TODO add envmap later
-            
+            #TODO add envmap to material later
             # set keys
+            self.helper.set_keyframe(bpy_ob, "hide_render", frame)
             for camera in cameras:
                 #self.helper.set_keyframe(camera, "hide_viewport", frame)
                 self.helper.set_keyframe(camera, "hide_render", frame)
@@ -119,11 +121,10 @@ class SceneExporter():
                 self.helper.set_keyframe(light, "hide_render", frame)
 
 
-            
-
-
     def run(self):
         scene_description = self.get_scene_description
+
+
         #self.validata_scene_description(scene_description)
         #self.load_scene(scene_description)
         #self.create_render_frames(scene_description)
@@ -155,6 +156,7 @@ if __name__ == '__main__':
     for scene_description, render_setup in zip(scene_descriptions, render_setups):
         # create empty scene
         helper.new_scene()
+        # import the parts file
         bpy_scene_description = scene_exporter.load_scene(scene_description=scene_description)
         scene_exporter.create_render_frames(bpy_scene_description, render_setup)
 

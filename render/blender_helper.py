@@ -8,23 +8,23 @@ def new_scene():
 def save_scene(filepath: str):
     bpy.ops.wm.save_as_mainfile(filepath=filepath)
 
-def set_keyframe(ob:object, attr_path: str, frame: int):
+def set_keyframe(ob: bpy.types.Object, attr_path: str, frame: int):
     ob.keyframe_insert(data_path=attr_path, frame=frame)
 
-def show(obj, scene=None):
+def show(obj: bpy.types.Object, scene=None):
     obj.hide_render = False
 
 def hide_all():
     for ob in bpy.data.objects:
         ob.hide_render = True
 
-def get_object_by_name(name):
+def get_object_by_name(name: str):
     return bpy.data.objects[name]
 
-def get_collection_by_name(name):
+def get_collection_by_name(name: str):
     return bpy.data.collections[name]
 
-def add_hdri_map(file_path):
+def add_hdri_map(file_path: str):
     # Get the environment node tree of the current scene
     node_tree = bpy.context.scene.world.node_tree
     tree_nodes = node_tree.nodes
