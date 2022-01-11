@@ -2,15 +2,21 @@ import bpy
 import random
 import mathutils
 
+def new_scene():
+    bpy.ops.scene.new(type='EMPTY')
+
+def save_scene(filepath: str):
+    bpy.ops.wm.save_as_mainfile(filepath=filepath)
+
 def set_keyframe(ob:object, attr_path: str, frame: int):
     ob.keyframe_insert(data_path=attr_path, frame=frame)
 
-def show(obj):
-    obj.hide_set(False)
+def show(obj, scene=None):
+    obj.hide_render = False
 
 def hide_all():
     for ob in bpy.data.objects:
-        ob.hide_set(True)
+        ob.hide_render = True
 
 def get_object_by_name(name):
     return bpy.data.objects[name]
@@ -119,7 +125,7 @@ def create_camera(name, data):
     #TODO make assertions that camera data contains certain keys
     # create camera data
     camera_data = bpy.data.cameras.new(name)
-    camera_data.type = data["type"] if "type" in data.keys() else "perspective"
+    camera_data.type = data["type"] if "type" in data.keys() else "PERSP"
     camera_data.lens = data["focal_length"] if "focal_length" in data.keys() else 50
     # create camera object and link to scene collection
     camera_object = bpy.data.objects.new('Camera', camera_data)

@@ -112,10 +112,10 @@ class SceneExporter():
             
             # set keys
             for camera in cameras:
-                self.helper.set_keyframe(camera, "hide_viewport", frame)
+                #self.helper.set_keyframe(camera, "hide_viewport", frame)
                 self.helper.set_keyframe(camera, "hide_render", frame)
             for light in lights:
-                self.helper.set_keyframe(light, "hide_viewport", frame)
+                #self.helper.set_keyframe(light, "hide_viewport", frame)
                 self.helper.set_keyframe(light, "hide_render", frame)
 
 
@@ -141,15 +141,25 @@ if __name__ == '__main__':
     import sys
     import os
     blender_helper_path = '/home/phillip/repos/iisy/rendering-pipeline'
+    blender_helper_path = r'C:\Users\Phillip\Documents\beuth\rendering-pipeline'
     sys.path.append(blender_helper_path)
     import render.blender_helper as helper
+
+    tempdir = r'C:\Users\Phillip\Documents\beuth\tempdir'
 
     test_path = r"./cfg/cfg_test.json"
     scene_exporter = SceneExporter(test_path, helper)
 
     scene_descriptions, render_setups = scene_exporter.get_scene_description()
+    i = 0
     for scene_description, render_setup in zip(scene_descriptions, render_setups):
+        # create empty scene
+        helper.new_scene()
         bpy_scene_description = scene_exporter.load_scene(scene_description=scene_description)
         scene_exporter.create_render_frames(bpy_scene_description, render_setup)
+
+        output_path = os.path.join(tempdir, "test_{0}.blend".format(str(i)))
+        helper.save_scene(output_path)
+        i+=1
 
 
