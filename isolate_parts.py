@@ -7,15 +7,15 @@ import argparse
 import os
 
 
-def get_parts(config):
+def get_parts(part_ids: list):
     """ returns a list of parts.
 
         Args:
-            config (object): Render configuration file.
+            part_ids (list<str>): A list of part IDs .
     """
-    parts = []
-    for part in config["parts"]:
-        id = part["part_id"]
+
+    for part_id in part_ids:
+        print(part_id)
 
 
 def get_args():
@@ -42,9 +42,10 @@ def get_args():
 
 if __name__ == '__main__':
     args = get_args()
-    config_file = args.config
-    output_directory = args.output_directory
-    print(config_file)
-    with open(config_file) as cfile:
-        settings = json.load(cfile)
-    get_parts(settings, output_directory)
+    rcfg_file = args.rcfg_file
+    output_dir = args.output_dir
+    with open(rcfg_file) as f:
+        rcfg = json.load(f)
+
+    part_ids = [part["id"] for part in rcfg["parts"]]
+    get_parts(part_ids=part_ids)
