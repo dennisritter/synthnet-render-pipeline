@@ -4,9 +4,9 @@
             {
                 "focal_length": 50.0,
                 "position": [
-                    0.0011946123913571072,
-                    0.11910858045083744,
-                    0.48719681226476774
+                    0.3200211634852611,
+                    0.07956246716952536,
+                    0.10306362531137253
                 ],
                 "target": [
                     0,
@@ -18,9 +18,9 @@
             {
                 "focal_length": 50.0,
                 "position": [
-                    -0.6075334557745292,
-                    -0.5714037240249162,
-                    -0.23025027853518365
+                    -0.4910501360710751,
+                    -0.1873915436186559,
+                    0.18834198727677706
                 ],
                 "target": [
                     0,
@@ -32,9 +32,9 @@
             {
                 "focal_length": 50.0,
                 "position": [
-                    -0.45966554947563987,
-                    -0.27744575997245996,
-                    -0.4041125520209265
+                    -0.45486950130089526,
+                    -0.6341598091052647,
+                    0.611888698590731
                 ],
                 "target": [
                     0,
@@ -49,8 +49,8 @@
             {
                 "intensity": 1000,
                 "position": [
-                    -0.7268654769414911,
-                    -0.31259230308193664,
+                    -0.3538162623803349,
+                    -0.01795480170277064,
                     1.0
                 ],
                 "target": [
@@ -63,8 +63,8 @@
             {
                 "intensity": 1000,
                 "position": [
-                    -0.9826281944805639,
-                    0.1817402175730689,
+                    -0.29070517734148504,
+                    -0.6369894237897835,
                     1.0
                 ],
                 "target": [
@@ -77,8 +77,8 @@
             {
                 "intensity": 1000,
                 "position": [
-                    0.761245633630945,
-                    -0.8714648090792076,
+                    -0.3491008456236895,
+                    -0.8244636791723445,
                     1.0
                 ],
                 "target": [
@@ -202,7 +202,7 @@
                     "name": "Circlip_for_Shafts_normal_din_Circlip_DIN_471_-_17_x_1"
                 },
                 {
-                    "id": "IGS_63B/6.3",
+                    "id": "IGS_63B_6.3",
                     "material": "default",
                     "name": "Gabel-Lichtschranke"
                 },
@@ -527,13 +527,13 @@
         },
         {
             "hierarchy": "1.12",
-            "id": "IGS_63B/6.3",
+            "id": "IGS_63B_6.3",
             "is_spare": true,
             "name": "Gabel-Lichtschranke",
             "scenes": [],
             "single_parts": [
                 {
-                    "id": "IGS_63B/6.3",
+                    "id": "IGS_63B_6.3",
                     "material": "default",
                     "name": "Gabel-Lichtschranke"
                 }
@@ -3627,7 +3627,7 @@
                     "name": "Frontplatte_Druck._-_Links"
                 },
                 {
-                    "id": "AS-PA-4-6-08/21",
+                    "id": "AS-PA-4-6-08_21",
                     "material": "plastic.blend",
                     "name": "Leiterpl._-_Abstandsbolzen_M4"
                 }
@@ -3665,7 +3665,7 @@
                     "name": "Frontplatte_Druck._-_Links"
                 },
                 {
-                    "id": "AS-PA-4-6-08/21",
+                    "id": "AS-PA-4-6-08_21",
                     "material": "plastic.blend",
                     "name": "Leiterpl._-_Abstandsbolzen_M4"
                 }
@@ -3701,13 +3701,13 @@
         },
         {
             "hierarchy": "14.2.3",
-            "id": "AS-PA-4-6-08/21",
+            "id": "AS-PA-4-6-08_21",
             "is_spare": false,
             "name": "Leiterpl._-_Abstandsbolzen_M4",
             "scenes": [],
             "single_parts": [
                 {
-                    "id": "AS-PA-4-6-08/21",
+                    "id": "AS-PA-4-6-08_21",
                     "material": "plastic.blend",
                     "name": "Leiterpl._-_Abstandsbolzen_M4"
                 }
