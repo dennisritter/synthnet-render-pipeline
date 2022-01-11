@@ -1,9 +1,0 @@
-{
-    "$id": "https://example.com/schemas",
-    "global_scene": {
-        "gltf_path": "",
-        "lights": [],
-        "cameras": []
-    },
-    "parts": []
-}
