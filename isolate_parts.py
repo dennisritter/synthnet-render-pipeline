@@ -17,6 +17,8 @@ def get_parts(part_ids: list):
     for part_id in part_ids:
         print(part_id)
 
+    # hierarchy_root = [ob for ob in bpy.context.scene.collection.children if ob.name.endswith(".hierarchy")][0]
+
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -26,7 +28,6 @@ def get_args():
     double_dash_index = all_arguments.index('--')
     script_args = all_arguments[double_dash_index + 1:]
 
-    # add parser rules
     parser.add_argument(
         '--rcfg_file',
         help="A Render Configuration JSON file that describes all parts and scenes to generate and export.",
