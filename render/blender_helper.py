@@ -1,6 +1,42 @@
 import bpy
 import random
 import mathutils
+from typing import Generator
+
+def translate_all_objects_in_scene(root, translate_by):
+    scene_collections = get_scene_collections(root)
+    scene_objects = [ob for col in scene_collections for ob in col.objects]
+    for ob in scene_objects:
+        ob.location += translate_by
+
+def get_bounding_sphere(objects:list):
+    """
+    Get Bounding Sphere for list of objects based on bounding boxes
+    params:
+        objects: list of objects to calculate with
+    """
+    points_co_global = []
+    for obj in objects:
+        points_co_global.extend([obj.matrix_world @ mathutils.Vector(bbox) for bbox in obj.bound_box])
+    def get_center(l):
+        return (max(l) + min(l)) / 2 if l else 0.0
+    x, y, z = [[point_co[i] for point_co in points_co_global] for i in range(3)]
+    b_sphere_center = mathutils.Vector([get_center(axis) for axis in [x, y, z]]) if (x and y and z) else None
+    b_sphere_radius = max(((point - b_sphere_center) for point in points_co_global)) if b_sphere_center else None
+    return b_sphere_center, b_sphere_radius.length
+
+def get_scene_collections(parent_coll: bpy.types.Collection) -> Generator:
+    """ Recursively walks through the bpy collections tree and.
+        Returns a generator for scene collections.
+
+        Args:
+            parent_coll (bpy.types.Collection): The bpy collection to get children from
+        Return:
+            Generator<bpy.types.Collection>
+    """
+    yield parent_coll
+    for child_coll in parent_coll.children:
+        yield from get_scene_collections(child_coll)
 
 def delete(object: bpy.types.Object):
     bpy.ops.object.select_all(action='DESELECT')
@@ -30,23 +66,22 @@ def add_object_to_collection(collection: bpy.types.Collection, object_to_add: bp
 def export_gltf(file_path: str, export_selected=True):
     bpy.ops.export_scene.gltf(filepath=file_path, export_format="GLB", use_selection=True, export_image_format="JPEG", export_cameras=True, export_lights=True)
 
-
 def get_objects_from_collection(collection: bpy.types.Collection):
     children = []
+    collection.name
     for ob in collection.objects:
         if type(ob) == bpy.types.Collection:
             children += get_objects_from_collection()
             continue
         children.append(ob)
     return children
-        
-
 
 def select(objects_to_select: list):
     selected_objects = []
     bpy.ops.object.select_all(action='DESELECT')
     for ob in objects_to_select:
         if type(ob) == bpy.types.Collection:
+            print(ob)
             for c in get_objects_from_collection(ob):
                 c.select_set(True)
                 selected_objects.append(c.name)
@@ -82,6 +117,9 @@ def get_object_by_name(name: str):
 def get_collection_by_name(name: str):
     return bpy.data.collections[name]
 
+def get_collections_by_suffix(suffix: str):
+    return [ob for ob in bpy.context.scene.collection.children if ob.name.endswith(suffix)]
+
 def add_hdri_map(file_path: str):
     # Get the environment node tree of the current scene
     node_tree = bpy.context.scene.world.node_tree
@@ -107,7 +145,7 @@ def add_hdri_map(file_path: str):
 def add_image_to_blender(file_path):
     return bpy.data.images.load(file_path, check_existing=True)
 
-def add_materials_from_blend(file_path):
+def import_materials_from_blend(file_path):
     with bpy.data.libraries.load(file_path, link=False) as (data_from, data_to):
         data_to.materials = data_from.materials 
 
