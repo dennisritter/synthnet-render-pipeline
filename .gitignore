@@ -210,9 +210,13 @@ cython_debug/
 
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode
 
+# pycharm
+.idea
+
 # CUSTOM
 data/*
 !data/.gitkeep
 !data/drucker-example
 out/*
 !out/.gitkeep
+
