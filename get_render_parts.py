@@ -89,4 +89,4 @@ if __name__ == '__main__':
 
     part_ids = [part["id"] for part in rcfg["parts"]]
     root_collection = [ob for ob in bpy.context.scene.collection.children if ob.name.endswith(".hierarchy")][0]
-    get_parts(part_ids=part_ids, root_collection=root_collection)
+    get_render_parts(part_ids=part_ids, root_collection=root_collection)
