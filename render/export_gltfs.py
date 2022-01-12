@@ -17,6 +17,20 @@ from typing import Generator
 
 #########################################
 
+def parent(objects: list, parent: bpy.types.Object):
+    for ob in objects:
+        ob.parent = parent
+
+def unparent(objects: list):
+    parents = []
+    for ob in objects:
+        parents.append(ob.parent)
+        ob.parent = None
+    return parents
+
+def translate_objects_by(objects: list, translate_by):
+    for ob in objects:
+        ob.location += translate_by
 
 def translate_all_objects_in_scene(root, translate_by):
     scene_collections = get_scene_collections(root)
@@ -526,7 +540,9 @@ class SceneExporter():
                     apply_material(bpy_ob, single_part["material"])
                 # get the bounding sphere center
                 bsphere_center, bsphere_radius = get_bounding_sphere(bpy_single_parts)
-                translate_all_objects_in_scene(root_col, -1 * bsphere_center)
+                # unparent
+                original_parents = unparent(bpy_single_parts)
+                translate_objects_by(bpy_single_parts, -1 * bsphere_center)
                 # get object
                 render_ob = parts_scene_dict[render["part"]["id"]]
                 # get cameras
@@ -540,7 +556,10 @@ class SceneExporter():
                 select(objects_to_export)
                 # export gltf
                 export_gltf(os.path.join(output_directory, render["part"]["id"] + "_" + str(render_idx) + ".glb"))
-                translate_all_objects_in_scene(root_col, bsphere_center)
+                translate_objects_by(bpy_single_parts, bsphere_center)
+                # reparent
+                for p, c in zip(original_parents, bpy_single_parts):
+                    parent([c], p)
 
     def run(self):
         scene_description = self.get_scene_description
