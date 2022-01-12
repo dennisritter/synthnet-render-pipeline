@@ -574,6 +574,10 @@ def get_args():
 
 
 if __name__ == '__main__':
+    import time
+
+    tstart = time.time()
+
     args = get_args()
 
     rcfg_file = args.rcfg_file
@@ -592,3 +596,7 @@ if __name__ == '__main__':
 
     scene_exporter = SceneExporter(rcfg_data, data_dir)
     scene_exporter.export_gltfs(f'{out_dir}', blend_file)
+
+    tend = time.time() - tstart
+    print('-' * 20)
+    print(f'Done GLTF Export in {tend}')
