@@ -205,9 +205,13 @@ cython_debug/
 .ionide
 
 # Support for Project snippet scope
+.vscode/*
 !.vscode/*.code-snippets
 
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode
+
+# pycharm
+.idea
 
 # CUSTOM
 data/*
@@ -215,3 +219,4 @@ data/*
 !data/drucker-example
 out/*
 !out/.gitkeep
+
