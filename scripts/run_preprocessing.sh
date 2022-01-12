@@ -3,7 +3,7 @@ python preprocessing.py \
 --blend_file './data/drucker-example/drucker.blend' \
 --output_dir './out' \
 --run_description 'testrun' \
---n_images 3 \
+--n_images 100 \
 --scene_mode 'global' \
 --camera_def_mode 'sphere-uniform' \
 --light_def_mode 'range-uniform' \
