@@ -2,8 +2,66 @@ import bpy
 import random
 import mathutils
 
+def delete(object: bpy.types.Object):
+    bpy.ops.object.select_all(action='DESELECT')
+    object.select = True
+    bpy.ops.object.delete()
+
+def create_scene(name: str):
+    scene = bpy.data.scenes.new(name)
+    return scene
+
+def add_object_to_scene(scene: bpy.types.Scene, object_to_add: bpy.types.Object):
+    scene.collection.objects.link(object_to_add)
+
+def get_scene(name:str):
+    if name in bpy.data.scenes.keys():
+        return bpy.data.scenes[name]
+    return None
+
+def create_collection(name: str):
+    collection = bpy.data.collections.new(name)
+    bpy.context.scene.collection.children.link(collection)
+    return collection
+
+def add_object_to_collection(collection: bpy.types.Collection, object_to_add: bpy.types.Object):
+    collection.objects.link(object_to_add)
+
+def export_gltf(file_path: str, export_selected=True):
+    bpy.ops.export_scene.gltf(filepath=file_path, export_format="GLB", use_selection=True, export_image_format="JPEG", export_cameras=True, export_lights=True)
+
+
+def get_objects_from_collection(collection: bpy.types.Collection):
+    children = []
+    for ob in collection.objects:
+        if type(ob) == bpy.types.Collection:
+            children += get_objects_from_collection()
+            continue
+        children.append(ob)
+    return children
+        
+
+
+def select(objects_to_select: list):
+    selected_objects = []
+    bpy.ops.object.select_all(action='DESELECT')
+    for ob in objects_to_select:
+        if type(ob) == bpy.types.Collection:
+            for c in get_objects_from_collection(ob):
+                c.select_set(True)
+                selected_objects.append(c.name)
+            continue
+        ob.select_set(True)
+        selected_objects.append(ob.name)
+    print("SELECTION:", bpy.context.selected_objects)
+    print("SELECTED:", selected_objects)
+
+
 def new_scene():
     bpy.ops.scene.new(type='EMPTY')
+
+def open_scene(file_path: str):
+    bpy.ops.wm.open_mainfile(filepath=file_path)
 
 def save_scene(filepath: str):
     bpy.ops.wm.save_as_mainfile(filepath=filepath)
@@ -93,7 +151,7 @@ def apply_material(ob, material_id):
         ob.data.materials.append(mat)
     return mat
 
-def create_light(name, data):
+def create_light(name, data, collection=None):
     """
     Create Light with given data
     Args:
@@ -105,7 +163,10 @@ def create_light(name, data):
     light_data = bpy.data.lights.new(name, type=light_type)
     light_data.energy = data["intensity"] if "intensity" in data.keys() else 500
     light_object = bpy.data.objects.new(name, object_data=light_data)
-    bpy.context.collection.objects.link(light_object)
+    if collection:
+        collection.objects.link(light_object)
+    else:
+        bpy.context.collection.objects.link(light_object)
     light_object.location = data["position"] if "position" in data.keys() else [0, 0, 0]
     if "target" in data.keys():
         target = data["target"]
@@ -114,7 +175,7 @@ def create_light(name, data):
         light_object.rotation_euler = data["rotation"]
     return light_object
 
-def create_camera(name, data):
+def create_camera(name, data, collection=None):
     """
     Create a camera in the scene with the given data
     Args:
@@ -129,7 +190,10 @@ def create_camera(name, data):
     camera_data.lens = data["focal_length"] if "focal_length" in data.keys() else 50
     # create camera object and link to scene collection
     camera_object = bpy.data.objects.new('Camera', camera_data)
-    bpy.context.scene.collection.objects.link(camera_object)
+    if collection:
+        collection.objects.link(camera_object)
+    else:
+        bpy.context.scene.collection.objects.link(camera_object)
     # set camera object settings
     camera_object.location = data["position"] if "position" in data.keys() else [0, 0, 0]
     if "target" in data.keys():
