@@ -1,34 +1,38 @@
 """ Render gltf files via Blender Software """
 import argparse
 import os
+import time
 # blender api
 import bpy
+
 
 def clear_scene():
     bpy.ops.wm.read_homefile(use_empty=True)
 
+
 def load_gltf(file_path):
     bpy.ops.import_scene.gltf(filepath=file_path)
 
-def render(args, output_directory):
+
+def render(out_fname, output_directory, device):
     # Scene setup
     scene = bpy.context.scene
+
+    scene.cycles.device = device
     scene.render.engine = args.engine
     scene.render.image_settings.file_format = args.output_format
     scene.render.resolution_x = args.resolution_x
     scene.render.resolution_y = args.resolution_y
     scene.render.image_settings.quality = args.output_quality
 
-
+    cameras = [obj for obj in scene.objects if obj.type == 'CAMERA']
     # render loop
-    idx = 0
-    for obj in scene.objects:
-        if obj.type == 'CAMERA':
-            bpy.context.scene.camera = obj
-            file = os.path.join(output_directory, args.file_name + "_" + str(idx))
-            bpy.context.scene.render.filepath = file
-            bpy.ops.render.render(write_still=True)
-            idx += 1
+    for i, cam in enumerate(cameras):
+        bpy.context.scene.camera = cam
+        out_file = f"{output_directory}/{out_fname}_{i}"
+        bpy.context.scene.render.filepath = out_file
+        bpy.ops.render.render(write_still=True)
+
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -54,12 +58,19 @@ if __name__ == '__main__':
     args = get_args()
     input_directory = args.input_directory
     output_directory = args.output_directory
-    for f in os.listdir(input_directory):
-        if not f.endswith(".glb"):
+
+    tstart = time.time()
+
+    device = "GPU"
+
+    for glb_fname in os.listdir(input_directory):
+        if not glb_fname.endswith(".glb"):
             continue
         clear_scene()
-        args.file_name = f.split(".")[0]
-        load_gltf(os.path.join(input_directory, f))
-        render(args, output_directory)
+        load_gltf(os.path.join(input_directory, glb_fname))
+        render_fname = f"{glb_fname.split('.')[0]}"
+        render(render_fname.split(".")[0], output_directory, device)
 
+    tend = tstart - time.time()
 
+    print(f"Rendered {len(os.listdir(input_directory))} imgs in {tend} seconds")
