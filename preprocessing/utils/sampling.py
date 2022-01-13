@@ -8,7 +8,7 @@ from numpy.core.fromnumeric import size
 
 
 def sphere_uniform(n_samples=100):
-    # TODO: Use numpy and remove loop (batch processing) -> return a numpy.ndarray
+    # TODO: Need object information to generate better zoom/pos
     """
     Generate random samples on the unit sphere
     :param number_of_samples:
@@ -20,7 +20,7 @@ def sphere_uniform(n_samples=100):
         costheta = random.uniform(-1, 1)
         u = random.uniform(0, 1)
         theta = math.acos(costheta)
-        r = 10 * u**(1. / 3.)  # 10 as radius
+        r = 5 * u**(1. / 3.)  # 10 as radius
         x = r * math.sin(theta) * math.cos(phi)
         y = r * math.sin(theta) * math.sin(phi)
         z = r * math.cos(theta)

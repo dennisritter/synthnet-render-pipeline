@@ -7,11 +7,12 @@ LIGHT_TYPES = ['point', 'sun', 'spot', 'area']
 
 
 class Light:
+
     def __init__(
         self,
         position: list,
         type_light: str = 'point',
-        intensity: int = 1000,
+        intensity: int = 100,
         target: list = [0, 0, 0],
     ):
 
