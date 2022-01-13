@@ -1,5 +1,5 @@
-INPUT_DIR=./out/export_gltf_test_n1
-OUTPUT_DIR=./out/render_test_n1
+INPUT_DIR=./out/export_gltf_test_n3
+OUTPUT_DIR=./out/render_test_n3
 
 
 blender --background --python ./render/render.py -- \

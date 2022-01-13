@@ -1,7 +1,7 @@
-RCFG_FILE=./out/1-testrun-n100/rcfg_v2.json
+RCFG_FILE=./out/11-testrun-n3/rcfg_v2.json
 BLEND_FILE=./data/drucker-example/drucker.blend
 DATA_DIR=./data/drucker-example
-OUT_DIR=./out/export_gltf_test
+OUT_DIR=./out/export_gltf_test_n3
 
 
 blender $BLEND_FILE --background --python ./render/export_gltfs.py -- \
