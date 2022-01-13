@@ -17,9 +17,11 @@ from typing import Generator
 
 #########################################
 
+
 def parent(objects: list, parent: bpy.types.Object):
     for ob in objects:
         ob.parent = parent
+
 
 def unparent(objects: list):
     parents = []
@@ -28,9 +30,11 @@ def unparent(objects: list):
         ob.parent = None
     return parents
 
+
 def translate_objects_by(objects: list, translate_by):
     for ob in objects:
         ob.location += translate_by
+
 
 def translate_all_objects_in_scene(root, translate_by):
     scene_collections = get_scene_collections(root)
@@ -616,6 +620,6 @@ if __name__ == '__main__':
     scene_exporter = SceneExporter(rcfg_data, data_dir)
     scene_exporter.export_gltfs(f'{out_dir}', blend_file)
 
-    tend = time.time() - tstart
+    tend = tstart - time.time()
     print('-' * 20)
     print(f'Done GLTF Export in {tend}')
