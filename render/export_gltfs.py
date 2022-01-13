@@ -42,6 +42,18 @@ def translate_all_objects_in_scene(root, translate_by):
     for ob in scene_objects:
         ob.location += translate_by
 
+def get_objects_center_pivot(objects: list):
+    world_positions = []
+    # get positions
+    for  ob in objects:
+        world_positions.append(ob.matrix_world.translation)
+    vec = mathutils.Vector([0,0,0])
+    for pos in world_positions:
+        vec += pos
+        
+    vec = vec / len(world_positions)
+    return vec
+
 
 def get_bounding_sphere(objects: list):
     """
@@ -543,10 +555,11 @@ class SceneExporter():
                     continue
                     apply_material(bpy_ob, single_part["material"])
                 # get the bounding sphere center
-                bsphere_center, bsphere_radius = get_bounding_sphere(bpy_single_parts)
+                #bsphere_center, bsphere_radius = get_bounding_sphere(bpy_single_parts)
+                pivot = get_objects_center_pivot(bpy_single_parts)
                 # unparent
                 original_parents = unparent(bpy_single_parts)
-                translate_objects_by(bpy_single_parts, -1 * bsphere_center)
+                translate_objects_by(bpy_single_parts, -1 * pivot)
                 # get object
                 render_ob = parts_scene_dict[render["part"]["id"]]
                 # get cameras
@@ -560,7 +573,7 @@ class SceneExporter():
                 select(objects_to_export)
                 # export gltf
                 export_gltf(os.path.join(output_directory, str(render_idx) + '_' + render["part"]["id"] + ".glb"))
-                translate_objects_by(bpy_single_parts, bsphere_center)
+                translate_objects_by(bpy_single_parts, pivot)
                 # reparent
                 for p, c in zip(original_parents, bpy_single_parts):
                     parent([c], p)
