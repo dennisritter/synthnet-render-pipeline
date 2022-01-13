@@ -14,11 +14,10 @@ def load_gltf(file_path):
     bpy.ops.import_scene.gltf(filepath=file_path)
 
 
-def render(out_fname, output_directory, device):
+def render(glb_fname, output_directory):
     # Scene setup
     scene = bpy.context.scene
 
-    scene.cycles.device = device
     scene.render.engine = args.engine
     scene.render.image_settings.file_format = args.output_format
     scene.render.resolution_x = args.resolution_x
@@ -29,8 +28,8 @@ def render(out_fname, output_directory, device):
     # render loop
     for i, cam in enumerate(cameras):
         bpy.context.scene.camera = cam
-        out_file = f"{output_directory}/{out_fname}_{i}"
-        bpy.context.scene.render.filepath = out_file
+        out_path = f"{output_directory}/{glb_fname}_{i}"
+        bpy.context.scene.render.filepath = out_path
         bpy.ops.render.render(write_still=True)
 
 
@@ -61,15 +60,12 @@ if __name__ == '__main__':
 
     tstart = time.time()
 
-    device = "GPU"
-
     for glb_fname in os.listdir(input_directory):
         if not glb_fname.endswith(".glb"):
             continue
         clear_scene()
         load_gltf(os.path.join(input_directory, glb_fname))
-        render_fname = f"{glb_fname.split('.')[0]}"
-        render(render_fname.split(".")[0], output_directory, device)
+        render(glb_fname, output_directory)
 
     tend = tstart - time.time()
 
