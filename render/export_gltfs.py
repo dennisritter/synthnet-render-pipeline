@@ -559,7 +559,7 @@ class SceneExporter():
                 objects_to_export.append(render_ob)
                 select(objects_to_export)
                 # export gltf
-                export_gltf(os.path.join(output_directory, render["part"]["id"] + "_" + str(render_idx) + ".glb"))
+                export_gltf(os.path.join(output_directory, str(render_idx) + '_' + render["part"]["id"] + ".glb"))
                 translate_objects_by(bpy_single_parts, bsphere_center)
                 # reparent
                 for p, c in zip(original_parents, bpy_single_parts):
