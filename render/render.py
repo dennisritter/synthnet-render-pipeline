@@ -60,7 +60,9 @@ if __name__ == '__main__':
 
     tstart = time.time()
 
-    for glb_fname in os.listdir(input_directory):
+    sorted_input_files = sorted(os.listdir(input_directory), key=lambda x: x.split("_")[0])
+
+    for glb_fname in sorted_input_files:
         if not glb_fname.endswith(".glb"):
             continue
         clear_scene()
