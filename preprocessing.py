@@ -3,7 +3,7 @@ from types import SimpleNamespace
 import logging
 import click
 
-from utils import logger_utils, timer_utils, filesystem_utils
+from utils import fs_utils, logger_utils, timer_utils
 from preprocessing.preprocessing_controller import PreprocessingController
 
 LOG_DELIM = '* ' * 20
@@ -23,21 +23,14 @@ LOG_DELIM = '* ' * 20
     required=True,
 )
 @click.option(
-    '--output_dir',
+    '--out_dir',
     help='Output root directory (created if not existent)',
     type=click.Path(exists=False, file_okay=False, dir_okay=True),
     show_default=True,
     default='./out',
 )
 @click.option(
-    '--run_description',
-    help='Description for this run. Value will be appendes to the output run directory (<id>-<run_description>)',
-    type=click.STRING,
-    show_default=True,
-    default='nodesc',
-)
-@click.option(
-    '--n_images',
+    '--n_images_per_part',
     help='Number of images to render for each part',
     type=click.INT,
     show_default=True,
@@ -88,24 +81,17 @@ def main(**kwargs):
 
     metadata_file = args.metadata_file
     blend_file = args.blend_file
-    output_dir = args.output_dir
-    run_description = args.run_description
-    n_images = args.n_images
+    out_dir = args.out_dir
+    n_images_per_part = args.n_images_per_part
     scene_mode = args.scene_mode
     camera_def_mode = args.camera_def_mode
     light_def_mode = args.light_def_mode
     material_def_mode = args.material_def_mode
     envmap_def_mode = args.envmap_def_mode
 
-    # Get Run ID and create output root folder for this run
-    run_id = filesystem_utils.get_run_id(outdir=output_dir)
-    run_dir = f'{output_dir}/{run_id}-{run_description}'
-    output_dir = run_dir
-    os.makedirs(output_dir, exist_ok=True)
-
     # Init Logger
     LOGGER = logging.getLogger(__name__)
-    log_dir = f'{output_dir}/logs'
+    log_dir = f'{out_dir}/logs'
     os.makedirs(log_dir, exist_ok=True)
     logger_utils.init_logger(output_path=log_dir)
 
@@ -118,8 +104,8 @@ def main(**kwargs):
     ppc = PreprocessingController(
         metadata_file=metadata_file,
         blend_file=blend_file,
-        output_dir=output_dir,
-        n_images=n_images,
+        output_dir=out_dir,
+        n_images=n_images_per_part,
         scene_mode=scene_mode,
         camera_def_mode=camera_def_mode,
         light_def_mode=light_def_mode,

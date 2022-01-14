@@ -217,5 +217,7 @@ cython_debug/
 data/*
 !data/.gitkeep
 !data/drucker-example
+!data/mini_example
+!data/render_configs
 out/*
 !out/.gitkeep
