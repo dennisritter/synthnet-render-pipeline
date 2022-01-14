@@ -42,15 +42,16 @@ def translate_all_objects_in_scene(root, translate_by):
     for ob in scene_objects:
         ob.location += translate_by
 
+
 def get_objects_center_pivot(objects: list):
     world_positions = []
     # get positions
-    for  ob in objects:
+    for ob in objects:
         world_positions.append(ob.matrix_world.translation)
-    vec = mathutils.Vector([0,0,0])
+    vec = mathutils.Vector([0, 0, 0])
     for pos in world_positions:
         vec += pos
-        
+
     vec = vec / len(world_positions)
     return vec
 
@@ -633,6 +634,6 @@ if __name__ == '__main__':
     scene_exporter = SceneExporter(rcfg_data, data_dir)
     scene_exporter.export_gltfs(f'{out_dir}', blend_file)
 
-    tend = tstart - time.time()
+    tend = time.time() - tstart
     print('-' * 20)
     print(f'Done GLTF Export in {tend}')
