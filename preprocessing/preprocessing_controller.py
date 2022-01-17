@@ -9,7 +9,7 @@ from typing import Tuple
 
 from preprocessing.utils.metadata import prepare_metadata
 from preprocessing.parse_parts import parse_parts
-from preprocessing import define_cameras, define_lights, define_materials, define_envmaps, export_objs
+from preprocessing import define_cameras, define_lights, define_materials
 from preprocessing.models.scene import Scene
 from utils import timer_utils
 
