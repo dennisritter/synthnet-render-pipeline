@@ -14,7 +14,7 @@ def load_gltf(file_path):
     bpy.ops.import_scene.gltf(filepath=file_path)
 
 
-def render(glb_fname, output_directory):
+def render(glb_fname, output_directory, args):
     # Scene setup
     scene = bpy.context.scene
 
@@ -42,33 +42,34 @@ def get_args():
     script_args = all_arguments[double_dash_index + 1:]
 
     # add parser rules
-    parser.add_argument('-i', '--input_directory', help="Ditrectory with gltf files.")
-    parser.add_argument('-o', '--output_directory', help="Ditrectory to save the rendered images in.")
-    parser.add_argument('-rx', '--resolution_x', help="Resolution in X", default=512)
-    parser.add_argument('-ry', '--resolution_y', help="Resolution in Y", default=512)
-    parser.add_argument('-oq', '--output_quality', help="Output Quality in range[1, 100]", default=100)
-    parser.add_argument('-of', '--output_format', help="Output Format for images", default="JPEG")
-    parser.add_argument('-e', '--engine', type=str, required=False, default="CYCLES", help="rendering engine")
+    parser.add_argument('-i', '--in_dir', help="Directory with gltf files.", type=str)
+    parser.add_argument('-o', '--out_dir', help="Directory to save the rendered images in.", type=str)
+    parser.add_argument('-rx', '--resolution_x', help="Resolution in X", default=512, type=int)
+    parser.add_argument('-ry', '--resolution_y', help="Resolution in Y", default=512, type=int)
+    parser.add_argument('-oq', '--output_quality', help="Output Quality in range[1, 100]", default=100, type=int)
+    parser.add_argument('-of', '--output_format', help="Output Format for images", default="JPEG", type=str)
+    parser.add_argument('-e', '--engine', help="rendering engine", default="CYCLES", type=str)
     parsed_script_args, _ = parser.parse_known_args(script_args)
     return parsed_script_args
 
 
 if __name__ == '__main__':
     args = get_args()
-    input_directory = args.input_directory
-    output_directory = args.output_directory
+    in_dir = args.in_dir
+    out_dir = args.out_dir
 
+    print(args)
     tstart = time.time()
 
-    sorted_input_files = sorted(os.listdir(input_directory), key=lambda x: x.split("_")[0])
+    sorted_input_files = sorted(os.listdir(in_dir), key=lambda x: x.split("_")[0])
 
     for glb_fname in sorted_input_files:
         if not glb_fname.endswith(".glb"):
             continue
         clear_scene()
-        load_gltf(os.path.join(input_directory, glb_fname))
-        render(glb_fname, output_directory)
+        load_gltf(os.path.join(in_dir, glb_fname))
+        render(glb_fname, out_dir, args)
 
-    tend = tstart - time.time()
+    tend = time.time() - tstart
 
-    print(f"Rendered {len(os.listdir(input_directory))} imgs in {tend} seconds")
+    print(f"Rendered {len(os.listdir(in_dir))} imgs in {tend} seconds")
