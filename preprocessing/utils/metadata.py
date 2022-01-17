@@ -29,7 +29,7 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
     # Change Bem. values to Boolean that denotes whether part is spare or not
     # (V=Verschleißteil, E=Ersatzteil)
     for i, p in enumerate(raw_in.loc[:, 'Bem.']):
-        if p.lower() == 'v' or p.lower() == 'e':
+        if p == 'V' or p == 'E':
             part_is_spare.append(True)
         else:
             part_is_spare.append(False)
