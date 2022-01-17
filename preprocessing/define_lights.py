@@ -1,6 +1,6 @@
 """ Functions for light definition """
 from preprocessing.utils import sampling
-from models.light import Light
+from preprocessing.models.light import Light
 
 
 def get_lights_range_uniform(n: int, xrange=(-1.0, 1.0), yrange=(-1.0, 1.0), zrange=(1.0, 1.0)) -> list[Light]:
