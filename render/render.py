@@ -13,26 +13,35 @@ def load_gltf(file_path):
     bpy.ops.import_scene.gltf(filepath=file_path)
 
 
-def render(glb_fname, output_directory, args):
+def render(glb_fname,
+           out_dir,
+           res_x: int = 256,
+           res_y: int = 256,
+           out_format: str = "JPEG",
+           out_quality: int = 100,
+           engine: str = "CYCLES"):
     # Scene setup
     scene = bpy.context.scene
-    scene.render.engine = args.engine
-    scene.render.image_settings.file_format = args.output_format
-    scene.render.resolution_x = args.resolution_x
-    scene.render.resolution_y = args.resolution_y
-    scene.render.image_settings.quality = args.output_quality
+    scene.render.resolution_x = res_x
+    scene.render.resolution_y = res_y
+    scene.render.image_settings.quality = out_quality
+    scene.render.image_settings.file_format = out_format
+    scene.render.engine = engine
     cameras = [obj for obj in scene.objects if obj.type == 'CAMERA']
 
     # render loop
     for i, cam in enumerate(cameras):
         bpy.context.scene.camera = cam
-        out_path = f"{output_directory}/{glb_fname}_{i}"
-        bpy.context.scene.render.filepath = out_path
+        bpy.context.scene.render.filepath = f"{out_dir}/{glb_fname}_{i}"
         bpy.ops.render.render(write_still=True)
 
 
 def get_args():
     parser = argparse.ArgumentParser()
+    # Only consider script args, ignore blender args
+    _, all_arguments = parser.parse_known_args()
+    double_dash_index = all_arguments.index('--')
+    script_args = all_arguments[double_dash_index + 1:]
 
     parser.add_argument(
         '--in_dir',
@@ -49,13 +58,13 @@ def get_args():
     parser.add_argument(
         '--res_x',
         help="Pixel Resolution in X direction.",
-        default=512,
+        default=256,
         type=int,
     )
     parser.add_argument(
         '--res_y',
         help="Pixel Resolution in Y direction.",
-        default=512,
+        default=256,
         type=int,
     )
     parser.add_argument(
@@ -80,10 +89,6 @@ def get_args():
         type=str,
     )
 
-    # Only consider script args, ignore blender args
-    _, all_arguments = parser.parse_known_args()
-    double_dash_index = all_arguments.index('--')
-    script_args = all_arguments[double_dash_index + 1:]
     args, _ = parser.parse_known_args(script_args)
     return args
 
@@ -95,14 +100,27 @@ if __name__ == '__main__':
 
     in_dir = args.in_dir
     out_dir = args.out_dir
-    sorted_input_files = sorted(os.listdir(in_dir), key=lambda x: x.split("_")[0])
+    res_x = args.res_x
+    res_y = args.res_y
+    out_format = args.out_format
+    out_quality = args.out_quality
+    engine = args.engine
 
+    sorted_input_files = sorted(os.listdir(in_dir), key=lambda x: x.split("_")[0])
     for glb_fname in sorted_input_files:
         if not glb_fname.endswith(".glb"):
             continue
         clear_scene()
         load_gltf(os.path.join(in_dir, glb_fname))
-        render(glb_fname, out_dir, args)
+        render(
+            glb_fname=glb_fname,
+            out_dir=out_dir,
+            res_x=res_x,
+            res_y=res_y,
+            out_format=out_format,
+            out_quality=out_quality,
+            engine=engine,
+        )
 
     tend = time.time() - tstart
     print(f"Rendered {len(os.listdir(in_dir))} imgs in {tend} seconds")
