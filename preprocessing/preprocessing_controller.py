@@ -3,9 +3,6 @@ import os
 import logging
 import json
 import jsonschema
-from jsonschema.exceptions import SchemaError
-import pandas as pd
-from typing import Tuple
 
 from preprocessing.utils.metadata import prepare_metadata
 from preprocessing.parse_parts import parse_parts
@@ -246,14 +243,3 @@ class PreprocessingController:
 
         except jsonschema.exceptions.SchemaError as err:
             LOGGER.error('Schema Error:', err)
-
-    # TODO: Implement using blender as a module
-    # ? NOTE: Couldn't manage to build Blender on my machines to use it as a python module (Ubuntu 18.04, WSL2 Ubuntu 18.04)
-    # def export_part_objs(self):
-    #     """ Export OBJ file for each part in self.parts """
-    #     obj_dir = f'{self.output_dir}/part_objs'
-    #     export_objs.export_part_objs(
-    #         parts=self.parts,
-    #         blend_file=self.blend_file,
-    #         out_dir=obj_dir,
-    #     )
