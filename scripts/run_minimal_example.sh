@@ -85,8 +85,8 @@ fi
 ########## RENDER ##########
 if [[ $RUN_MODE -ge 3 ]]; then
     # Set options
-    RES_X=512
-    RES_Y=512
+    RES_X=256
+    RES_Y=256
     OUT_QUALITY=100
     OUT_FORMAT="JPEG"
     ENGINE="CYCLES"
@@ -94,10 +94,10 @@ if [[ $RUN_MODE -ge 3 ]]; then
     blender --background --python ./render/render.py -- \
     --in_dir $GLTF_DIR \
     --out_dir $OUT_DIR/render \
-    --resolution_x $RES_X \
-    --resolution_y $RES_Y \
-    --output_quality $OUT_QUALITY \
-    --output_format $OUT_FORMAT \
+    --res_x $RES_X \
+    --res_y $RES_Y \
+    --out_quality $OUT_QUALITY \
+    --out_format $OUT_FORMAT \
     --engine $ENGINE
 fi
 ############################
