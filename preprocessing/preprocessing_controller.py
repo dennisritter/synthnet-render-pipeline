@@ -16,7 +16,7 @@ from utils import timer_utils
 LOGGER = logging.getLogger(__name__)
 LOG_DELIM = '- ' * 20
 
-RCFG_VAL_SCHEMA_FILE = './schemas/rcfg_schema_v2.json'
+RCFG_VAL_SCHEMA_FILE = './validation/schemas/rcfg_schema_v2.json'
 
 
 class PreprocessingController:
