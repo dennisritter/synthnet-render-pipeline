@@ -1,8 +1,7 @@
 # exporter
 import json
 import os
-import importlib
-import sys
+import time
 import argparse
 
 # helper
@@ -596,31 +595,41 @@ class SceneExporter():
 
 def get_args():
     parser = argparse.ArgumentParser()
-
-    # get all script args
+    # Only consider script args, ignore blender args
     _, all_arguments = parser.parse_known_args()
     double_dash_index = all_arguments.index('--')
     script_args = all_arguments[double_dash_index + 1:]
 
-    # add parser rules
-    parser.add_argument('--rcfg_file', help="Render configuration file.")
-    parser.add_argument('--data_dir', help="Data directory for materials, envmaps and other dependencies.")
-    parser.add_argument('--out_dir', help="Root directory to save outputs in.")
-    parsed_script_args, _ = parser.parse_known_args(script_args)
-    return parsed_script_args
+    parser.add_argument(
+        '--rcfg_file',
+        help="Render configuration file.",
+        type=str,
+        required=True,
+    )
+    parser.add_argument(
+        '--data_dir',
+        help="Data directory for materials, envmaps and other dependencies.",
+        type=str,
+        required=True,
+    )
+    parser.add_argument(
+        '--out_dir',
+        help="Root directory to save outputs in.",
+        type=str,
+        required=True,
+    )
+    args, _ = parser.parse_known_args(script_args)
+    return args
 
 
 if __name__ == '__main__':
-    import time
-
     tstart = time.time()
-
     args = get_args()
+    print(f"Running GLTF export with args:\n{args}")
 
     rcfg_file = args.rcfg_file
     data_dir = args.data_dir
     out_dir = args.out_dir
-
     # Create out dir if not existent
     os.makedirs(out_dir, exist_ok=True)
 
