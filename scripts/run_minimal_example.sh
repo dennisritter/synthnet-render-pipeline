@@ -8,7 +8,7 @@
 #   default=3
 
 # Set run mode by args or set default
-RUN_MODE = $1
+RUN_MODE="${1}"
 if [ -z "$1" ]
     then
         RUN_MODE=3
@@ -22,7 +22,7 @@ fi
 
 echo "- - - - - - - - - - - - - - - - - - - - "
 echo "Starting SynthNet Rendering Pipeline run."
-echo "RUN_MODE: $RUN_MODE"
+echo "RUN_MODE: ${RUN_MODE}"
 echo "  1 = Preprocessing only"
 echo "  2 = Preprocessing and GLTF Export"
 echo "  3 = Preprocessing, GLTF Export and Rendering"
@@ -61,7 +61,6 @@ python preprocessing.py \
 --out_dir $OUT_DIR \
 --n_images_per_part $N_IMAGES_PER_PART \
 --scene_mode $SCENE_MODE \
-# Set 
 --camera_def_mode $CAMERA_DEF_MODE \
 --light_def_mode $LIGHT_DEF_MODE \
 --material_def_mode $MATERIAL_DEF_MODE \
@@ -88,7 +87,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     # Set options
     RES_X=512
     RES_Y=512
-    OUT_QUALITY=20
+    OUT_QUALITY=100
     OUT_FORMAT="JPEG"
     ENGINE="CYCLES"
     # Run Export GLTFs
