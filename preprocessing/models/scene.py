@@ -1,11 +1,12 @@
 """ Class model of a single part. (A part that has no sub-parts)"""
 import logging
-from models.camera import Camera
+from preprocessing.models.camera import Camera
 
 LOGGER = logging.getLogger(__name__)
 
 
 class Scene:
+
     def __init__(
         self,
         cameras: list = [],

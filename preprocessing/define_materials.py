@@ -2,7 +2,7 @@
 import pandas as pd
 import logging
 
-from models.part import Part
+from preprocessing.models.part import Part
 
 LOGGER = logging.getLogger(__name__)
 

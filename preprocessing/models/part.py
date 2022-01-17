@@ -1,7 +1,7 @@
 """ Class model of a part."""
 import logging
 
-from models.single_part import SinglePart
+from preprocessing.models.single_part import SinglePart
 
 LOGGER = logging.getLogger(__name__)
 
