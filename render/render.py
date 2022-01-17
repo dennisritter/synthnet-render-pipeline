@@ -42,13 +42,13 @@ def get_args():
     script_args = all_arguments[double_dash_index + 1:]
 
     # add parser rules
-    parser.add_argument('-i', '--in_dir', help="Directory with gltf files.")
-    parser.add_argument('-o', '--out_dir', help="Directory to save the rendered images in.")
-    parser.add_argument('-rx', '--resolution_x', help="Resolution in X", default=512)
-    parser.add_argument('-ry', '--resolution_y', help="Resolution in Y", default=512)
-    parser.add_argument('-oq', '--output_quality', help="Output Quality in range[1, 100]", default=100)
-    parser.add_argument('-of', '--output_format', help="Output Format for images", default="JPEG")
-    parser.add_argument('-e', '--engine', type=str, required=False, default="CYCLES", help="rendering engine")
+    parser.add_argument('-i', '--in_dir', help="Directory with gltf files.", type=str)
+    parser.add_argument('-o', '--out_dir', help="Directory to save the rendered images in.", type=str)
+    parser.add_argument('-rx', '--resolution_x', help="Resolution in X", default=512, type=int)
+    parser.add_argument('-ry', '--resolution_y', help="Resolution in Y", default=512, type=int)
+    parser.add_argument('-oq', '--output_quality', help="Output Quality in range[1, 100]", default=100, type=int)
+    parser.add_argument('-of', '--output_format', help="Output Format for images", default="JPEG", type=str)
+    parser.add_argument('-e', '--engine', help="rendering engine", default="CYCLES", type=str)
     parsed_script_args, _ = parser.parse_known_args(script_args)
     return parsed_script_args
 
