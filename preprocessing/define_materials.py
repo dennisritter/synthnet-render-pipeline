@@ -1,16 +1,13 @@
 """ Functions for material definition of single parts"""
-
 import pandas as pd
 import logging
 
 from models.part import Part
-from models.single_part import SinglePart
-from utils import timer_utils
 
 LOGGER = logging.getLogger(__name__)
 
 
-def assign_materials_static(parts: list, metadata: 'pd.DataFrame'):
+def assign_materials_static(parts: list, metadata: 'pd.DataFrame') -> list[Part]:
     """ Returns a list of Part objects with assigned materials of all SingleParts. 
     
         Args:
@@ -52,8 +49,8 @@ def assign_materials_static(parts: list, metadata: 'pd.DataFrame'):
     for part in parts:
         for single_part in part.single_parts:
             # Get material for SinglePart from our metadata
-            # NOTE: We assume, that same SingleParts always have the same material,
-            #       so take only the first value for a SinglePart id.
+            # NOTE: We assume, that SingleParts with the same ID are also of the same material,
+            #       so we lookup the material using the first occurence only.
             metadata_material = metadata.loc[metadata['part_id'] == single_part.id].loc[:, "part_material"].values[0]
 
             # Store metadata materials that are not in MATERIAL_MAP
