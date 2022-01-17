@@ -2,8 +2,8 @@
 import logging
 import pandas as pd
 
-from models.part import Part
-from models.single_part import SinglePart
+from preprocessing.models.part import Part
+from preprocessing.models.single_part import SinglePart
 from utils import timer_utils
 
 LOGGER = logging.getLogger(__name__)
