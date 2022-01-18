@@ -3,12 +3,40 @@ import json
 import os
 import time
 import argparse
+import logging
 
 # helper
 import bpy
 import random
 import mathutils
 from typing import Generator
+
+import builtins as __builtin__
+
+#########################################
+
+# PRINT TO SYSTEM CONSOLE
+
+
+#########################################
+def console_print(*args, **kwargs):
+    for a in bpy.context.screen.areas:
+        if a.type == 'CONSOLE':
+            c = {}
+            c['area'] = a
+            c['space_data'] = a.spaces.active
+            c['region'] = a.regions[-1]
+            c['window'] = bpy.context.window
+            c['screen'] = bpy.context.screen
+            s = " ".join([str(arg) for arg in args])
+            for line in s.split("\n"):
+                bpy.ops.console.scrollback_append(c, text=line)
+
+
+def print(*args, **kwargs):
+    console_print(*args, **kwargs)  # to Python Console
+    __builtin__.print(*args, **kwargs)  # to System Console
+
 
 #########################################
 
@@ -558,11 +586,11 @@ class SceneExporter():
                     continue
                     apply_material(bpy_ob, single_part["material"])
                 # get the bounding sphere center
-                #bsphere_center, bsphere_radius = get_bounding_sphere(bpy_single_parts)
-                pivot = get_objects_center_pivot(bpy_single_parts)
+                bsphere_center, bsphere_radius = get_bounding_sphere(bpy_single_parts)
+                # pivot = get_objects_center_pivot(bpy_single_parts)
                 # unparent
                 original_parents = unparent(bpy_single_parts)
-                translate_objects_by(bpy_single_parts, -1 * pivot)
+                translate_objects_by(bpy_single_parts, -1 * bsphere_center)
                 # get object
                 render_ob = parts_scene_dict[render["part"]["id"]]
                 # get cameras
@@ -582,7 +610,6 @@ class SceneExporter():
                 select(objects_to_export)
                 # export gltf
                 export_gltf(os.path.join(output_directory, str(render_idx) + '_' + render["part"]["id"] + ".glb"))
-                translate_objects_by(bpy_single_parts, pivot)
                 # reparent
                 for p, c in zip(original_parents, bpy_single_parts):
                     parent([c], p)
