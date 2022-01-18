@@ -12,7 +12,7 @@ class Scene:
         self,
         cameras: list[Camera] = [],
         lights: list = [Light],
-        envmaps: list = [],
+        envmaps: list = ["default.hdr"],
         render_setups: list = [],
     ):
 

@@ -165,7 +165,7 @@ class PreprocessingController:
             render_setup = {
                 "camera_i": i,
                 "lights_i": [i],
-                "envmap_fname": "",
+                "envmap_fname": "default.hdr",
             }
             render_setups.append(render_setup)
         return render_setups
@@ -180,7 +180,7 @@ class PreprocessingController:
 
             cameras = self._sample_cameras(n_cameras)
             lights = self._sample_lights(n_lights)
-            envmaps = []  # self.assign_envmaps()
+            envmaps = ["default.hdr"]  # self.assign_envmaps()
             render_setups = self._compose_render_setups(
                 cameras=cameras,
                 lights=lights,
