@@ -442,8 +442,9 @@ class SceneExporter():
             bpy_material = import_materials_from_blend(material)
             bpy_scene_description["materials"].append(bpy_material)
             #add_object_to_scene(bpy_scene_description["scene"], bpy_material)
-        for img in scene_description["envmaps"]:
-            bpy_image = add_image_to_blender(img)
+        for envmap_fname in scene_description["envmaps"]:
+            envmap_path = f"{self.data_dir}/envmaps/{envmap_fname}"
+            bpy_image = add_image_to_blender(envmap_path)
             bpy_scene_description["envmaps"].append(bpy_image)
             #add_object_to_scene(bpy_scene_description["scene"], bpy_image)
         return bpy_scene_description
@@ -502,7 +503,8 @@ class SceneExporter():
             bpy_ob = get_object_by_name(render["obj"]["id"])
             camera_index = render["camera_i"]
             lights_indices = render["lights_i"]
-            env_map = render["envmap_fname"]
+            envmap_fname = render["envmap_fname"]
+
             cameras = bpy_scene_description["cameras"]
             lights = bpy_scene_description["lights"]
             # make object visible or active
@@ -513,6 +515,7 @@ class SceneExporter():
             for idx in lights_indices:
                 show(lights[idx])
             #TODO add envmap to material later
+
             # set keys
             set_keyframe(bpy_ob, "hide_render", frame)
             for camera in cameras:
@@ -565,11 +568,17 @@ class SceneExporter():
                 # get cameras
                 render_camera = cameras[render["camera_i"]]
                 render_lights = [lights[idx] for idx in render["lights_i"]]
-                #env_map = render["envmap_fname"]
+                # get Envmap
+                envmap_fname = render["envmap_fname"]
+                envmap_path = f"{self.data_dir}/envmaps/{envmap_fname}"
+                # hdri_image = add_image_to_blender(envmap_path)
+                hdri_map = add_hdri_map(envmap_path)
                 # select objects and export to gltf
                 objects_to_export.append(render_camera)
                 objects_to_export += render_lights
                 objects_to_export.append(render_ob)
+                # objects_to_export.append(hdri_image)
+                # objects_to_export.append(hdri_map)
                 select(objects_to_export)
                 # export gltf
                 export_gltf(os.path.join(output_directory, str(render_idx) + '_' + render["part"]["id"] + ".glb"))
