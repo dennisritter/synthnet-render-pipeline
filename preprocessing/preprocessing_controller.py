@@ -17,7 +17,7 @@ RCFG_VAL_SCHEMA_FILE = './validation/schemas/rcfg_schema_v2.json'
 
 
 class PreprocessingController:
-    SCENE_MODES = ['global', 'part']
+    SCENE_MODES = ['global', 'exclusive']
     CAMERA_DEF_MODES = ['sphere-uniform']
     LIGHT_DEF_MODES = ['range-uniform']
     MATERIAL_DEF_MODES = ['static']
@@ -84,7 +84,7 @@ class PreprocessingController:
 
         # A scene described by Cameras, Lights and envmaps and render_setups, that is used for
         # all parts
-        self.global_scene = Scene()
+        self.global_scene = None
 
         tstart = timer_utils.time_now()
         LOGGER.info(LOG_DELIM)
@@ -186,12 +186,33 @@ class PreprocessingController:
                 lights=lights,
                 envmaps=envmaps,
             )
-            self.global_scene.cameras = cameras
-            self.global_scene.lights = lights
-            self.global_scene.envmaps = envmaps
-            self.global_scene.render_setups = render_setups
-        if self.scene_mode == 'part':
+            global_scene = Scene()
+            global_scene.cameras = cameras
+            global_scene.lights = lights
+            global_scene.envmaps = envmaps
+            global_scene.render_setups = render_setups
+            self.global_scene = global_scene
+        if self.scene_mode == 'exclusive':
             # Build scenes of for each part exclusively
+            # TODO: Add arguments for number of cameras and lights
+            n_cameras = self.n_images
+            n_lights = self.n_images
+
+            for part in self.parts:
+                cameras = self._sample_cameras(n_cameras)
+                lights = self._sample_lights(n_lights)
+                envmaps = ["default.hdr"]  # self.assign_envmaps()
+                render_setups = self._compose_render_setups(
+                    cameras=cameras,
+                    lights=lights,
+                    envmaps=envmaps,
+                )
+                scene = Scene()
+                scene.cameras = cameras
+                scene.lights = lights
+                scene.envmaps = envmaps
+                scene.render_setups = render_setups
+                part.scene = scene
             pass
 
     def export_rcfg_json(self, filename: str = 'rcfg.json'):

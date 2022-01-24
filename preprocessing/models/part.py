@@ -25,7 +25,7 @@ class Part:
         assert isinstance(hierarchy, str)
         assert isinstance(is_spare, bool)
         assert isinstance(single_parts, list)
-        assert isinstance(scene, Scene)
+        assert isinstance(scene, Scene) or scene is None
 
         ## Assign properties
         self.id = id
