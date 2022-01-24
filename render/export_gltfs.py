@@ -401,13 +401,13 @@ class SceneExporter():
         # parse part scenes
         parts = self.config_data["parts"]
         for part in parts:
-            scene = part["scenes"]
+            scene = part["scene"]
             # add the materials to be imported to the scene description
             materials = [
                 os.path.join(self.material_path, single_part["material"])
                 if not single_part["material"] == "default" else "default" for single_part in part["single_parts"]
             ]
-            if len(scene) > 0:
+            if scene:
                 cameras = []
                 lights = []
                 envmaps = []
@@ -430,7 +430,7 @@ class SceneExporter():
 
                 # get render setups
                 local_render_setups = []
-                for render_setup in part["render_setups"]:
+                for render_setup in scene["render_setups"]:
                     local_render_setup = render_setup.copy()
                     local_render_setup["part"] = part
                     local_render_setups.append(local_render_setup)
@@ -555,6 +555,7 @@ class SceneExporter():
 
     def export_gltfs(self, output_directory, parts_scene_path):
         scene_descriptions, render_setups = scene_exporter.get_scene_description()
+        print(f'SCENE DESCRIPTIONS {len(scene_descriptions)}')
         open_scene(parts_scene_path)
         for scene_description, render_setup in zip(scene_descriptions, render_setups):
             # create empty scene
