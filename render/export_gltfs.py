@@ -83,7 +83,7 @@ def translate_objects_by(objects: list, translate_by: mathutils.Vector):
         ob.location += translate_by
 
 
-def translate_all_objects_in_scene(root : bpy.types.Collection, translate_by : mathutils.Vector):
+def translate_all_objects_in_scene(root: bpy.types.Collection, translate_by: mathutils.Vector):
     """Translate all objects in current scene
 
     Args:
@@ -408,7 +408,10 @@ def import_materials_from_blend(file_path):
         data_to.materials = data_from.materials
 
 
-def look_at(start: mathutils.Vector, target: mathutils.Vector, forward_vector:str="-Z", up_vector:str="Y") -> mathutils.Euler:
+def look_at(start: mathutils.Vector,
+            target: mathutils.Vector,
+            forward_vector: str = "-Z",
+            up_vector: str = "Y") -> mathutils.Euler:
     """Calculate rotation to look at target point from start point
 
     Args:
@@ -528,7 +531,7 @@ def add_camera_frame(frame: int, camera: bpy.types.Camera) -> bpy.types.Timeline
     return marker
 
 
-def remove_markers(objs:list):
+def remove_markers(objs: list):
     """Remove TimelineMarkers from object
 
     Args:
