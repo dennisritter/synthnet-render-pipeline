@@ -550,137 +550,45 @@ def remove_markers(objs: list):
 
 class SceneExporter():
 
-    def __init__(self, config: object, data_dir: str):
-        # Load render config (rcfg)
-        self.config_data = config
+    def __init__(self, rcfg: object, data_dir: str, blend_file: str, out_dir: str):
+        # Set parts
+        # -> See Part definition in Render Config (RCFG)
+        self.parts = []
+        self._set_parts(rcfg)
+
         self.data_dir = data_dir
+        self.out_dir = out_dir
+        self.blend_file = blend_file
 
-        self.material_path = os.path.join(self.data_dir, "materials")
+    def _set_parts(self, rcfg):
+        """ Sets the self.parts attribute of the SceneExporter.
 
-    def get_scene_description(self) -> list:
-        """Parse config file to get scene descriptions and render configs
+            Takes all parts described in the Render Config and checks whether they are matched in the blender file.
+            If a part can not be matched, it is not added to the list of parts and subsequently not exported/rendered.
+            If it is matched, it is aded to the SceneExporter.parts list with the respective blender object added to the part["blend_obj"] property.
 
-        Returns:
-            list(dict, dict): scene descriptions and render setups
+            Args:
+                config
         """
-        # parse global scenes
-        scene_descriptions = [None]
-        render_setups = [[]]
-        global_scene = self.config_data["global_scene"]
-        if global_scene:
-            cameras = []
-            lights = []
-            envmaps = []
-            materials = []
-            # iterate over cameras
-            for camera in global_scene["cameras"]:
-                cameras.append(camera)
-            # iterate over lights
-            for light in global_scene["lights"]:
-                lights.append(light)
-            # iterate over envmaps
-            for envmap in global_scene["envmaps"]:
-                envmaps.append(envmap)
-            global_scene_description = dict(cameras=cameras, lights=lights, envmaps=envmaps, materials=materials)
-            scene_descriptions[0] = global_scene_description
+        # Create list of parts to render
+        # Note: Adds "blend_obj" property to each part.
+        self.parts = []
+        part_ids = [part["id"] for part in rcfg["parts"]]
+        root_coll = get_collections_by_suffix(".hierarchy")[0]
+        # Get blender objects for all parts that can be matched with given part ids
+        render_parts = self._get_render_parts(part_ids, root_coll)
+        render_parts_ids = [part_id[0] for part_id in render_parts]
+        render_parts_obj = [part_id[1] for part_id in render_parts]
+        for part in rcfg["parts"]:
+            # Keep parts only if a matching blend_obj has been identified
+            if part["id"] in render_parts_ids:
+                part["blend_obj"] = render_parts_obj[render_parts_ids.index(part["id"])]
+                # If a global_scene is defined, assign it as a part scene
+                if rcfg["global_scene"]:
+                    part["scene"] = rcfg["global_scene"]
+                self.parts.append(part)
 
-        # parse part scenes
-        parts = self.config_data["parts"]
-        for part in parts:
-            scene = part["scene"]
-            # add the materials to be imported to the scene description
-            materials = [
-                os.path.join(self.material_path, single_part["material"])
-                if not single_part["material"] == "default" else "default" for single_part in part["single_parts"]
-            ]
-            if scene:
-                cameras = []
-                lights = []
-                envmaps = []
-                # iterate over cameras
-                for camera in scene["cameras"]:
-                    cameras.append(camera)
-                # iterate over lights
-                for light in scene["lights"]:
-                    lights.append(light)
-                # iterate over envmaps
-                for envmap in scene["envmaps"]:
-                    envmaps.append(envmap)
-                local_scene_description = dict(cameras=cameras, lights=lights, envmaps=envmaps, materials=materials)
-                # TODO check if scene description exists already and get the index?
-                # add scene description
-                scene_descriptions.append(local_scene_description)
-                # add a new list for render setups using this scene
-                render_setups.append([])
-                scene_idx = len(scene_descriptions) - 1
-
-                # get render setups
-                local_render_setups = []
-                for render_setup in scene["render_setups"]:
-                    local_render_setup = render_setup.copy()
-                    local_render_setup["part"] = part
-                    local_render_setups.append(local_render_setup)
-                render_setups[scene_idx] += local_render_setups
-            else:
-                scene_idx = 0
-                # iterate over render setups
-                local_render_setups = []
-                for render_setup in global_scene["render_setups"]:
-                    local_render_setup = render_setup.copy()
-                    local_render_setup["part"] = part
-                    local_render_setups.append(local_render_setup)
-                render_setups[scene_idx] += local_render_setups
-            # add materials to scene description
-            scene_descriptions[scene_idx]["materials"] = materials
-
-        return scene_descriptions, render_setups
-
-    def validata_scene_description(self, scene_description: dict):
-        """Validate that objects in scene description are in scene
-        and all needed data to create objects are contained
-
-        Args:
-            scene_description ([type]): scene description to validate
-
-        Returns:
-            dict: valid scene description
-        """
-        # verify valid
-        return scene_description
-
-    def load_scene(self, scene_description: dict) -> dict:
-        """Load scene based on scene description dict
-
-        Args:
-            scene_description (dict): scene description dict
-
-        Returns:
-            dict: scene description with bpy object
-        """
-        bpy_scene_description = {"cameras": [], "lights": [], "materials": [], "envmaps": [], "scene": None}
-        bpy_scene_description["scene"] = create_scene("scene_descr")
-        for idx, camera_data in enumerate(scene_description["cameras"]):
-            bpy_camera = create_camera("camera_{0}".format(str(idx)), camera_data)
-            bpy_scene_description["cameras"].append(bpy_camera)
-            #add_object_to_scene(bpy_scene_description["scene"], bpy_camera)
-        for idx, light_data in enumerate(scene_description["lights"]):
-            bpy_light = create_light("light_{0}".format(str(idx)), light_data)
-            bpy_scene_description["lights"].append(bpy_light)
-            #add_object_to_scene(bpy_scene_description["scene"], bpy_light)
-        for material in scene_description["materials"]:
-            if material == "default":
-                continue
-            bpy_material = import_materials_from_blend(material)
-            bpy_scene_description["materials"].append(bpy_material)
-            #add_object_to_scene(bpy_scene_description["scene"], bpy_material)
-        for envmap_fname in scene_description["envmaps"]:
-            envmap_path = f"{self.data_dir}/envmaps/{envmap_fname}"
-            bpy_image = add_image_to_blender(envmap_path)
-            bpy_scene_description["envmaps"].append(bpy_image)
-            #add_object_to_scene(bpy_scene_description["scene"], bpy_image)
-        return bpy_scene_description
-
-    def get_render_parts(self, part_ids: list, root_collection) -> list:
+    def _get_render_parts(self, part_ids: list, root_collection) -> list:
         """ returns a list of tuples.
 
             Args:
@@ -725,125 +633,72 @@ class SceneExporter():
         print(f'- ' * 20)
         return matches
 
-    def create_render_frames(self, bpy_scene_description: dict, render_setups: list):
-        """Create frames for render for each scene description [NOT USED]
+    def export_gltfs(self):
+        """ Export gltf files based on scene descriptions parsed from a valid 
+            config file
 
-        Args:
-            bpy_scene_description ([type]): [description]
-            render_setups ([type]): [description]
         """
-        # hide all objects
-        for frame, render in enumerate(render_setups):
-            # hide all
-            hide_all()
-            # get relevant objects
-            bpy_ob = get_object_by_name(render["obj"]["id"])
-            camera_index = render["camera_i"]
-            lights_indices = render["lights_i"]
-            envmap_fname = render["envmap_fname"]
-
-            cameras = bpy_scene_description["cameras"]
-            lights = bpy_scene_description["lights"]
-            # make object visible or active
-            show(bpy_ob)
-            # make camera active or visible
-            show(cameras[camera_index])
-            # make lights visible
-            for idx in lights_indices:
-                show(lights[idx])
-            #TODO add envmap to material later
-
-            # set keys
-            set_keyframe(bpy_ob, "hide_render", frame)
-            for camera in cameras:
-                #set_keyframe(camera, "hide_viewport", frame)
-                set_keyframe(camera, "hide_render", frame)
-            for light in lights:
-                #set_keyframe(light, "hide_viewport", frame)
-                set_keyframe(light, "hide_render", frame)
-
-    def export_gltfs(self, output_directory: str, parts_scene_path: str):
-        """Export gltf files based on scene descriptions parsed from a valid 
-        config file
-
-        Args:
-            output_directory (str): directory to save the gltfs in
-            parts_scene_path (str): path to .blend file with parts
-        """
-        scene_descriptions, render_setups = scene_exporter.get_scene_description()
-        print(f'SCENE DESCRIPTIONS {len(scene_descriptions)}')
-        open_scene(parts_scene_path)
-        for scene_description, render_setup in zip(scene_descriptions, render_setups):
+        for part in self.parts:
             # create empty scene
-            open_scene(parts_scene_path)
-            # test per scene TODO optimize
-            part_ids = [render["part"]["id"] for render_setup in render_setups for render in render_setup]
-            root_col = get_collections_by_suffix(".hierarchy")[0]
-            parts_scene_dict = {part_id: ob for part_id, ob in self.get_render_parts(part_ids, root_col)}
-            # import the parts file
-            bpy_scene_description = scene_exporter.load_scene(scene_description=scene_description)
-            # get relevant objects from scene description
-            cameras = bpy_scene_description["cameras"]
-            lights = bpy_scene_description["lights"]
-            # iterate over all renders in render setup
-            for render_idx, render in enumerate(render_setup):
-                if not render["part"]["id"] in parts_scene_dict.keys():
-                    continue
+            rcfg_scene = part["scene"]
+
+            # Get all BPY single parts of the current part
+            if isinstance(part["blend_obj"], bpy.types.Collection):
+                bpy_single_parts = part["blend_obj"].all_objects
+            else:
+                bpy_single_parts = [part["blend_obj"]]
+
+            ### CREATE BPY SCENE COMPONENTS
+            # Create bpy cameras
+            bpy_cameras = [create_camera(f"camera_{i}", cam) for i, cam in enumerate(rcfg_scene["cameras"])]
+            # Create bpy lights
+            bpy_lights = [create_light(f"light_{i}", light) for i, light in enumerate(rcfg_scene["lights"])]
+            # Create bpy envmaps
+            envmap_dir = f"{self.data_dir}/envmaps"
+            bpy_envmaps = [add_image_to_blender(f"{envmap_dir}/{envmap_fn}") for envmap_fn in rcfg_scene["envmaps"]]
+            # Create bpy materials
+            materials_dir = f"{self.data_dir}/materials"
+            part_mats = [sp_mat["material"] for sp_mat in part["single_parts"]]
+            bpy_materials = [import_materials_from_blend(f"{materials_dir}/{material_fn}") for material_fn in part_mats]
+
+            ### APPLY MATERIALS
+            for bpy_single_part in bpy_single_parts:
+                for single_part in part["single_parts"]:
+                    if bpy_single_part.name.startswith(single_part["id"]):
+                        # TODO: Apply actual Material
+                        # ? What is the material ID?
+                        print(f"Apply material: {single_part['id']}: {single_part['material']}")
+                        apply_material(bpy_single_part, single_part["material"])
+
+            ### Translate current part to world center
+            # get the bounding sphere center
+            bsphere_center, _ = get_bounding_sphere(bpy_single_parts)
+            # unparent single parts from collections
+            original_parents = unparent(bpy_single_parts)
+            translate_objects_by(bpy_single_parts, -1 * bsphere_center)
+
+            # Handle RCFG render setups
+            for i, render_setup in enumerate(part["scene"]["render_setups"]):
                 objects_to_export = []
-                # assign material
-                bpy_single_parts = []
-                for single_part in render["part"]["single_parts"]:
-                    # get object
-                    if not single_part["id"] in parts_scene_dict.keys():
-                        continue
-                    bpy_ob = parts_scene_dict[single_part["id"]]
-                    bpy_single_parts.append(bpy_ob)
-                    if single_part["material"] == "default":
-                        continue
-                    continue
-                    apply_material(bpy_ob, single_part["material"])
-                # get the bounding sphere center
-                bsphere_center, bsphere_radius = get_bounding_sphere(bpy_single_parts)
-                # pivot = get_objects_center_pivot(bpy_single_parts)
-                # unparent
-                original_parents = unparent(bpy_single_parts)
-                translate_objects_by(bpy_single_parts, -1 * bsphere_center)
-                # get object
-                render_ob = parts_scene_dict[render["part"]["id"]]
-                # get cameras
-                render_camera = cameras[render["camera_i"]]
-                render_lights = [lights[idx] for idx in render["lights_i"]]
-                # get Envmap
-                envmap_fname = render["envmap_fname"]
-                envmap_path = f"{self.data_dir}/envmaps/{envmap_fname}"
-                # hdri_image = add_image_to_blender(envmap_path)
-                hdri_map = add_hdri_map(envmap_path)
-                # select objects and export to gltf
+                render_object = part["blend_obj"]
+                render_camera = bpy_cameras[render_setup["camera_i"]]
+                render_lights = [bpy_lights[light_i] for light_i in render_setup["lights_i"]]
+                # TODO: Apply actual Envmap to scene/render
+                render_envmap = add_hdri_map(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
+                # render_envmap = add_image_to_blender(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
+
+                # select objects to export
+                objects_to_export.append(render_object)
                 objects_to_export.append(render_camera)
                 objects_to_export += render_lights
-                objects_to_export.append(render_ob)
-                # objects_to_export.append(hdri_image)
-                # objects_to_export.append(hdri_map)
                 select(objects_to_export)
-                # export gltf
-                export_gltf(os.path.join(output_directory, str(render_idx) + '_' + render["part"]["id"] + ".glb"))
-                # reparent
-                for p, c in zip(original_parents, bpy_single_parts):
-                    parent([c], p)
 
-    def run(self):
-        scene_description = self.get_scene_description
+                ### EXPORT GLTF
+                export_gltf(f"{self.out_dir}/{part['id']}_{i}.glb")
 
-        #self.validata_scene_description(scene_description)
-        #self.load_scene(scene_description)
-        #self.create_render_frames(scene_description)
-
-
-# def add_module_to_blender(name, path):
-#     spec = importlib.util.spec_from_file_location(name, path)
-#     module = importlib.util.module_from_spec(spec)
-#     sys.modules[spec.name] = module
-#     spec.loader.exec_module(module)
+            # Reparent single parts
+            for p, c in zip(original_parents, bpy_single_parts):
+                parent([c], p)
 
 
 def get_args():
@@ -885,17 +740,28 @@ if __name__ == '__main__':
     out_dir = args.out_dir
     # Create out dir if not existent
     os.makedirs(out_dir, exist_ok=True)
-
     # Get opened blender file path to reload scene when needed
     # blend_file = bpy.path.abspath("//")
     blend_file = bpy.data.filepath
-
+    # Load RCFG data
     with open(rcfg_file, "r") as rcfg_json:
         rcfg_data = json.load(rcfg_json)
 
-    scene_exporter = SceneExporter(rcfg_data, data_dir)
-    scene_exporter.export_gltfs(f'{out_dir}', blend_file)
+    open_scene(blend_file)
+    scene_exporter = SceneExporter(
+        rcfg=rcfg_data,
+        data_dir=data_dir,
+        blend_file=blend_file,
+        out_dir=out_dir,
+    )
+    scene_exporter.export_gltfs()
 
     tend = time.time() - tstart
     print('-' * 20)
     print(f'Done GLTF Export in {tend}')
+
+# def add_module_to_blender(name, path):
+#     spec = importlib.util.spec_from_file_location(name, path)
+#     module = importlib.util.module_from_spec(spec)
+#     sys.modules[spec.name] = module
+#     spec.loader.exec_module(module)
