@@ -2,6 +2,7 @@
 import logging
 
 from preprocessing.models.single_part import SinglePart
+from preprocessing.models.scene import Scene
 
 LOGGER = logging.getLogger(__name__)
 
@@ -14,8 +15,8 @@ class Part:
         name: str,
         hierarchy: str,
         is_spare: bool = False,
-        single_parts: list = [],
-        scenes: list = [],
+        single_parts: list[SinglePart] = [],
+        scene: Scene = None,
     ):
 
         ## Validate parameters
@@ -24,7 +25,7 @@ class Part:
         assert isinstance(hierarchy, str)
         assert isinstance(is_spare, bool)
         assert isinstance(single_parts, list)
-        assert isinstance(scenes, list)
+        assert isinstance(scene, Scene)
 
         ## Assign properties
         self.id = id
@@ -32,7 +33,7 @@ class Part:
         self.hierarchy = hierarchy
         self.single_parts = single_parts
         self.is_spare = is_spare
-        self.scenes = []
+        self.scene = None
 
     def __eq__(self, other):
         if not isinstance(other, Part):
