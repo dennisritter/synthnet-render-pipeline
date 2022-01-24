@@ -46,11 +46,25 @@ def print(*args, **kwargs):
 
 
 def parent(objects: list, parent: bpy.types.Object):
+    """ Parents objects to given parent
+
+    Args:
+        objects (list): list of children to parent
+        parent (bpy.types.Object): object to parent to
+    """
     for ob in objects:
         ob.parent = parent
 
 
-def unparent(objects: list):
+def unparent(objects: list) -> list[bpy.types.Object]:
+    """Unparent given objects
+
+    Args:
+        objects (list): list of objects to unparent
+
+    Returns:
+        list[bpy.types.Object]: previous parent for each object
+    """
     parents = []
     for ob in objects:
         parents.append(ob.parent)
@@ -58,19 +72,39 @@ def unparent(objects: list):
     return parents
 
 
-def translate_objects_by(objects: list, translate_by):
+def translate_objects_by(objects: list, translate_by: mathutils.Vector):
+    """Translate objects by given vector
+
+    Args:
+        objects (list): objects to translate
+        translate_by (mathutils.Vector): vector to translate by
+    """
     for ob in objects:
         ob.location += translate_by
 
 
-def translate_all_objects_in_scene(root, translate_by):
+def translate_all_objects_in_scene(root : bpy.types.Collection, translate_by : mathutils.Vector):
+    """Translate all objects in current scene
+
+    Args:
+        root (bpy.types.Collection): root collection in scene
+        translate_by (mathutils.Vector): vector to translate by
+    """
     scene_collections = get_scene_collections(root)
     scene_objects = [ob for col in scene_collections for ob in col.objects]
     for ob in scene_objects:
         ob.location += translate_by
 
 
-def get_objects_center_pivot(objects: list):
+def get_objects_center_pivot(objects: list) -> mathutils.Vector:
+    """Calculate the center of a list of objects by their transform pivot
+
+    Args:
+        objects (list): objects to get the center point for
+
+    Returns:
+        mathutils.Vector: center pivot
+    """
     world_positions = []
     # get positions
     for ob in objects:
@@ -83,10 +117,11 @@ def get_objects_center_pivot(objects: list):
     return vec
 
 
-def get_bounding_sphere(objects: list):
+def get_bounding_sphere(objects: list) -> list[mathutils.Vector, float]:
     """
     Get Bounding Sphere for list of objects based on bounding boxes
-    params:
+
+    Args:
         objects: list of objects to calculate with
     """
     points_co_global = []
@@ -116,38 +151,86 @@ def get_scene_collections(parent_coll: bpy.types.Collection) -> Generator:
         yield from get_scene_collections(child_coll)
 
 
-def delete(object: bpy.types.Object):
+def delete(objects: list):
+    """Delete given objects
+
+    Args:
+        object (bpy.types.Object): list of objects to delete
+    """
     bpy.ops.object.select_all(action='DESELECT')
-    object.select = True
+    for ob in objects:
+        object.select = True
     bpy.ops.object.delete()
 
 
-def create_scene(name: str):
+def create_scene(name: str) -> bpy.types.Scene:
+    """Create new scene
+
+    Args:
+        name (str): name of the scene
+
+    Returns:
+        bpy.types.Scene: created scene
+    """
     scene = bpy.data.scenes.new(name)
     return scene
 
 
 def add_object_to_scene(scene: bpy.types.Scene, object_to_add: bpy.types.Object):
+    """Add object to given scene
+
+    Args:
+        scene (bpy.types.Scene): scene to add object to
+        object_to_add (bpy.types.Object): object to add
+    """
     scene.collection.objects.link(object_to_add)
 
 
-def get_scene(name: str):
+def get_scene(name: str) -> bpy.types.Scene:
+    """Get scene by name
+
+    Args:
+        name (str): name of the scene
+
+    Returns:
+        bpy.types.Scene: scene object if found else None
+    """
     if name in bpy.data.scenes.keys():
         return bpy.data.scenes[name]
     return None
 
 
-def create_collection(name: str):
+def create_collection(name: str) -> bpy.types.Collection:
+    """Create new collection
+
+    Args:
+        name (str): name of collection
+
+    Returns:
+        bpy.types.Collection: created collection
+    """
     collection = bpy.data.collections.new(name)
     bpy.context.scene.collection.children.link(collection)
     return collection
 
 
 def add_object_to_collection(collection: bpy.types.Collection, object_to_add: bpy.types.Object):
+    """Add object to collection
+
+    Args:
+        collection (bpy.types.Collection): [description]
+        object_to_add (bpy.types.Object): [description]
+    """
     collection.objects.link(object_to_add)
 
 
 def export_gltf(file_path: str, export_selected=True):
+    """Export gltf
+
+    Args:
+        file_path (str): path to output gltf file
+        export_selected (bool, optional): use selection when exporting. Defaults to True.
+    """
     bpy.ops.export_scene.gltf(filepath=file_path,
                               export_format="GLB",
                               use_selection=True,
@@ -156,7 +239,15 @@ def export_gltf(file_path: str, export_selected=True):
                               export_lights=True)
 
 
-def get_objects_from_collection(collection: bpy.types.Collection):
+def get_objects_from_collection(collection: bpy.types.Collection) -> list:
+    """Get objects of collection
+
+    Args:
+        collection (bpy.types.Collection): collection to get objects from
+
+    Returns:
+        list(bpy.types.Object): list of object in collection
+    """
     children = []
     collection.name
     for ob in collection.objects:
@@ -168,6 +259,11 @@ def get_objects_from_collection(collection: bpy.types.Collection):
 
 
 def select(objects_to_select: list):
+    """Select objects
+
+    Args:
+        objects_to_select (list): list of objects to select
+    """
     selected_objects = []
     bpy.ops.object.select_all(action='DESELECT')
     for ob in objects_to_select:
@@ -179,48 +275,100 @@ def select(objects_to_select: list):
             continue
         ob.select_set(True)
         selected_objects.append(ob.name)
-    print("SELECTION:", bpy.context.selected_objects)
-    print("SELECTED:", selected_objects)
 
 
 def new_scene():
+    """Create new scene"""
     bpy.ops.scene.new(type='EMPTY')
 
 
 def open_scene(file_path: str):
+    """Open .blend file
+
+    Args:
+        file_path (str): path to .blend
+    """
     bpy.ops.wm.open_mainfile(filepath=file_path)
 
 
 def save_scene(filepath: str):
+    """Save current as .blend file
+
+    Args:
+        filepath (str): path to output .blend file
+    """
     bpy.ops.wm.save_as_mainfile(filepath=filepath)
 
 
 def set_keyframe(ob: bpy.types.Object, attr_path: str, frame: int):
+    """Set keyframe on attribute for given frame
+
+    Args:
+        ob (bpy.types.Object): object with the keyable attribute
+        attr_path (str): attr path on the object
+        frame (int): frame to set the key on
+    """
     ob.keyframe_insert(data_dir=attr_path, frame=frame)
 
 
 def show(obj: bpy.types.Object, scene=None):
+    """Show object in scene
+
+    Args:
+        obj (bpy.types.Object): object to show
+        scene ([type], optional): [description]. Defaults to None.
+    """
     obj.hide_render = False
 
 
 def hide_all():
+    """ Hide all objects """
     for ob in bpy.data.objects:
         ob.hide_render = True
 
 
-def get_object_by_name(name: str):
+def get_object_by_name(name: str) -> bpy.types.Object:
+    """Get object by name
+
+    Args:
+        name (str): name or key of the object
+
+    Returns:
+        bpy.types.Object: [description]
+    """
     return bpy.data.objects[name]
 
 
-def get_collection_by_name(name: str):
+def get_collection_by_name(name: str) -> bpy.types.Collection:
+    """Get collection by name
+
+    Returns:
+        bpy.types.Collection: the collection in the scene
+    """
     return bpy.data.collections[name]
 
 
-def get_collections_by_suffix(suffix: str):
+def get_collections_by_suffix(suffix: str) -> list:
+    """Get collections by suffix in scene
+
+    Args:
+        suffix (str): string to search for
+
+    Returns:
+        bpy.types.Collection: collections that end with the given string
+    """
     return [ob for ob in bpy.context.scene.collection.children if ob.name.endswith(suffix)]
 
 
-def add_hdri_map(file_path: str):
+def add_hdri_map(file_path: str) -> list:
+    """Add hdri map to .blend
+
+    Args:
+        file_path (str): path to image file
+
+    Returns:
+        list(bpy.types.Material, bpy.types.EnvironmentTexture): [description]
+    """
     # Get the environment node tree of the current scene
     node_tree = bpy.context.scene.world.node_tree
     tree_nodes = node_tree.nodes
@@ -243,7 +391,15 @@ def add_hdri_map(file_path: str):
     return node_background, node_environment
 
 
-def add_image_to_blender(file_path):
+def add_image_to_blender(file_path: str) -> bpy.types.Image:
+    """Add image to .blend file
+
+    Args:
+        file_path (str): path to image file
+
+    Returns:
+        bpy.types.Image: created image node
+    """
     return bpy.data.images.load(file_path, check_existing=True)
 
 
@@ -252,13 +408,17 @@ def import_materials_from_blend(file_path):
         data_to.materials = data_from.materials
 
 
-def look_at(start, target, forward_vector="-Z", up_vector="Y"):
-    """
-    Calculate camera rotation
+def look_at(start: mathutils.Vector, target: mathutils.Vector, forward_vector:str="-Z", up_vector:str="Y") -> mathutils.Euler:
+    """Calculate rotation to look at target point from start point
+
     Args:
-        position: start position
-        point: target position
-    Returns: euler rotation
+        start (mathutils.Vector): point of origin
+        target (mathutils.Vector): point of target
+        forward_vector (str, optional): forward axis. Defaults to "-Z".
+        up_vector (str, optional): secondary axis. Defaults to "Y".
+
+    Returns:
+        bpy.types.EulerRotation: rotation to look at target
     """
     direction = target - start
     # point the cameras '-Z' and use its 'Y' as up
@@ -266,13 +426,17 @@ def look_at(start, target, forward_vector="-Z", up_vector="Y"):
     return rot_quat.to_euler()
 
 
-def get_random_color():
-    ''' generate rgb using a list comprehension '''
+def get_random_color() -> list:
+    """Generate random color
+
+    Returns:
+        list(float, float, float, float): [description]
+    """
     r, g, b = [random.random() for i in range(3)]
     return r, g, b, 1
 
 
-def apply_material(ob, material_id):
+def apply_material(ob, material_id) -> bpy.types.Material:
     """
     Apply material to given ob by material id
     Args:
@@ -349,13 +513,27 @@ def create_camera(name, data, collection=None):
     return camera_object
 
 
-def add_camera_frame(frame, camera):
+def add_camera_frame(frame: int, camera: bpy.types.Camera) -> bpy.types.TimelineMarker:
+    """Add camera marker to frame which switches the main camera.
+
+    Args:
+        frame (int): frame to set the marker at
+        camera (bpy.types.Camera): camera to mark
+
+    Returns:
+        bpy.types.TimelineMarker: created timeline marker 
+    """
     marker = scene.timeline_markers.new("marker{0}".format(frame), frame=frame)
     marker.camera = camera
     return marker
 
 
-def remove_markers(objs):
+def remove_markers(objs:list):
+    """Remove TimelineMarkers from object
+
+    Args:
+        objs (list): [description]
+    """
     for obj in objs:
         bpy.types.TimelineMarkers.remove(obj)
 
@@ -376,7 +554,12 @@ class SceneExporter():
 
         self.material_path = os.path.join(self.data_dir, "materials")
 
-    def get_scene_description(self):
+    def get_scene_description(self) -> list:
+        """Parse config file to get scene descriptions and render configs
+
+        Returns:
+            list(dict, dict): scene descriptions and render setups
+        """
         # parse global scenes
         scene_descriptions = [None]
         render_setups = [[]]
@@ -449,11 +632,28 @@ class SceneExporter():
 
         return scene_descriptions, render_setups
 
-    def validata_scene_description(scene_description):
+    def validata_scene_description(self, scene_description: dict):
+        """Validate that objects in scene description are in scene
+        and all needed data to create objects are contained
+
+        Args:
+            scene_description ([type]): scene description to validate
+
+        Returns:
+            dict: valid scene description
+        """
         # verify valid
         return scene_description
 
-    def load_scene(self, scene_description):
+    def load_scene(self, scene_description: dict) -> dict:
+        """Load scene based on scene description dict
+
+        Args:
+            scene_description (dict): scene description dict
+
+        Returns:
+            dict: scene description with bpy object
+        """
         bpy_scene_description = {"cameras": [], "lights": [], "materials": [], "envmaps": [], "scene": None}
         bpy_scene_description["scene"] = create_scene("scene_descr")
         for idx, camera_data in enumerate(scene_description["cameras"]):
@@ -477,7 +677,7 @@ class SceneExporter():
             #add_object_to_scene(bpy_scene_description["scene"], bpy_image)
         return bpy_scene_description
 
-    def get_render_parts(self, part_ids: list, root_collection) -> list[tuple]:
+    def get_render_parts(self, part_ids: list, root_collection) -> list:
         """ returns a list of tuples.
 
             Args:
@@ -522,7 +722,13 @@ class SceneExporter():
         print(f'- ' * 20)
         return matches
 
-    def create_render_frames(self, bpy_scene_description, render_setups):
+    def create_render_frames(self, bpy_scene_description: dict, render_setups: list):
+        """Create frames for render for each scene description [NOT USED]
+
+        Args:
+            bpy_scene_description ([type]): [description]
+            render_setups ([type]): [description]
+        """
         # hide all objects
         for frame, render in enumerate(render_setups):
             # hide all
@@ -553,7 +759,14 @@ class SceneExporter():
                 #set_keyframe(light, "hide_viewport", frame)
                 set_keyframe(light, "hide_render", frame)
 
-    def export_gltfs(self, output_directory, parts_scene_path):
+    def export_gltfs(self, output_directory: str, parts_scene_path: str):
+        """Export gltf files based on scene descriptions parsed from a valid 
+        config file
+
+        Args:
+            output_directory (str): directory to save the gltfs in
+            parts_scene_path (str): path to .blend file with parts
+        """
         scene_descriptions, render_setups = scene_exporter.get_scene_description()
         print(f'SCENE DESCRIPTIONS {len(scene_descriptions)}')
         open_scene(parts_scene_path)
