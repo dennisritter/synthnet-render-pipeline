@@ -17,7 +17,7 @@ def assign_materials_static(parts: list, metadata: 'pd.DataFrame') -> list[Part]
     """
     # Map materials of metadata to predefined materials
     MATERIAL_MAP = {
-        "-": "default",
+        "-": "default.blend",
         "X5CrNi18-10": "steel.blend",
         "X8CrNiS18-9": "steel.blend",
         "Stahl": "steel.blend",
@@ -56,7 +56,7 @@ def assign_materials_static(parts: list, metadata: 'pd.DataFrame') -> list[Part]
             # Store metadata materials that are not in MATERIAL_MAP
             if metadata_material not in list(MATERIAL_MAP.keys()):
                 unmapped_metadata_materials.append(metadata_material)
-                single_part.material = "default"
+                single_part.material = "default.blend"
             # Assign material from MATERIAL_MAP, whose key is the metadata_material
             else:
                 single_part.material = MATERIAL_MAP[metadata_material]
