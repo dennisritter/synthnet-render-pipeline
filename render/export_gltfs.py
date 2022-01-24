@@ -550,33 +550,42 @@ def remove_markers(objs: list):
 
 class SceneExporter():
 
-    def __init__(self, config: object, data_dir: str, blend_file: str, out_dir: str):
+    def __init__(self, rcfg: object, data_dir: str, blend_file: str, out_dir: str):
         # Set parts
-        # -> See Part definition in Render Config
+        # -> See Part definition in Render Config (RCFG)
         self.parts = []
-        self._set_parts(config)
+        self._set_parts(rcfg)
 
         self.data_dir = data_dir
         self.out_dir = out_dir
         self.blend_file = blend_file
 
-    def _set_parts(self, config):
+    def _set_parts(self, rcfg):
+        """ Sets the self.parts attribute of the SceneExporter.
+
+            Takes all parts described in the Render Config and checks whether they are matched in the blender file.
+            If a part can not be matched, it is not added to the list of parts and subsequently not exported/rendered.
+            If it is matched, it is aded to the SceneExporter.parts list with the respective blender object added to the part["blend_obj"] property.
+
+            Args:
+                config
+        """
         # Create list of parts to render
         # Note: Adds "blend_obj" property to each part.
         self.parts = []
-        part_ids = [part["id"] for part in config["parts"]]
+        part_ids = [part["id"] for part in rcfg["parts"]]
         root_coll = get_collections_by_suffix(".hierarchy")[0]
         # Get blender objects for all parts that can be matched with given part ids
         render_parts = self._get_render_parts(part_ids, root_coll)
         render_parts_ids = [part_id[0] for part_id in render_parts]
         render_parts_obj = [part_id[1] for part_id in render_parts]
-        for part in config["parts"]:
+        for part in rcfg["parts"]:
             # Keep parts only if a matching blend_obj has been identified
             if part["id"] in render_parts_ids:
                 part["blend_obj"] = render_parts_obj[render_parts_ids.index(part["id"])]
                 # If a global_scene is defined, assign it as a part scene
-                if config["global_scene"]:
-                    part["scene"] = config["global_scene"]
+                if rcfg["global_scene"]:
+                    part["scene"] = rcfg["global_scene"]
                 self.parts.append(part)
 
     def _get_render_parts(self, part_ids: list, root_collection) -> list:
@@ -739,7 +748,12 @@ if __name__ == '__main__':
         rcfg_data = json.load(rcfg_json)
 
     open_scene(blend_file)
-    scene_exporter = SceneExporter(rcfg_data, data_dir, blend_file, out_dir)
+    scene_exporter = SceneExporter(
+        rcfg=rcfg_data,
+        data_dir=data_dir,
+        blend_file=blend_file,
+        out_dir=out_dir,
+    )
     scene_exporter.export_gltfs()
 
     tend = time.time() - tstart
