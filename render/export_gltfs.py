@@ -551,89 +551,33 @@ def remove_markers(objs: list):
 class SceneExporter():
 
     def __init__(self, config: object, data_dir: str):
+        self.parts = []
+        self._set_parts(config)
+
         # Load render config (rcfg)
         self.config_data = config
         self.data_dir = data_dir
 
         self.material_path = os.path.join(self.data_dir, "materials")
 
-    def get_scene_description(self) -> list:
-        """Parse config file to get scene descriptions and render configs
-
-        Returns:
-            list(dict, dict): scene descriptions and render setups
-        """
-        # parse global scenes
-        scene_descriptions = [None]
-        render_setups = [[]]
-        global_scene = self.config_data["global_scene"]
-        if global_scene:
-            cameras = []
-            lights = []
-            envmaps = []
-            materials = []
-            # iterate over cameras
-            for camera in global_scene["cameras"]:
-                cameras.append(camera)
-            # iterate over lights
-            for light in global_scene["lights"]:
-                lights.append(light)
-            # iterate over envmaps
-            for envmap in global_scene["envmaps"]:
-                envmaps.append(envmap)
-            global_scene_description = dict(cameras=cameras, lights=lights, envmaps=envmaps, materials=materials)
-            scene_descriptions[0] = global_scene_description
-
-        # parse part scenes
-        parts = self.config_data["parts"]
-        for part in parts:
-            scene = part["scene"]
-            # add the materials to be imported to the scene description
-            materials = [
-                os.path.join(self.material_path, single_part["material"])
-                if not single_part["material"] == "default" else "default" for single_part in part["single_parts"]
-            ]
-            if scene:
-                cameras = []
-                lights = []
-                envmaps = []
-                # iterate over cameras
-                for camera in scene["cameras"]:
-                    cameras.append(camera)
-                # iterate over lights
-                for light in scene["lights"]:
-                    lights.append(light)
-                # iterate over envmaps
-                for envmap in scene["envmaps"]:
-                    envmaps.append(envmap)
-                local_scene_description = dict(cameras=cameras, lights=lights, envmaps=envmaps, materials=materials)
-                # TODO check if scene description exists already and get the index?
-                # add scene description
-                scene_descriptions.append(local_scene_description)
-                # add a new list for render setups using this scene
-                render_setups.append([])
-                scene_idx = len(scene_descriptions) - 1
-
-                # get render setups
-                local_render_setups = []
-                for render_setup in scene["render_setups"]:
-                    local_render_setup = render_setup.copy()
-                    local_render_setup["part"] = part
-                    local_render_setups.append(local_render_setup)
-                render_setups[scene_idx] += local_render_setups
-            else:
-                scene_idx = 0
-                # iterate over render setups
-                local_render_setups = []
-                for render_setup in global_scene["render_setups"]:
-                    local_render_setup = render_setup.copy()
-                    local_render_setup["part"] = part
-                    local_render_setups.append(local_render_setup)
-                render_setups[scene_idx] += local_render_setups
-            # add materials to scene description
-            scene_descriptions[scene_idx]["materials"] = materials
-
-        return scene_descriptions, render_setups
+    def _set_parts(self, config):
+        # Create list of parts to render
+        # Note: Adds "blend_obj" property to each part.
+        self.parts = []
+        part_ids = [part["id"] for part in config["parts"]]
+        root_coll = get_collections_by_suffix(".hierarchy")[0]
+        # Get blender objects for all parts that can be matched with given part ids
+        render_parts = self.get_render_parts(part_ids, root_coll)
+        render_parts_ids = [part_id[0] for part_id in render_parts]
+        render_parts_obj = [part_id[1] for part_id in render_parts]
+        for part in config["parts"]:
+            # Keep parts only if a matching blend_obj has been identified
+            if part["id"] in render_parts_ids:
+                part["blend_obj"] = render_parts_obj[render_parts_ids.index(part["id"])]
+                # If a global_scene is defined, assign it as a part scene
+                if config["global_scene"]:
+                    part["scene"] = config["global_scene"]
+                self.parts.append(part)
 
     def validata_scene_description(self, scene_description: dict):
         """Validate that objects in scene description are in scene
@@ -762,7 +706,7 @@ class SceneExporter():
                 #set_keyframe(light, "hide_viewport", frame)
                 set_keyframe(light, "hide_render", frame)
 
-    def export_gltfs(self, output_directory: str, parts_scene_path: str):
+    def export_gltfs(self, output_directory: str, blend_file: str):
         """Export gltf files based on scene descriptions parsed from a valid 
         config file
 
@@ -770,9 +714,12 @@ class SceneExporter():
             output_directory (str): directory to save the gltfs in
             parts_scene_path (str): path to .blend file with parts
         """
-        scene_descriptions, render_setups = scene_exporter.get_scene_description()
-        print(f'SCENE DESCRIPTIONS {len(scene_descriptions)}')
-        open_scene(parts_scene_path)
+
+        # open_scene(blend_file)
+
+        for part in self.parts:
+            open_scene(blend_file)
+
         for scene_description, render_setup in zip(scene_descriptions, render_setups):
             # create empty scene
             open_scene(parts_scene_path)
@@ -893,8 +840,10 @@ if __name__ == '__main__':
     with open(rcfg_file, "r") as rcfg_json:
         rcfg_data = json.load(rcfg_json)
 
+    open_scene(blend_file)
     scene_exporter = SceneExporter(rcfg_data, data_dir)
-    scene_exporter.export_gltfs(f'{out_dir}', blend_file)
+    print(scene_exporter.parts)
+    # scene_exporter.export_gltfs(f'{out_dir}', blend_file)
 
     tend = time.time() - tstart
     print('-' * 20)
