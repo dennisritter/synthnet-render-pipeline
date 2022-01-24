@@ -9,7 +9,6 @@
     ],
     "properties": {
         "global_scene": {
-            "type": "object",
             "description": "Scene definitions that are used for all parts",
             "$ref": "/schemas/scene"
         },
@@ -24,7 +23,7 @@
                     "name",
                     "hierarchy",
                     "single_parts",
-                    "scenes"
+                    "scene"
                 ],
                 "properties": {
                     "id": {
@@ -46,12 +45,9 @@
                             "$ref": "/schemas/single_part"
                         }
                     },
-                    "scenes": {
-                        "type": "array",
-                        "description": "Scene definitions for this part",
-                        "items": {
-                            "$ref": "/schemas/scene"
-                        }
+                    "scene": {
+                        "description": "Scene definition for this part",
+                        "$ref": "/schemas/scene"
                     }
                 }
             }
@@ -192,7 +188,10 @@
             },
             "scene": {
                 "$id": "/schemas/scene",
-                "type": "object",
+                "type": [
+                    "object",
+                    "null"
+                ],
                 "description": "A Scene definition that contains lists of all cameras, lights and envmaps referenced by their respective indices in the list of render_setups",
                 "required": [
                     "lights",
