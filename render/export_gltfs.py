@@ -550,13 +550,14 @@ def remove_markers(objs: list):
 
 class SceneExporter():
 
-    def __init__(self, config: object, data_dir: str):
+    def __init__(self, config: object, data_dir: str, out_dir: str):
         self.parts = []
         self._set_parts(config)
 
         # Load render config (rcfg)
         self.config_data = config
         self.data_dir = data_dir
+        self.out_dir = out_dir
 
         self.material_path = os.path.join(self.data_dir, "materials")
 
@@ -841,9 +842,8 @@ if __name__ == '__main__':
         rcfg_data = json.load(rcfg_json)
 
     open_scene(blend_file)
-    scene_exporter = SceneExporter(rcfg_data, data_dir)
-    print(scene_exporter.parts)
-    # scene_exporter.export_gltfs(f'{out_dir}', blend_file)
+    scene_exporter = SceneExporter(rcfg_data, data_dir, out_dir)
+    scene_exporter.export_gltfs(blend_file)
 
     tend = time.time() - tstart
     print('-' * 20)
