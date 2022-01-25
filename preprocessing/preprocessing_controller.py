@@ -19,7 +19,7 @@ RCFG_VAL_SCHEMA_FILE = './validation/schemas/rcfg_schema_v2.json'
 class PreprocessingController:
     SCENE_MODES = ['global', 'exclusive']
     CAMERA_DEF_MODES = ['sphere-uniform']
-    LIGHT_DEF_MODES = ['range-uniform']
+    LIGHT_DEF_MODES = ['sphere-uniform', 'range-uniform']
     MATERIAL_DEF_MODES = ['static']
     ENVMAP_DEF_MODES = ['static']
 
@@ -115,7 +115,7 @@ class PreprocessingController:
         LOGGER.info(LOG_DELIM)
         LOGGER.info(f'Sampling cameras [mode={self.camera_def_mode}]')
 
-        # Add cameras with random uniform pos to Scene
+        # Add cameras - sphere uniform
         if self.camera_def_mode == 'sphere-uniform':
             cameras = define_cameras.get_cameras_sphere_uniform(n_images)
 
@@ -132,7 +132,10 @@ class PreprocessingController:
         LOGGER.info(LOG_DELIM)
         LOGGER.info(f'Sampling lights [mode={self.light_def_mode}]')
 
-        # Add lights with random pos to Scene
+        # Add lights - sphere uniform
+        if self.light_def_mode == 'sphere-uniform':
+            lights = define_lights.get_lights_sphere_uniform(n_images)
+        # Add lights - random within range
         if self.light_def_mode == 'range-uniform':
             lights = define_lights.get_lights_range_uniform(n_images)
 

@@ -50,7 +50,7 @@ echo "Created output directory: $OUT_DIR"
 N_IMAGES_PER_PART=3
 SCENE_MODE='exclusive'
 CAMERA_DEF_MODE='sphere-uniform'
-LIGHT_DEF_MODE='range-uniform'
+LIGHT_DEF_MODE='sphere-uniform'
 MATERIAL_DEF_MODE='static'
 ENVMAP_DEF_MODE='static'
 
