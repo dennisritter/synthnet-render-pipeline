@@ -405,8 +405,11 @@ def add_image_to_blender(file_path: str) -> bpy.types.Image:
 
 
 def import_materials_from_blend(file_path):
+    materials = None
     with bpy.data.libraries.load(file_path, link=False) as (data_from, data_to):
+        materials = data_from.materials
         data_to.materials = data_from.materials
+    return materials
 
 
 def look_at(start: mathutils.Vector,
@@ -450,17 +453,14 @@ def apply_material(ob, material_id) -> bpy.types.Material:
     """
     # Get material
     mat = bpy.data.materials.get(material_id)
-    if mat is None:
-        # create material
-        mat = bpy.data.materials.new(name=material_id)
-    # Assign it to object
-    if ob.data.materials:
-        # assign to 1st material slot
-        ob.data.materials[0] = mat
-    else:
+    if mat is not None:
+        # Assign it to object
+        if ob.data.materials:
+            ob.data.materials.clear()
         # no slots
         ob.data.materials.append(mat)
-    return mat
+        return mat
+    return None
 
 
 def create_light(name, data, collection=None):
@@ -639,6 +639,8 @@ class SceneExporter():
             config file
 
         """
+        # materials only need to be imported once each
+        bpy_materials = {}
         for part in self.parts:
             # create empty scene
             rcfg_scene = part["scene"]
@@ -661,7 +663,13 @@ class SceneExporter():
             ## Create bpy materials
             materials_dir = f"{self.data_dir}/materials"
             part_mats = [sp_mat["material"] for sp_mat in part["single_parts"]]
-            bpy_materials = [import_materials_from_blend(f"{materials_dir}/{material_fn}") for material_fn in part_mats]
+            # import materials
+            for material_fn in part_mats:
+                if material_fn in bpy_materials.keys():
+                    continue
+                materials_from_file = import_materials_from_blend(f"{materials_dir}/{material_fn}")
+                # we assume the file contains only the single material and id it by the file name
+                bpy_materials[material_fn] = materials_from_file[0]
 
             ### APPLY MATERIALS
             for bpy_single_part in bpy_single_parts:
@@ -670,7 +678,8 @@ class SceneExporter():
                         # TODO: Apply actual Material
                         # ? What is the material ID?
                         print(f"Apply material: {single_part['id']}: {single_part['material']}")
-                        apply_material(bpy_single_part, single_part["material"])
+                        if single_part["material"] in bpy_materials.keys():
+                            apply_material(bpy_single_part, bpy_materials[single_part["material"]].name)
 
             ### Translate current part to world center
             # get the bounding sphere center
