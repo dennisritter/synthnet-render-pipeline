@@ -3,6 +3,7 @@ import argparse
 import os
 import time
 import bpy
+import mathutils
 
 import builtins as __builtin__
 
@@ -82,6 +83,17 @@ def add_hdri_map(file_path: str) -> list:
     return node_background, node_environment
 
 
+def translate_objects_by(objects: list, translate_by: mathutils.Vector):
+    """Translate objects by given vector
+
+    Args:
+        objects (list): objects to translate
+        translate_by (mathutils.Vector): vector to translate by
+    """
+    for ob in objects:
+        ob.location += translate_by
+
+
 def clear_scene():
     bpy.ops.wm.read_homefile(use_empty=True)
 
@@ -125,6 +137,8 @@ def render(glb_fname,
         # Change camera zoom to see whole object
         bpy.ops.object.select_by_type(extend=False, type='MESH')
         bpy.ops.view3d.camera_to_view_selected()
+        # Zoom out a little
+        translate_objects_by([cam], mathutils.Vector((0, 0, 0.5)))
 
         bpy.context.scene.render.filepath = f"{out_dir}/{glb_fname}_{i}"
         bpy.ops.render.render(write_still=True)
