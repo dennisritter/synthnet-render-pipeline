@@ -236,7 +236,8 @@ def export_gltf(file_path: str, export_selected=True):
                               use_selection=True,
                               export_image_format="JPEG",
                               export_cameras=True,
-                              export_lights=True)
+                              export_lights=True,
+                              export_extras=True)
 
 
 def get_objects_from_collection(collection: bpy.types.Collection) -> list:
@@ -404,8 +405,11 @@ def add_image_to_blender(file_path: str) -> bpy.types.Image:
 
 
 def import_materials_from_blend(file_path):
+    materials = None
     with bpy.data.libraries.load(file_path, link=False) as (data_from, data_to):
+        materials = data_from.materials
         data_to.materials = data_from.materials
+    return materials
 
 
 def look_at(start: mathutils.Vector,
@@ -449,17 +453,14 @@ def apply_material(ob, material_id) -> bpy.types.Material:
     """
     # Get material
     mat = bpy.data.materials.get(material_id)
-    if mat is None:
-        # create material
-        mat = bpy.data.materials.new(name=material_id)
-    # Assign it to object
-    if ob.data.materials:
-        # assign to 1st material slot
-        ob.data.materials[0] = mat
-    else:
+    if mat is not None:
+        # Assign it to object
+        if ob.data.materials:
+            ob.data.materials.clear()
         # no slots
         ob.data.materials.append(mat)
-    return mat
+        return mat
+    return None
 
 
 def create_light(name, data, collection=None):
@@ -638,6 +639,8 @@ class SceneExporter():
             config file
 
         """
+        # materials only need to be imported once each
+        bpy_materials = {}
         for part in self.parts:
             # create empty scene
             rcfg_scene = part["scene"]
@@ -653,13 +656,20 @@ class SceneExporter():
             bpy_cameras = [create_camera(f"camera_{i}", cam) for i, cam in enumerate(rcfg_scene["cameras"])]
             # Create bpy lights
             bpy_lights = [create_light(f"light_{i}", light) for i, light in enumerate(rcfg_scene["lights"])]
-            # Create bpy envmaps
-            envmap_dir = f"{self.data_dir}/envmaps"
-            bpy_envmaps = [add_image_to_blender(f"{envmap_dir}/{envmap_fn}") for envmap_fn in rcfg_scene["envmaps"]]
-            # Create bpy materials
+            ## Create bpy envmaps
+            # TODO see if we can integrate envmaps in the export_gltfs
+            # envmap_dir = f"{self.data_dir}/envmaps"
+            # bpy_envmaps = [add_image_to_blender(f"{envmap_dir}/{envmap_fn}") for envmap_fn in rcfg_scene["envmaps"]]
+            ## Create bpy materials
             materials_dir = f"{self.data_dir}/materials"
             part_mats = [sp_mat["material"] for sp_mat in part["single_parts"]]
-            bpy_materials = [import_materials_from_blend(f"{materials_dir}/{material_fn}") for material_fn in part_mats]
+            # import materials
+            for material_fn in part_mats:
+                if material_fn in bpy_materials.keys():
+                    continue
+                materials_from_file = import_materials_from_blend(f"{materials_dir}/{material_fn}")
+                # we assume the file contains only the single material and id it by the file name
+                bpy_materials[material_fn] = materials_from_file[0]
 
             ### APPLY MATERIALS
             for bpy_single_part in bpy_single_parts:
@@ -668,7 +678,8 @@ class SceneExporter():
                         # TODO: Apply actual Material
                         # ? What is the material ID?
                         print(f"Apply material: {single_part['id']}: {single_part['material']}")
-                        apply_material(bpy_single_part, single_part["material"])
+                        if single_part["material"] in bpy_materials.keys():
+                            apply_material(bpy_single_part, bpy_materials[single_part["material"]].name)
 
             ### Translate current part to world center
             # get the bounding sphere center
@@ -684,9 +695,10 @@ class SceneExporter():
                 render_camera = bpy_cameras[render_setup["camera_i"]]
                 render_lights = [bpy_lights[light_i] for light_i in render_setup["lights_i"]]
                 # TODO: Apply actual Envmap to scene/render
-                render_envmap = add_hdri_map(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
+                # render_envmap = add_hdri_map(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
                 # render_envmap = add_image_to_blender(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
-
+                # we attach the envmap to the camera in the scene to identify easily later for now
+                render_camera.data["ud_envmap"] = f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}"
                 # select objects to export
                 # NOTE: Sometimes not all single part objects are exported by adding the collection, so we add all single parts instead
                 # objects_to_export.append(render_object)
