@@ -604,7 +604,7 @@ class SceneExporter():
             # Get collections
             for coll in get_scene_collections(root_collection):
                 coll.name = coll.name.replace(" ", "_")
-                if coll.name.startswith(part_id) and part_id not in [m[0] for m in matches]:
+                if coll.name.startswith(part_id) and part_id not in [m[0] for m in matches] and coll != root_collection:
                     matches.append((part_id, coll))
 
                 for obj in coll.objects:
@@ -688,7 +688,9 @@ class SceneExporter():
                 # render_envmap = add_image_to_blender(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
 
                 # select objects to export
-                objects_to_export.append(render_object)
+                # NOTE: Sometimes not all single part objects are exported by adding the collection, so we add all single parts instead
+                # objects_to_export.append(render_object)
+                objects_to_export += bpy_single_parts
                 objects_to_export.append(render_camera)
                 objects_to_export += render_lights
                 select(objects_to_export)
