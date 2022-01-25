@@ -70,7 +70,7 @@ def render(glb_fname,
         bpy.ops.object.select_by_type(extend=False, type='MESH')
         bpy.ops.view3d.camera_to_view_selected()
 
-        bpy.context.scene.render.filepath = f"{out_dir}/{glb_fname}_zoomfix_{i}"
+        bpy.context.scene.render.filepath = f"{out_dir}/{glb_fname}_{i}"
         bpy.ops.render.render(write_still=True)
 
 
