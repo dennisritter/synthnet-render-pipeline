@@ -6,15 +6,14 @@ from typing import Tuple
 import numpy as np
 
 
-def sphere_uniform(n_samples=100) -> list:
-    # TODO: Need object information to generate better zoom/pos
+def sphere_uniform(n_samples=100, r_factor=10.0) -> list:
     """ Returns a list of random points sampled on the unit sphere.
     
         Args:
             n_samples (int): Number of points to sample.
+            r_factor (float): Radius factor to control the distance of objects to the sphere center.
     """
     points = []
-    r_factor = 5.0
     for i in range(n_samples):
         phi = random.uniform(0, 2 * math.pi)
         costheta = random.uniform(-1, 1)
