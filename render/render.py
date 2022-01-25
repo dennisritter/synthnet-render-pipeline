@@ -4,6 +4,40 @@ import os
 import time
 import bpy
 
+import builtins as __builtin__
+
+#########################################
+
+# PRINT TO SYSTEM CONSOLE
+
+#########################################
+
+
+def console_print(*args, **kwargs):
+    for a in bpy.context.screen.areas:
+        if a.type == 'CONSOLE':
+            c = {}
+            c['area'] = a
+            c['space_data'] = a.spaces.active
+            c['region'] = a.regions[-1]
+            c['window'] = bpy.context.window
+            c['screen'] = bpy.context.screen
+            s = " ".join([str(arg) for arg in args])
+            for line in s.split("\n"):
+                bpy.ops.console.scrollback_append(c, text=line)
+
+
+def print(*args, **kwargs):
+    console_print(*args, **kwargs)  # to Python Console
+    __builtin__.print(*args, **kwargs)  # to System Console
+
+
+#########################################
+
+# RENDER
+
+#########################################
+
 
 def clear_scene():
     bpy.ops.wm.read_homefile(use_empty=True)
@@ -32,7 +66,11 @@ def render(glb_fname,
     # render loop
     for i, cam in enumerate(cameras):
         bpy.context.scene.camera = cam
-        bpy.context.scene.render.filepath = f"{out_dir}/{glb_fname}_{i}"
+        # Change camera zoom to see whole object
+        bpy.ops.object.select_by_type(extend=False, type='MESH')
+        bpy.ops.view3d.camera_to_view_selected()
+
+        bpy.context.scene.render.filepath = f"{out_dir}/{glb_fname}_zoomfix_{i}"
         bpy.ops.render.render(write_still=True)
 
 
