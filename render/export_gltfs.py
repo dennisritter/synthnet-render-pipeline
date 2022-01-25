@@ -236,7 +236,8 @@ def export_gltf(file_path: str, export_selected=True):
                               use_selection=True,
                               export_image_format="JPEG",
                               export_cameras=True,
-                              export_lights=True)
+                              export_lights=True,
+                              export_extras=True)
 
 
 def get_objects_from_collection(collection: bpy.types.Collection) -> list:
@@ -653,10 +654,11 @@ class SceneExporter():
             bpy_cameras = [create_camera(f"camera_{i}", cam) for i, cam in enumerate(rcfg_scene["cameras"])]
             # Create bpy lights
             bpy_lights = [create_light(f"light_{i}", light) for i, light in enumerate(rcfg_scene["lights"])]
-            # Create bpy envmaps
-            envmap_dir = f"{self.data_dir}/envmaps"
-            bpy_envmaps = [add_image_to_blender(f"{envmap_dir}/{envmap_fn}") for envmap_fn in rcfg_scene["envmaps"]]
-            # Create bpy materials
+            ## Create bpy envmaps
+            # TODO see if we can integrate envmaps in the export_gltfs
+            # envmap_dir = f"{self.data_dir}/envmaps"
+            # bpy_envmaps = [add_image_to_blender(f"{envmap_dir}/{envmap_fn}") for envmap_fn in rcfg_scene["envmaps"]]
+            ## Create bpy materials
             materials_dir = f"{self.data_dir}/materials"
             part_mats = [sp_mat["material"] for sp_mat in part["single_parts"]]
             bpy_materials = [import_materials_from_blend(f"{materials_dir}/{material_fn}") for material_fn in part_mats]
@@ -684,9 +686,10 @@ class SceneExporter():
                 render_camera = bpy_cameras[render_setup["camera_i"]]
                 render_lights = [bpy_lights[light_i] for light_i in render_setup["lights_i"]]
                 # TODO: Apply actual Envmap to scene/render
-                render_envmap = add_hdri_map(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
+                # render_envmap = add_hdri_map(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
                 # render_envmap = add_image_to_blender(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
-
+                # we attach the envmap to the camera in the scene to identify easily later for now
+                render_camera.data["ud_envmap"] = f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}"
                 # select objects to export
                 objects_to_export.append(render_object)
                 objects_to_export.append(render_camera)

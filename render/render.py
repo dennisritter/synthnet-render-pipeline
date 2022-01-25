@@ -4,6 +4,46 @@ import os
 import time
 import bpy
 
+def add_image_to_blender(file_path: str) -> bpy.types.Image:
+    """Add image to .blend file
+
+    Args:
+        file_path (str): path to image file
+
+    Returns:
+        bpy.types.Image: created image node
+    """
+    return bpy.data.images.load(file_path, check_existing=True)
+
+def add_hdri_map(file_path: str) -> list:
+    """Add hdri map to .blend
+
+    Args:
+        file_path (str): path to image file
+
+    Returns:
+        list(bpy.types.Material, bpy.types.EnvironmentTexture): [description]
+    """
+    # Get the environment node tree of the current scene
+    node_tree = bpy.context.scene.world.node_tree
+    tree_nodes = node_tree.nodes
+    # Clear all nodes
+    tree_nodes.clear()
+    # Add Background node
+    node_background = tree_nodes.new(type='ShaderNodeBackground')
+    # Add Environment Texture node
+    node_environment = tree_nodes.new('ShaderNodeTexEnvironment')
+    # Load and assign the image to the node property
+    node_environment.image = bpy.data.images.load(file_path)  # Relative path
+    node_environment.location = -300, 0
+    # Add Output node
+    node_output = tree_nodes.new(type='ShaderNodeOutputWorld')
+    node_output.location = 200, 0
+    # Link all nodes
+    links = node_tree.links
+    link = links.new(node_environment.outputs["Color"], node_background.inputs["Color"])
+    link = links.new(node_background.outputs["Background"], node_output.inputs["Surface"])
+    return node_background, node_environment
 
 def clear_scene():
     bpy.ops.wm.read_homefile(use_empty=True)
@@ -11,6 +51,17 @@ def clear_scene():
 
 def load_gltf(file_path):
     bpy.ops.import_scene.gltf(filepath=file_path)
+    envmap = [obj for obj in bpy.context.scene.objects if obj.type == 'CAMERA'][0].data["ud_envmap"]
+    print(f"Adding Envmap: {envmap}")
+    bpy_envmap = add_image_to_blender(envmap)
+    bpy_world = bpy.context.scene.world
+    if bpy_world is None:
+    # create a new world
+        new_world = bpy.data.worlds.new("World")
+        new_world.use_nodes = True
+        bpy.context.scene.world = new_world
+
+    add_hdri_map(envmap)
 
 
 def render(glb_fname,
@@ -27,6 +78,8 @@ def render(glb_fname,
     scene.render.image_settings.quality = out_quality
     scene.render.image_settings.file_format = out_format
     scene.render.engine = engine
+    # set transparency to true at this point to hide envmap
+    scene.render.film_transparent = True
     cameras = [obj for obj in scene.objects if obj.type == 'CAMERA']
 
     # render loop
