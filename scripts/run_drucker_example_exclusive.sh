@@ -31,7 +31,7 @@ echo "- - - - - - - - - - - - - - - - - - - - "
 ##### RESOURCES
 # Resource directory path. Contains Environment maps, materials, CAD data and metadata. 
 # (relative to project root)
-RESOURCE_DIR="./data/drucker-example"
+RESOURCE_DIR="./data/drucker_example"
 TOPEX_METADATA_FILE="${RESOURCE_DIR}/drucker.xlsx"
 TOPEX_BLENDER_FILE="${RESOURCE_DIR}/drucker.blend"
 MATERIALS_DIR="${RESOURCE_DIR}/materials"
@@ -47,7 +47,7 @@ echo "Created output directory: $OUT_DIR"
 
 ########## PREPROCESSING ##########
 # Set options
-N_IMAGES_PER_PART=3
+N_IMAGES_PER_PART=10
 SCENE_MODE='exclusive'
 CAMERA_DEF_MODE='sphere-uniform'
 LIGHT_DEF_MODE='sphere-uniform'
