@@ -1,15 +1,4 @@
-<p float="left">
-  <img src="./docs/imgs/example-1.jpg" width="100" />
-  <img src="./docs/imgs/example-1.jpg" width="100" />
-  <img src="./docs/imgs/example-1.jpg" width="100" />
-  <img src="./docs/imgs/example-1.jpg" width="100" />
-  <img src="./docs/imgs/example-1.jpg" width="100" />
-  <img src="./docs/imgs/example-1.jpg" width="100" />
-  <img src="./docs/imgs/example-1.jpg" width="100" />
-  <img src="./docs/imgs/example-1.jpg" width="100" />
-  <img src="./docs/imgs/example-1.jpg" width="100" />
-  <img src="./docs/imgs/example-1.jpg" width="100" />
-</p>
+![](./docs/imgs/example_renders.jpg)
 
 # SynthNet Rendering Pipeline
 
