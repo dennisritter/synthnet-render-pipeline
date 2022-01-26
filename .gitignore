@@ -216,8 +216,9 @@ cython_debug/
 # CUSTOM
 data/*
 !data/.gitkeep
-!data/drucker_example
 !data/mini_example
 !data/render_configs
+# !data/drucker_example
+
 out/*
 !out/.gitkeep
