@@ -13,7 +13,7 @@ A full process, from preprocessing to rendered images involves three essential s
 2. **GLTF Export** to export GLTF files that describes a scene for each machine part according to the RCFG.
 3. **Rendering** to read each parts GLTF files and render multiple images from it.
 
-### Run Mini Example
+### Run Complete Pipeline
 The simplest method to run the whole pipeline is to use the bash script [run_minimal_example.sh](./scripts/run_minimal_example.sh). 
 Simply navigate to the project root and run
 ```shell
@@ -21,6 +21,7 @@ bash scripts/run_minimal_example.sh
 ``` 
 Feel free to use this script as starting point to setup your own experiments.
 
+---
 ### Preprocessing
 The [preprocessing](./preprocessing.py) script creates a render configuration according to a [json schema](./validation/schemas/rcfg_schema_v2.json). The created RCFG lists every machine part that must be rendered and defines all lights, cameras, materials and environment maps used. Further it defines render setups, that describe which of the scene components are used for each particular render.
 
