@@ -1,3 +1,16 @@
+<p float="left">
+  <img src="./docs/imgs/example-1.jpg" width="100" />
+  <img src="./docs/imgs/example-1.jpg" width="100" />
+  <img src="./docs/imgs/example-1.jpg" width="100" />
+  <img src="./docs/imgs/example-1.jpg" width="100" />
+  <img src="./docs/imgs/example-1.jpg" width="100" />
+  <img src="./docs/imgs/example-1.jpg" width="100" />
+  <img src="./docs/imgs/example-1.jpg" width="100" />
+  <img src="./docs/imgs/example-1.jpg" width="100" />
+  <img src="./docs/imgs/example-1.jpg" width="100" />
+  <img src="./docs/imgs/example-1.jpg" width="100" />
+</p>
+
 # SynthNet Rendering Pipeline
 
 The purpose of the rendering pipeline is to parse a Blender file and export gltf-scenes for each of a machines' assemblys and single components to render multiple images for each part in order to create an image based search index from them.
