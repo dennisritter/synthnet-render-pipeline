@@ -30,19 +30,19 @@ python preprocessing.py --help
 ```
 ---
 ### GLTF Export
-The [GLTF Export (Add link)]() reads the RCFG created by the preprocessing step and a structured .blend file of a machine. Then it uses the [Blender API](https://docs.blender.org/api/current/index.html) to create cameras and lights, assigns materials to single parts and loads environment maps according to the RCFG. Finally, a .GLB file is exported for every frame that should be rendered. (WIP: We want to export one GLB/part instead of one for each render)
-
-See the example start script script below
-```shell
-blender -b -P ./render/export_gltfs.py -- --rcfg_file /path/to/rcfg_file.json --data_dir path/to/resources --out_dir path/to/out_dir
-```
----
-### Rendering
-The [Rendering (Add link)]() process reads GLTF files exported by the *GLTF Export* and simply renders them.
+The [GLTF Export](./bpy_modules/export_gltfs.py) reads the RCFG created by the preprocessing step and a structured .blend file of a machine. Then it uses the [Blender API](https://docs.blender.org/api/current/index.html) to create cameras and lights, assigns materials to single parts and loads environment maps according to the RCFG. Finally, a .GLB file is exported for every frame that should be rendered. (WIP: We want to export one GLB/part instead of one for each render)
 
 See the example start script below
 ```shell
-blender -b -P ./render/render.py -- --in_dir /path/to/gltf_files --out_dir /path/to/output_dir --resolution_x 512 --resolution_y 512 --output_quality 100 --output_format JPEG --engine BLENDER_EEVEE
+blender -b -P ./bpy_modules/export_gltfs.py -- --rcfg_file /path/to/rcfg_file.json --data_dir path/to/resources --out_dir path/to/out_dir
+```
+---
+### Rendering
+The [Rendering](./bpy_modules/render.py) process reads GLTF files exported by the *GLTF Export* and simply renders them.
+
+See the example start script below
+```shell
+blender -b -P ./bpy_modules/render.py -- --in_dir /path/to/gltf_files --out_dir /path/to/output_dir --res_x 256 --res_y 256 --out_quality 100 --out_format JPEG --engine CYCLES
 ```
 
 ## Render Configuration (RCFG)
