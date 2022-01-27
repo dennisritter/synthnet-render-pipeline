@@ -1,4 +1,5 @@
 """ Functions for camera definition """
+import numpy as np
 import preprocessing.utils.sampling as sampling
 from preprocessing.models.camera import Camera
 
@@ -10,7 +11,8 @@ def get_cameras_sphere_uniform(n: int) -> list[Camera]:
             n (int): Number of cameras to sample
     """
     cam_positions = sampling.sphere_uniform(n)
-    return [Camera(position=cam_pos) for cam_pos in cam_positions]
+    roll_angles = np.linspace(start=0, stop=90, num=n, endpoint=False)
+    return [Camera(position=cam_pos, roll_angle=roll_angles[i]) for i, cam_pos in enumerate(cam_positions)]
 
 
 def get_cameras_equidistant(n: int) -> list[Camera]:

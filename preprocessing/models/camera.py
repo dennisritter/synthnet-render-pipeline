@@ -7,12 +7,14 @@ CAMERA_TYPES = ['persp', 'ortho', 'pano']
 
 
 class Camera:
+
     def __init__(
         self,
         position: list,
         type_camera: str = 'persp',
         focal_length: float = 50.0,
         target: list = [0, 0, 0],
+        roll_angle: float = 0,
     ):
 
         ## Validate parameters
@@ -33,6 +35,7 @@ class Camera:
         self.position = position
         self.type_camera = type_camera
         self.focal_length = focal_length
+        self.roll_angle = roll_angle
         self.target = target
 
     def __str__(self):
