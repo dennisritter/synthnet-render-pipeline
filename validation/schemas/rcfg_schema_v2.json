@@ -87,7 +87,8 @@
                     "position",
                     "type_camera",
                     "target",
-                    "focal_length"
+                    "focal_length",
+                    "roll_angle"
                 ],
                 "properties": {
                     "position": {
@@ -103,6 +104,10 @@
                     "focal_lenght": {
                         "type": "float",
                         "description": "Focal length setting of the camera"
+                    },
+                    "roll_angle": {
+                        "type": "int",
+                        "description": "Roll rotation angle in degrees"
                     }
                 }
             },
