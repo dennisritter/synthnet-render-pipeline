@@ -93,7 +93,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     # Run Export GLTFs
     blender --background --python ./bpy_modules/render.py -- \
     --in_dir $GLTF_DIR \
-    --out_dir $OUT_DIR/render \
+    --out_dir $OUT_DIR/renders \
     --res_x $RES_X \
     --res_y $RES_Y \
     --out_quality $OUT_QUALITY \
