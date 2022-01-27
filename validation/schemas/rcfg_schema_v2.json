@@ -87,7 +87,8 @@
                     "position",
                     "type_camera",
                     "target",
-                    "focal_length"
+                    "focal_length",
+                    "local_rotation"
                 ],
                 "properties": {
                     "position": {
@@ -100,9 +101,16 @@
                     "target": {
                         "$ref": "/schemas/point_3d"
                     },
-                    "focal_lenght": {
-                        "type": "float",
+                    "focal_length": {
+                        "type": "number",
                         "description": "Focal length setting of the camera"
+                    },
+                    "local_rotation": {
+                        "type": "array",
+                        "description": "XYZ local rotation angles in radians",
+                        "items": {
+                            "type": "number"
+                        }
                     }
                 }
             },
