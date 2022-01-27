@@ -16,7 +16,11 @@ blender -v
  ```bash
 conda env create --file environment.yml 
 ```
-4. Run the pipeline mini example to test your environment</br>
+4. Activate the environment
+ ```bash
+conda activate py39-synthnet-render-pipeline 
+```
+5. Run the pipeline mini example to test your environment</br>
 This Process could take a few minutes depending on your system.
 ```bash
 bash scripts/run_minimal_example.sh
