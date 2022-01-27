@@ -1,0 +1,11 @@
+name: py39-synthnet-render-pipeline
+channels:
+  - defaults
+  - anaconda
+  - conda-forge
+dependencies:
+  - python=3.9.*
+  - pandas=1.4.*
+  - openpyxl=3.0.*
+  - click=8.0.*
+  - jsonschema=4.0.*

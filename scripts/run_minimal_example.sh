@@ -75,7 +75,7 @@ if [[ $RUN_MODE -ge 2 ]]; then
     GLTF_DIR="$OUT_DIR/gltf"
 
     # Run Export GLTFs
-    blender $TOPEX_BLENDER_FILE --background --python ./render/export_gltfs.py -- \
+    blender $TOPEX_BLENDER_FILE --background --python ./bpy_modules/export_gltfs.py -- \
     --rcfg_file $RCFG_FILE \
     --data_dir $RESOURCE_DIR \
     --out_dir $GLTF_DIR 
@@ -91,9 +91,9 @@ if [[ $RUN_MODE -ge 3 ]]; then
     OUT_FORMAT="JPEG"
     ENGINE="CYCLES"
     # Run Export GLTFs
-    blender --background --python ./render/render.py -- \
+    blender --background --python ./bpy_modules/render.py -- \
     --in_dir $GLTF_DIR \
-    --out_dir $OUT_DIR/render \
+    --out_dir $OUT_DIR/renders \
     --res_x $RES_X \
     --res_y $RES_Y \
     --out_quality $OUT_QUALITY \
