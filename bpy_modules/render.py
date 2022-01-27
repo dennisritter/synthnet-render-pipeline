@@ -113,7 +113,7 @@ def load_gltf(file_path):
     add_hdri_map(envmap)
 
 
-def render(glb_fname,
+def render(render_fname,
            out_dir,
            res_x: int = 256,
            res_y: int = 256,
@@ -140,7 +140,7 @@ def render(glb_fname,
         # Zoom out a little
         translate_objects_by([cam], mathutils.Vector((0, 0, 0.5)))
 
-        bpy.context.scene.render.filepath = f"{out_dir}/{glb_fname}_{i}"
+        bpy.context.scene.render.filepath = f"{out_dir}/{render_fname}_{i}"
         bpy.ops.render.render(write_still=True)
 
 
@@ -220,8 +220,9 @@ if __name__ == '__main__':
             continue
         clear_scene()
         load_gltf(os.path.join(in_dir, glb_fname))
+        render_fname = glb_fname[:-4]  # Remove .glb from glb filename
         render(
-            glb_fname=glb_fname,
+            render_fname=render_fname,
             out_dir=out_dir,
             res_x=res_x,
             res_y=res_y,
