@@ -88,7 +88,7 @@
                     "type_camera",
                     "target",
                     "focal_length",
-                    "roll_angle"
+                    "local_rotation"
                 ],
                 "properties": {
                     "position": {
@@ -105,9 +105,12 @@
                         "type": "number",
                         "description": "Focal length setting of the camera"
                     },
-                    "roll_angle": {
-                        "type": "number",
-                        "description": "Roll rotation angle in degrees"
+                    "local_rotation": {
+                        "type": "array",
+                        "description": "XYZ local rotation angles in radians",
+                        "items": {
+                            "type": "number"
+                        }
                     }
                 }
             },
