@@ -3,8 +3,6 @@ import json
 import os
 import time
 import argparse
-import logging
-
 # helper
 import bpy
 import random
@@ -483,8 +481,7 @@ def create_light(name, data, collection=None):
     if "target" in data.keys():
         target = data["target"]
         light_object.rotation_euler = look_at(mathutils.Vector(light_object.location), mathutils.Vector(target))
-    elif "rotation" in data.keys():
-        light_object.rotation_euler = data["rotation"]
+
     return light_object
 
 
@@ -512,8 +509,10 @@ def create_camera(name, data, collection=None):
     if "target" in data.keys():
         target = data["target"]
         camera_object.rotation_euler = look_at(mathutils.Vector(camera_object.location), mathutils.Vector(target))
-    elif "rotation" in data.keys():
-        camera_object.rotation_euler = data["rotation"]
+
+    bpy.context.scene.transform_orientation_slots[0].type = 'LOCAL'
+    if "local_rotation" in data.keys():
+        camera_object.rotation_euler.rotate_axis("Z", data["local_rotation"][2])
     return camera_object
 
 
