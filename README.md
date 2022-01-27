@@ -21,6 +21,7 @@ This Process could take a few minutes depending on your system.
 ```bash
 bash scripts/run_minimal_example.sh
 ``` 
+If everything worked, you should find 39 renderings, three of each part, in the `out/0-mini-example/renders` directory.
 
 ## Usage
 
