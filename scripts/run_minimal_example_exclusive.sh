@@ -13,6 +13,18 @@ if [ -z "$1" ]
     then
         RUN_MODE=3
 fi
+# Set camera seed by Args or set default
+CAMERA_SEED="${2}"
+if [ -z "$2"]
+    then
+        CAMERA_SEED=42
+fi
+# Set light seed by Args or set default
+LIGHT_SEED="${3}"
+if [ -z "$3"]
+    then
+        LIGHT_SEED=43
+fi
 
 # Shell script to trigger a SynthNet Rendering Pipeline run using a minimal example
 #
@@ -64,7 +76,9 @@ python preprocessing.py \
 --camera_def_mode $CAMERA_DEF_MODE \
 --light_def_mode $LIGHT_DEF_MODE \
 --material_def_mode $MATERIAL_DEF_MODE \
---envmap_def_mode $ENVMAP_DEF_MODE
+--envmap_def_mode $ENVMAP_DEF_MODE \
+--camera_seed $CAMERA_SEED \
+--light_seed $LIGHT_SEED
 ###################################
 
 ########## EXPORT GLTFs ##########
