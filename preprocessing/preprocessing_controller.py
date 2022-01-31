@@ -34,6 +34,8 @@ class PreprocessingController:
         light_def_mode: str,
         material_def_mode: str,
         envmap_def_mode: str,
+        camera_seed: int,
+        light_seed: int,
     ):
 
         ## Validate parameters
@@ -65,6 +67,9 @@ class PreprocessingController:
         # validate envmap_def_mode
         assert isinstance(envmap_def_mode, str)
         assert envmap_def_mode.lower() in self.ENVMAP_DEF_MODES
+        # validate seeds
+        assert isinstance(camera_seed, int)
+        assert isinstance(light_seed, int)
 
         ## Assign options
         self.metadata_file = metadata_file
@@ -76,6 +81,8 @@ class PreprocessingController:
         self.light_def_mode = light_def_mode.lower()
         self.material_def_mode = material_def_mode.lower()
         self.envmap_def_mode = envmap_def_mode.lower()
+        self.camera_seed = camera_seed
+        self.light_seed = light_seed
 
         # Prepared metadata.xlsx file as pandas DataFrame
         # rows: parts
@@ -117,7 +124,7 @@ class PreprocessingController:
 
         # Add cameras - sphere uniform
         if self.camera_def_mode == 'sphere-uniform':
-            cameras = define_cameras.get_cameras_sphere_uniform(n_images)
+            cameras = define_cameras.get_cameras_sphere_uniform(n=n_images, seed=self.camera_seed)
 
         tend = timer_utils.time_since(tstart)
         LOGGER.info(f'Done in {tend}')
@@ -134,10 +141,10 @@ class PreprocessingController:
 
         # Add lights - sphere uniform
         if self.light_def_mode == 'sphere-uniform':
-            lights = define_lights.get_lights_sphere_uniform(n_images)
+            lights = define_lights.get_lights_sphere_uniform(n=n_images, seed=self.light_seed)
         # Add lights - random within range
         if self.light_def_mode == 'range-uniform':
-            lights = define_lights.get_lights_range_uniform(n_images)
+            lights = define_lights.get_lights_range_uniform(n=n_images, seed=self.light_seed)
 
         tend = timer_utils.time_since(tstart)
         LOGGER.info(f'Done in {tend}')

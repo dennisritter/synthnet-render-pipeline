@@ -76,6 +76,20 @@ LOG_DELIM = '* ' * 20
     show_choices=True,
     default=PreprocessingController.ENVMAP_DEF_MODES[0],
 )
+@click.option(
+    '--camera_seed',
+    help='Random camera seed for reproducibility',
+    type=int,
+    show_default=True,
+    default=42,
+)
+@click.option(
+    '--light_seed',
+    help='Random light seed for reproducibility',
+    type=int,
+    show_default=True,
+    default=43,
+)
 def main(**kwargs):
     args = SimpleNamespace(**kwargs)
 
@@ -88,6 +102,8 @@ def main(**kwargs):
     light_def_mode = args.light_def_mode
     material_def_mode = args.material_def_mode
     envmap_def_mode = args.envmap_def_mode
+    camera_seed = args.camera_seed
+    light_seed = args.light_seed
 
     # Init Logger
     LOGGER = logging.getLogger(__name__)
@@ -111,6 +127,8 @@ def main(**kwargs):
         light_def_mode=light_def_mode,
         material_def_mode=material_def_mode,
         envmap_def_mode=envmap_def_mode,
+        camera_seed=camera_seed,
+        light_seed=light_seed,
     )
     ppc.assign_materials()
     ppc.build_scenes()
