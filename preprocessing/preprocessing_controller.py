@@ -20,8 +20,8 @@ class PreprocessingController:
     SCENE_MODES = ['global', 'exclusive']
     CAMERA_DEF_MODES = ['sphere-uniform']
     LIGHT_DEF_MODES = ['sphere-uniform', 'range-uniform']
-    MATERIAL_DEF_MODES = ['static']
-    ENVMAP_DEF_MODES = ['static']
+    MATERIAL_DEF_MODES = ['disabled', 'static']
+    ENVMAP_DEF_MODES = ['disabled', 'static']
 
     def __init__(
         self,
@@ -108,6 +108,9 @@ class PreprocessingController:
         LOGGER.info(LOG_DELIM)
         LOGGER.info(f'Assigning materials [mode={self.material_def_mode}]')
 
+        # disabled: Do not add any materials (but 'none')
+        if self.material_def_mode == 'disabled':
+            pass
         # static: Read metadata materials and apply our materials depending
         # on a static metadata_material:our_material map
         if self.material_def_mode == 'static':
@@ -151,9 +154,22 @@ class PreprocessingController:
 
         return lights
 
-    def assign_envmaps(self):
+    def _assign_envmaps(self, n_images: int):
         """ Assign Environment Maps to single parts depending on self.envmap_def_mode. """
-        pass
+        tstart = timer_utils.time_now()
+        LOGGER.info(LOG_DELIM)
+        LOGGER.info(f'Sampling lights [mode={self.light_def_mode}]')
+
+        # No envmaps
+        if self.envmap_def_mode == 'disabled':
+            envmaps = []
+        if self.envmap_def_mode == 'static':
+            envmaps = ['default.hdr' for _ in range(0, n_images)]
+
+        tend = timer_utils.time_since(tstart)
+        LOGGER.info(f'Done in {tend}')
+
+        return envmaps
 
     # TODO: Refactor / WIP
     # TODO: Add parameter to better define lightsetups?
@@ -175,7 +191,7 @@ class PreprocessingController:
             render_setup = {
                 "camera_i": i,
                 "lights_i": [i],
-                "envmap_fname": "default.hdr",
+                "envmap_fname": envmaps[i] if len(envmaps) == len(cameras) else "none",
             }
             render_setups.append(render_setup)
         return render_setups
@@ -187,10 +203,11 @@ class PreprocessingController:
             # TODO: Add arguments for number of cameras and lights
             n_cameras = self.n_images
             n_lights = self.n_images
+            n_envmaps = self.n_images
 
             cameras = self._sample_cameras(n_cameras)
             lights = self._sample_lights(n_lights)
-            envmaps = ["default.hdr"]  # self.assign_envmaps()
+            envmaps = self._assign_envmaps(n_envmaps)
             render_setups = self._compose_render_setups(
                 cameras=cameras,
                 lights=lights,
@@ -207,11 +224,12 @@ class PreprocessingController:
             # TODO: Add arguments for number of cameras and lights
             n_cameras = self.n_images
             n_lights = self.n_images
+            n_envmaps = self.n_images
 
             for part in self.parts:
                 cameras = self._sample_cameras(n_cameras)
                 lights = self._sample_lights(n_lights)
-                envmaps = ["default.hdr"]  # self.assign_envmaps()
+                envmaps = self._assign_envmaps(n_envmaps)
                 render_setups = self._compose_render_setups(
                     cameras=cameras,
                     lights=lights,

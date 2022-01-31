@@ -100,17 +100,20 @@ def clear_scene():
 
 def load_gltf(file_path):
     bpy.ops.import_scene.gltf(filepath=file_path)
-    envmap = [obj for obj in bpy.context.scene.objects if obj.type == 'CAMERA'][0].data["ud_envmap"]
-    print(f"Adding Envmap: {envmap}")
-    bpy_envmap = add_image_to_blender(envmap)
+    # NOTE: Hack to load envmap path from extras data of first camera
+    camera_with_envmap = [obj for obj in bpy.context.scene.objects if obj.type == 'CAMERA'][0]
+    if "ud_envmap" in camera_with_envmap.keys():
+        envmap = [obj for obj in bpy.context.scene.objects if obj.type == 'CAMERA'][0].data["ud_envmap"]
+        print(f"Adding Envmap: {envmap}")
+        bpy_envmap = add_image_to_blender(envmap)
+        add_hdri_map(envmap)
+
     bpy_world = bpy.context.scene.world
     if bpy_world is None:
         # create a new world
         new_world = bpy.data.worlds.new("World")
         new_world.use_nodes = True
         bpy.context.scene.world = new_world
-
-    add_hdri_map(envmap)
 
 
 def render(render_fname,
