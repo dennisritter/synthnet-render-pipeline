@@ -21,7 +21,7 @@ class PreprocessingController:
     CAMERA_DEF_MODES = ['sphere-uniform']
     LIGHT_DEF_MODES = ['sphere-uniform', 'range-uniform']
     MATERIAL_DEF_MODES = ['disabled', 'static']
-    ENVMAP_DEF_MODES = ['disabled', 'static']
+    ENVMAP_DEF_MODES = ['disabled', 'white', 'gray', 'static']
 
     def __init__(
         self,
@@ -163,6 +163,10 @@ class PreprocessingController:
         # No envmaps
         if self.envmap_def_mode == 'disabled':
             envmaps = []
+        if self.envmap_def_mode == 'white':
+            envmaps = ['white.jpg' for _ in range(0, n_images)]
+        if self.envmap_def_mode == 'gray':
+            envmaps = ['gray.png' for _ in range(0, n_images)]
         if self.envmap_def_mode == 'static':
             envmaps = ['default.hdr' for _ in range(0, n_images)]
 
