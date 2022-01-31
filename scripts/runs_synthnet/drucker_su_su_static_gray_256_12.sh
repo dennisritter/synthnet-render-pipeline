@@ -59,11 +59,11 @@ echo "Created output directory: $OUT_DIR"
 
 ########## PREPROCESSING ##########
 # Set options
-N_IMAGES_PER_PART=10
+N_IMAGES_PER_PART=12
 SCENE_MODE='exclusive'
 CAMERA_DEF_MODE='sphere-uniform'
 LIGHT_DEF_MODE='sphere-uniform'
-MATERIAL_DEF_MODE='disabled'
+MATERIAL_DEF_MODE='static'
 ENVMAP_DEF_MODE='gray'
 
 # Run Preprocessing
