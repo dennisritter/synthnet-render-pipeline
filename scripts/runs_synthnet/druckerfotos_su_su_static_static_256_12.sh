@@ -102,7 +102,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     RES_X=256
     RES_Y=256
     OUT_QUALITY=100
-    OUT_FORMAT="JPEG"
+    OUT_FORMAT="PNG"
     ENGINE="CYCLES"
     # Run Export GLTFs
     blender --background --python ./bpy_modules/render.py -- \

@@ -121,7 +121,7 @@ def render(render_fname,
            out_dir,
            res_x: int = 256,
            res_y: int = 256,
-           out_format: str = "JPEG",
+           out_format: str = "PNG",
            out_quality: int = 100,
            engine: str = "CYCLES"):
     # Scene setup
@@ -190,7 +190,7 @@ def get_args():
     parser.add_argument(
         '--out_format',
         help="Output image format",
-        default="JPEG",
+        default="PNG",
         type=str,
         choices=["JPEG", "PNG"],
     )
