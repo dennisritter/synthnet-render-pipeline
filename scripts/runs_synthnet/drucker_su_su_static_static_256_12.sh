@@ -52,7 +52,7 @@ ENVMAPS_DIR="${RESOURCE_DIR}/envmaps"
 ##### OUTPUTS
 # Specify output root directory and a run description to create a unique output directory
 OUT_ROOT_DIR="./out"
-RUN_DESCRIPTION="drucker_su_su_static_static_256_12"
+RUN_DESCRIPTION="drucker_su_su_static_static_256_12_png"
 # will return a dir path like '$OUT_ROOT_DIR/$ID-$RUN_DESCRIPTION -> ./out/1-my-run
 OUT_DIR=`python scripts/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION"`
 echo "Created output directory: $OUT_DIR"
@@ -102,7 +102,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     RES_X=256
     RES_Y=256
     OUT_QUALITY=100
-    OUT_FORMAT="JPEG"
+    OUT_FORMAT="PNG"
     ENGINE="CYCLES"
     # Run Export GLTFs
     blender --background --python ./bpy_modules/render.py -- \
