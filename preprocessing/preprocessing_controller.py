@@ -247,6 +247,12 @@ class PreprocessingController:
                 part.scene = scene
             pass
 
+    def export_augmented_metadata(self, filename: str = 'metadata', fileformats: list[str] = ['csv', 'xlsx']):
+        if 'csv' in fileformats:
+            self.metadata.to_csv(path_or_buf=f"{self.output_dir}/{filename}.csv")
+        if 'xlsx' in fileformats:
+            self.metadata.to_excel(excel_writer=f"{self.output_dir}/{filename}.xlsx")
+
     def export_rcfg_json(self, filename: str = 'rcfg.json'):
         tstart = timer_utils.time_now()
         rcfg_path = f'{self.output_dir}/{filename}'

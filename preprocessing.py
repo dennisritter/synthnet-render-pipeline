@@ -133,6 +133,7 @@ def main(**kwargs):
     ppc.assign_materials()
     ppc.build_scenes()
     ppc.export_rcfg_json(filename='rcfg_v2.json')
+    ppc.export_augmented_metadata(filename='metadata', fileformats=['csv', 'xlsx'])
 
     # Log preprocessing time
     tend = timer_utils.time_since(tstart)
