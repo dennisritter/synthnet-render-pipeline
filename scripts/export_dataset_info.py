@@ -146,17 +146,19 @@ def main(**kwargs):
     render_engine = args.render_engine
     comment = args.comment
 
-    rcfg = json.load(rcfg_file)
+    with open(rcfg_file, 'r') as f:
+        rcfg = json.load(f)
 
-    n_total_parts = len(rcfg["parts"])
-    n_images_total = n_total_parts * n_images_per_part
-    n_rendered_parts = n_images_total / n_images_per_part
-    n_unidentified_parts = n_total_parts - n_rendered_parts
+    n_parts_total = len(rcfg["parts"])
+    n_images_total = len(os.listdir(render_dir))
+    n_rendered_parts = int(n_images_total / n_images_per_part)
+    n_unidentified_parts = int(n_parts_total - n_rendered_parts)
 
     dataset_info = {
         "run_description": run_description,
-        "n_images_per_part": n_images_per_part,
         "n_images_total": n_images_total,
+        "n_parts_total": n_parts_total,
+        "n_images_per_part": n_images_per_part,
         "n_rendered_parts": n_rendered_parts,
         "n_unidentified_parts": n_unidentified_parts,
         "comment": comment,
@@ -171,7 +173,6 @@ def main(**kwargs):
             "rcfg_version": rcfg_version,
         },
         "rendering": {
-            "render_dir": render_dir,
             "render_res_x": render_res_x,
             "render_res_y": render_res_y,
             "render_quality": render_quality,
@@ -179,8 +180,13 @@ def main(**kwargs):
             "render_engine": render_engine,
         },
     }
+    out_fname = "dataset_info.json"
+    with open(f'{args.out_dir}/{out_fname}', 'w', encoding='utf-8') as f:
+        json.dump(dataset_info, f, ensure_ascii=False, indent=4)
 
-    print(dataset_info)
+    print("- " * 20)
+    print(f'Saved {out_fname}')
+    print(json.dumps(dataset_info, ensure_ascii=False, indent=4))
 
 
 if __name__ == '__main__':
