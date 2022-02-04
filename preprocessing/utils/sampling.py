@@ -4,6 +4,7 @@ import math
 import random
 from typing import Tuple
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def sphere_uniform(n_samples: int = 100, r_factor: float = 10.0, seed: int = 42) -> list:
@@ -33,7 +34,20 @@ def sphere_equidistant(n_samples: int = 100, seed: int = 42) -> list:
     np.random.seed(seed)
     random.seed(seed)
     # TODO implement
-    pass
+    points = []
+    # golden angle
+    phi = math.pi * (3. - math.sqrt(5.))
+    for i in range(n_samples):
+        # y goes from 1 to -1
+        y = 1 - (i / float(n_samples - 1)) * 2 
+        # radius at y
+        radius = math.sqrt(1 - y * y) 
+         # golden angle increment
+        theta = phi * i
+        x = math.cos(theta) * radius
+        z = math.sin(theta) * radius
+        points.append((x, y, z))
+    return points
 
 
 def range_uniform(
@@ -59,3 +73,20 @@ def range_uniform(
 
     points = np.concatenate((randx, randy, randz), axis=1)
     return points
+
+def visualize_points(points):
+    print(f'Visualizing {len(points)} points')
+    _points = np.array(points) * 10
+    x, y, z = _points[:, 0], _points[:, 1], _points[:, 2]
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    ax.scatter(x, y, z, marker='o')
+    ax.set_xlabel('X Label')
+    ax.set_ylabel('Y Label')
+    ax.set_zlabel('Z Label')
+    plt.show()
+
+if __name__ == "__main__":
+    points = sphere_equidistant(100, 42)
+    visualize_points(points)
+
