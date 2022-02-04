@@ -55,7 +55,7 @@ ENVMAPS_DIR="${RESOURCE_DIR}/envmaps"
 OUT_ROOT_DIR="./out"
 RUN_DESCRIPTION="drucker_su_su_static_static_256_12_png"
 # will return a dir path like '$OUT_ROOT_DIR/$ID-$RUN_DESCRIPTION -> ./out/1-my-run
-OUT_DIR=`python scripts/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION"`
+OUT_DIR=`python scripts/utils/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION"`
 echo "Created output directory: $OUT_DIR"
 
 ########## PREPROCESSING ##########
@@ -126,7 +126,7 @@ fi
 ########## EXPORT DATASET INFO ##########
 if [[ $RUN_MODE -ge 3 ]]; then
     # Run Export GLTFs
-    python scripts/export_dataset_info.py \
+    python scripts/utils/export_dataset_info.py \
     --out_dir $OUT_DIR \
     --run_description $RUN_DESCRIPTION \
     --camera_seed $CAMERA_SEED \
