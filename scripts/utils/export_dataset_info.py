@@ -1,11 +1,9 @@
-""" Just create and return (print) a unique dir name. Should be called from shell script"""
+"""Export some info about a generated dataset."""
+
+import os
 import json
 import click
 from types import SimpleNamespace
-
-import sys
-import os
-import re
 
 
 @click.command()
