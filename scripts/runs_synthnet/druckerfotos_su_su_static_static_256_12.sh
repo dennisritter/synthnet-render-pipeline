@@ -1,5 +1,6 @@
 #!/bin/bash
 # IMPORTANT: Run this script from project root to function properly!
+SECONDS=0
 
 # NOTE: param $1 defines the RUN_MODE:
 #   1 = Preprocessing only
@@ -67,6 +68,7 @@ MATERIAL_DEF_MODE='static'
 ENVMAP_DEF_MODE='static'
 
 # Run Preprocessing
+PREPROCESSING_SECONDS_START=$SECONDS
 python preprocessing.py \
 --metadata_file $TOPEX_METADATA_FILE \
 --blend_file $TOPEX_BLENDER_FILE \
@@ -79,6 +81,7 @@ python preprocessing.py \
 --envmap_def_mode $ENVMAP_DEF_MODE \
 --camera_seed $CAMERA_SEED \
 --light_seed $LIGHT_SEED
+PREPROCESSING_SECONDS_END=$(($SECONDS-$PREPROCESSING_SECONDS_START))
 ###################################
 
 ########## EXPORT GLTFs ##########
@@ -89,10 +92,12 @@ if [[ $RUN_MODE -ge 2 ]]; then
     GLTF_DIR="$OUT_DIR/gltf"
 
     # Run Export GLTFs
+    EXPORT_SECONDS_START=$SECONDS
     blender $TOPEX_BLENDER_FILE --background --python ./bpy_modules/export_gltfs.py -- \
     --rcfg_file $RCFG_FILE \
     --data_dir $RESOURCE_DIR \
     --out_dir $GLTF_DIR 
+    EXPORT_SECONDS_END=$(($SECONDS-$EXPORT_SECONDS_START))
 fi
 ###################################
 
@@ -115,3 +120,35 @@ if [[ $RUN_MODE -ge 3 ]]; then
     --engine $ENGINE
 fi
 ############################
+
+########## EXPORT DATASET INFO ##########
+if [[ $RUN_MODE -ge 3 ]]; then
+    # Run Export GLTFs
+    python scripts/export_dataset_info.py \
+    --out_dir $OUT_DIR \
+    --run_description $RUN_DESCRIPTION \
+    --camera_seed $CAMERA_SEED \
+    --light_seed $LIGHT_SEED \
+    --n_images_per_part $N_IMAGES_PER_PART \
+    --scene_mode $SCENE_MODE \
+    --camera_def_mode $CAMERA_DEF_MODE \
+    --light_def_mode $LIGHT_DEF_MODE \
+    --material_def_mode $MATERIAL_DEF_MODE \
+    --envmap_def_mode $ENVMAP_DEF_MODE \
+    --rcfg_version "v2" \
+    --rcfg_file $RCFG_FILE \
+    --render_dir $OUT_DIR/render \
+    --render_res_x $RES_X \
+    --render_res_y $RES_Y \
+    --render_quality $OUT_QUALITY \
+    --render_format $OUT_FORMAT \
+    --render_engine $ENGINE \
+    --comment "No comment" 
+fi
+############################
+
+echo "Time Measures:" 
+echo "Total time (s): $SECONDS"
+echo "Preprocessing time (s): $PREPROCESSING_SECONDS_END"
+echo "GLTF Export time (s): $EXPORT_SECONDS_END"
+echo "Render time (s): $RENDER_SECONDS_END"
