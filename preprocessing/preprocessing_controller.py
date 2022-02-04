@@ -93,6 +93,7 @@ class PreprocessingController:
         # all parts
         self.global_scene = None
 
+        # Parse Parts
         tstart = timer_utils.time_now()
         LOGGER.info(LOG_DELIM)
         LOGGER.info(f'Parsing unique Parts and SingleParts from {metadata_file}')
@@ -121,45 +122,25 @@ class PreprocessingController:
 
     def _sample_cameras(self, n_images: int):
         """ Assign Cameras to single parts depending on self.camera-def_mode. """
-        tstart = timer_utils.time_now()
-        LOGGER.info(LOG_DELIM)
-        LOGGER.info(f'Sampling cameras [mode={self.camera_def_mode}]')
-
         # Add cameras - sphere uniform
         if self.camera_def_mode == 'sphere-uniform':
             cameras = define_cameras.get_cameras_sphere_uniform(n=n_images, seed=self.camera_seed)
-
-        tend = timer_utils.time_since(tstart)
-        LOGGER.info(f'Done in {tend}')
-
         return cameras
 
     # TODO: Add functionality to specify a range for number of lights per scene
     #       => Add param n_lights_per_scene: Tuple = (1, 1)
     def _sample_lights(self, n_images: int):
         """ Sample lightsetups depending on self.light_def_mode. """
-        tstart = timer_utils.time_now()
-        LOGGER.info(LOG_DELIM)
-        LOGGER.info(f'Sampling lights [mode={self.light_def_mode}]')
-
         # Add lights - sphere uniform
         if self.light_def_mode == 'sphere-uniform':
             lights = define_lights.get_lights_sphere_uniform(n=n_images, seed=self.light_seed)
         # Add lights - random within range
         if self.light_def_mode == 'range-uniform':
             lights = define_lights.get_lights_range_uniform(n=n_images, seed=self.light_seed)
-
-        tend = timer_utils.time_since(tstart)
-        LOGGER.info(f'Done in {tend}')
-
         return lights
 
     def _assign_envmaps(self, n_images: int):
         """ Assign Environment Maps to single parts depending on self.envmap_def_mode. """
-        tstart = timer_utils.time_now()
-        LOGGER.info(LOG_DELIM)
-        LOGGER.info(f'Sampling lights [mode={self.light_def_mode}]')
-
         # No envmaps
         if self.envmap_def_mode == 'disabled':
             envmaps = []
@@ -169,10 +150,6 @@ class PreprocessingController:
             envmaps = ['gray.png' for _ in range(0, n_images)]
         if self.envmap_def_mode == 'static':
             envmaps = ['default.hdr' for _ in range(0, n_images)]
-
-        tend = timer_utils.time_since(tstart)
-        LOGGER.info(f'Done in {tend}')
-
         return envmaps
 
     # TODO: Refactor / WIP
@@ -202,6 +179,10 @@ class PreprocessingController:
 
     # TODO: Add envmap support
     def build_scenes(self):
+        tstart = timer_utils.time_now()
+        LOGGER.info(LOG_DELIM)
+        LOGGER.info(f'Define Scenes [mode={self.scene_mode}]')
+
         if self.scene_mode == 'global':
             # Build scenes to use for each part
             # TODO: Add arguments for number of cameras and lights
@@ -245,7 +226,9 @@ class PreprocessingController:
                 scene.envmaps = envmaps
                 scene.render_setups = render_setups
                 part.scene = scene
-            pass
+
+        tend = timer_utils.time_since(tstart)
+        LOGGER.info(f'Done in {tend}')
 
     def export_augmented_metadata(self, filename: str = 'metadata', fileformats: list[str] = ['csv', 'xlsx']):
         if 'csv' in fileformats:
