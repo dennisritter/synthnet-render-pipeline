@@ -46,7 +46,7 @@ def sphere_equidistant(n_samples: int = 100, r_factor=1.0, seed: int = 42) -> li
         # golden angle increment
         theta = phi * i
         # y goes from 1 to -1
-        y = 1 - (i / float(n_samples - 1)) * 2
+        y = 1 - (i / float(n_samples - 1)) * 2 if n_samples > 1 else 0
         # radius at y
         r = math.sqrt(1 - y * y)
         x = r * math.cos(theta)
