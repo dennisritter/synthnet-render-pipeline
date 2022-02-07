@@ -30,7 +30,7 @@ def sphere_uniform(n_samples: int = 100, r_factor: float = 10.0, seed: int = 42)
     return points
 
 def sphere_equidistant(n_samples: int = 100, r_factor=1.0, seed: int = 42) -> list:
-    """Returns a list of regularly samples points on the unit sphere using fibonacci lattice / golden spiral
+    """Returns a list of regularly samples points on the unit sphere using fibonacci lattice/ golden spiral
     Args:
         n_samples (int): Number of points to sample.. Defaults to 100.
         r_factor (float): Radius factor to control the distance of objects to the sphere center.
@@ -44,14 +44,14 @@ def sphere_equidistant(n_samples: int = 100, r_factor=1.0, seed: int = 42) -> li
     phi = math.pi * (3. - math.sqrt(5.))
     for i in range(n_samples):
         # y goes from 1 to -1
-        y = 1 - (i / float(n_samples - 1)) * 2  * r_factor
+        y = 1 - (i / float(n_samples - 1)) * 2
         # radius at y
         radius = math.sqrt(1 - y * y) 
          # golden angle increment
         theta = phi * i
-        x = math.cos(theta) * radius * r_factor
-        z = math.sin(theta) * radius * r_factor
-        points.append((x, y, z))
+        x = math.cos(theta) * radius
+        z = math.sin(theta) * radius
+        points.append((x * r_factor, y * r_factor, z * r_factor))
     return points
 
 
