@@ -29,23 +29,28 @@ def sphere_uniform(n_samples: int = 100, r_factor: float = 10.0, seed: int = 42)
         points.append([x, y, z])
     return points
 
-
-def sphere_equidistant(n_samples: int = 100, seed: int = 42) -> list:
+def sphere_equidistant(n_samples: int = 100, r_factor=1.0, seed: int = 42) -> list:
+    """Returns a list of regularly samples points on the unit sphere using fibonacci lattice / golden spiral
+    Args:
+        n_samples (int): Number of points to sample.. Defaults to 100.
+        r_factor (float): Radius factor to control the distance of objects to the sphere center.
+    Returns:
+        list: list of samples points
+    """
     np.random.seed(seed)
     random.seed(seed)
-    # TODO implement
     points = []
-    # golden angle
+    # golden angle 3d
     phi = math.pi * (3. - math.sqrt(5.))
     for i in range(n_samples):
         # y goes from 1 to -1
-        y = 1 - (i / float(n_samples - 1)) * 2 
+        y = 1 - (i / float(n_samples - 1)) * 2  * r_factor
         # radius at y
         radius = math.sqrt(1 - y * y) 
          # golden angle increment
         theta = phi * i
-        x = math.cos(theta) * radius
-        z = math.sin(theta) * radius
+        x = math.cos(theta) * radius * r_factor
+        z = math.sin(theta) * radius * r_factor
         points.append((x, y, z))
     return points
 
@@ -74,6 +79,7 @@ def range_uniform(
     points = np.concatenate((randx, randy, randz), axis=1)
     return points
 
+
 def visualize_points(points):
     print(f'Visualizing {len(points)} points')
     _points = np.array(points) * 10
@@ -84,9 +90,8 @@ def visualize_points(points):
     ax.set_xlabel('X Label')
     ax.set_ylabel('Y Label')
     ax.set_zlabel('Z Label')
-    plt.show()
+    plt.savefig("./preprocessing/utils/sampling.png")
 
 if __name__ == "__main__":
-    points = sphere_equidistant(100, 42)
+    points = sphere_equidistant(n_samples=1000, r_factor=1, seed=42)
     visualize_points(points)
-
