@@ -78,20 +78,3 @@ def range_uniform(
 
     points = np.concatenate((randx, randy, randz), axis=1)
     return points
-
-
-def visualize_points(points):
-    print(f'Visualizing {len(points)} points')
-    _points = np.array(points) * 10
-    x, y, z = _points[:, 0], _points[:, 1], _points[:, 2]
-    fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
-    ax.scatter(x, y, z, marker='o')
-    ax.set_xlabel('X Label')
-    ax.set_ylabel('Y Label')
-    ax.set_zlabel('Z Label')
-    plt.savefig("./preprocessing/utils/sampling.png")
-
-if __name__ == "__main__":
-    points = sphere_equidistant(n_samples=1000, r_factor=1, seed=42)
-    visualize_points(points)
