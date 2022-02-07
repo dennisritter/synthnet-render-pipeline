@@ -4,10 +4,9 @@ import math
 import random
 from typing import Tuple
 import numpy as np
-import matplotlib.pyplot as plt
 
 
-def sphere_uniform(n_samples: int = 100, r_factor: float = 10.0, seed: int = 42) -> list:
+def sphere_uniform(n_samples: int = 100, r_factor: float = 10.0, seed: int = 42) -> list[list]:
     """ Returns a list of random points sampled on the unit sphere.
     
         Args:
@@ -29,13 +28,14 @@ def sphere_uniform(n_samples: int = 100, r_factor: float = 10.0, seed: int = 42)
         points.append([x, y, z])
     return points
 
-def sphere_equidistant(n_samples: int = 100, r_factor=1.0, seed: int = 42) -> list:
-    """Returns a list of regularly samples points on the unit sphere using fibonacci lattice/ golden spiral
+
+def sphere_equidistant(n_samples: int = 100, r_factor=1.0, seed: int = 42) -> list[list]:
+    """Returns a list of regularly sampled points on the unit sphere using fibonacci lattice/ golden spiral
     Args:
         n_samples (int): Number of points to sample.. Defaults to 100.
         r_factor (float): Radius factor to control the distance of objects to the sphere center.
     Returns:
-        list: list of samples points
+        list: list of sampled points
     """
     np.random.seed(seed)
     random.seed(seed)
@@ -43,15 +43,15 @@ def sphere_equidistant(n_samples: int = 100, r_factor=1.0, seed: int = 42) -> li
     # golden angle 3d
     phi = math.pi * (3. - math.sqrt(5.))
     for i in range(n_samples):
+        # golden angle increment
+        theta = phi * i
         # y goes from 1 to -1
         y = 1 - (i / float(n_samples - 1)) * 2
         # radius at y
-        radius = math.sqrt(1 - y * y) 
-         # golden angle increment
-        theta = phi * i
-        x = math.cos(theta) * radius
-        z = math.sin(theta) * radius
-        points.append((x * r_factor, y * r_factor, z * r_factor))
+        r = math.sqrt(1 - y * y)
+        x = r * math.cos(theta)
+        z = r * math.sin(theta)
+        points.append([x * r_factor, y * r_factor, z * r_factor])
     return points
 
 
