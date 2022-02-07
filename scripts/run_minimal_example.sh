@@ -60,7 +60,7 @@ echo "Created output directory: $OUT_DIR"
 
 ########## PREPROCESSING ##########
 # Set options
-N_IMAGES_PER_PART=1
+N_IMAGES_PER_PART=3
 SCENE_MODE='exclusive'
 CAMERA_DEF_MODE='sphere-uniform'
 LIGHT_DEF_MODE='sphere-uniform'
