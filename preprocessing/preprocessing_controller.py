@@ -18,7 +18,7 @@ RCFG_VAL_SCHEMA_FILE = './validation/schemas/rcfg_schema_v2.json'
 
 class PreprocessingController:
     SCENE_MODES = ['global', 'exclusive']
-    CAMERA_DEF_MODES = ['sphere-uniform']
+    CAMERA_DEF_MODES = ['sphere-uniform', 'sphere-equidistant']
     LIGHT_DEF_MODES = ['sphere-uniform', 'range-uniform']
     MATERIAL_DEF_MODES = ['disabled', 'static']
     ENVMAP_DEF_MODES = ['disabled', 'white', 'gray', 'static']
@@ -125,6 +125,9 @@ class PreprocessingController:
         # Add cameras - sphere uniform
         if self.camera_def_mode == 'sphere-uniform':
             cameras = define_cameras.get_cameras_sphere_uniform(n=n_images, seed=self.camera_seed)
+        if self.camera_def_mode == 'sphere-equidistant':
+            cameras = define_cameras.get_cameras_sphere_equidistant(n=n_images, seed=self.camera_seed)
+
         return cameras
 
     # TODO: Add functionality to specify a range for number of lights per scene
