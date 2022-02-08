@@ -403,6 +403,12 @@ def add_image_to_blender(file_path: str) -> bpy.types.Image:
 
 
 def import_materials_from_blend(file_path):
+    """ Loads materials from .blend files and replaces all materials with those in the target blend file.
+
+        Args:
+            file_path (str): The path to the .blend file containing materials
+    
+    """
     materials = None
     with bpy.data.libraries.load(file_path, link=False) as (data_from, data_to):
         materials = data_from.materials
@@ -441,7 +447,7 @@ def get_random_color() -> list:
     return r, g, b, 1
 
 
-def apply_material(ob, material_id) -> bpy.types.Material:
+def apply_material(ob: bpy.types.Object, mat: bpy.types.Material) -> bpy.types.Material:
     """
     Apply material to given ob by material id
     Args:
@@ -449,16 +455,13 @@ def apply_material(ob, material_id) -> bpy.types.Material:
         material_id: name of material in scene to apply
     Returns:
     """
-    # Get material
-    mat = bpy.data.materials.get(material_id)
-    if mat is not None:
-        # Assign it to object
-        if ob.data.materials:
-            ob.data.materials.clear()
-        # no slots
-        ob.data.materials.append(mat)
-        return mat
-    return None
+    # Clear other mats?
+    if ob.data.materials:
+        ob.data.materials.clear()
+    ob.data.materials.append(mat)
+
+    # ob.data.materials.insert(0, mat)
+    return mat
 
 
 def create_light(name, data, collection=None):
@@ -549,6 +552,7 @@ def remove_markers(objs: list):
 
 
 class SceneExporter():
+    """The Scene Exporter exports scenes."""
 
     def __init__(self, rcfg: object, data_dir: str, blend_file: str, out_dir: str):
         # Set parts
@@ -679,7 +683,7 @@ class SceneExporter():
                         # ? What is the material ID?
                         print(f"Apply material: {single_part['id']}: {single_part['material']}")
                         if single_part["material"] in bpy_materials.keys():
-                            apply_material(bpy_single_part, bpy_materials[single_part["material"]].name)
+                            apply_material(bpy_single_part, bpy_materials[single_part["material"]])
 
             ### Translate current part to world center
             # get the bounding sphere center
