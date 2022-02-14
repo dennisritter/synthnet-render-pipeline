@@ -556,6 +556,22 @@ def remove_vertex_colors(obj: bpy.types.Object):
         vertex_colors.remove(vertex_colors[0])
 
 
+def set_object_material_basecolor(obj: bpy.types.Object, color):
+    """Set the base color in the Principled BSDF node for the material of the given object.
+
+        Args: 
+            mat (bpy.types.Material)
+    """
+    mat = obj.data.materials[0]
+    # Remove Texture input from base color and set a color
+    print("LINKS:")
+    if mat.node_tree.nodes["Principled BSDF"].inputs[0].links:
+        print(mat.node_tree.nodes["Principled BSDF"].inputs[0].links[0])
+        base_color_link = mat.node_tree.nodes["Principled BSDF"].inputs[0].links[0]
+        mat.node_tree.links.remove(base_color_link)
+    mat.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = color
+
+
 #########################################
 
 # EXPORTER
@@ -695,10 +711,11 @@ class SceneExporter():
                 for single_part in part["single_parts"]:
                     if bpy_single_part.name.startswith(single_part["id"]):
                         # Remove the Vertex Colors from the object
-                        bpy_material = remove_vertex_colors(bpy_single_part)
+                        remove_vertex_colors(bpy_single_part)
                         print(f"Apply material: {single_part['id']}: {single_part['material']}")
                         if single_part["material"] in bpy_materials.keys():
                             apply_material(bpy_single_part, bpy_materials[single_part["material"]])
+                            set_object_material_basecolor(bpy_single_part, (0.15, 0.15, 0.15, 1.0))
 
             ### Translate current part to world center
             # get the bounding sphere center
