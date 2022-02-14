@@ -142,7 +142,7 @@ def render(render_fname,
         bpy.ops.object.select_by_type(extend=False, type='MESH')
         bpy.ops.view3d.camera_to_view_selected()
         # Zoom out a little
-        translate_objects_by([cam], mathutils.Vector((0, 0, 0.5)))
+        # translate_objects_by([cam], mathutils.Vector((0, 0, 0.5)))
 
         bpy.context.scene.render.filepath = f"{out_dir}/{render_fname}_{i}"
         bpy.ops.render.render(write_still=True)
