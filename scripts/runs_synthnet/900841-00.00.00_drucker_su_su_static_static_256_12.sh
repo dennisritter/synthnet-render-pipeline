@@ -44,16 +44,16 @@ echo "- - - - - - - - - - - - - - - - - - - - "
 ##### RESOURCES
 # Resource directory path. Contains Environment maps, materials, CAD data and metadata. 
 # (relative to project root)
-RESOURCE_DIR="./data/drucker_example"
-TOPEX_METADATA_FILE="${RESOURCE_DIR}/drucker.xlsx"
-TOPEX_BLENDER_FILE="${RESOURCE_DIR}/drucker.blend"
+RESOURCE_DIR="./data/900841-00.00.00_drucker"
+TOPEX_METADATA_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.xlsx"
+TOPEX_BLENDER_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.blend"
 MATERIALS_DIR="${RESOURCE_DIR}/materials"
 ENVMAPS_DIR="${RESOURCE_DIR}/envmaps"
 
 ##### OUTPUTS
 # Specify output root directory and a run description to create a unique output directory
 OUT_ROOT_DIR="./out"
-RUN_DESCRIPTION="drucker_su_su_static_static_256_12_png"
+RUN_DESCRIPTION="900841-00.00.00_drucker_su_su_static_static_256_12"
 # will return a dir path like '$OUT_ROOT_DIR/$ID-$RUN_DESCRIPTION -> ./out/1-my-run
 OUT_DIR=`python scripts/utils/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION"`
 echo "Created output directory: $OUT_DIR"
@@ -145,7 +145,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     --render_quality $OUT_QUALITY \
     --render_format $OUT_FORMAT \
     --render_engine $ENGINE \
-    --comment "No comment" 
+    --comment "Aluminum material == Steel material; base color = (0.15, 0.15, 0.15, 1)" 
 fi
 ############################
 
