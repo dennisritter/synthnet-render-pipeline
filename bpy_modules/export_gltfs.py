@@ -544,6 +544,18 @@ def remove_markers(objs: list):
         bpy.types.TimelineMarkers.remove(obj)
 
 
+def remove_vertex_colors(obj: bpy.types.Object):
+    """Removes the Vertex Colors from the given object.
+
+    Args:
+        mat (bpy.types.Object): Blender object to remove the Vertex Colors from.
+    """
+    vertex_colors = obj.data.vertex_colors
+    while vertex_colors:
+        print(vertex_colors[0])
+        vertex_colors.remove(vertex_colors[0])
+
+
 #########################################
 
 # EXPORTER
@@ -672,15 +684,18 @@ class SceneExporter():
                     continue
                 if material_fn in bpy_materials.keys():
                     continue
-                materials_from_file = import_materials_from_blend(f"{materials_dir}/{material_fn}")
-                # we assume the file contains only the single material and id it by the file name
-                bpy_materials[material_fn] = materials_from_file[0]
+                # NOTE: Only works for materials included/defined as .blend files
+                # If we use another material format, we need to first convert it to a Blender material
+                # NOTE: We assume the file contains only the single material and id it by the file name
+                bpy_material = import_materials_from_blend(f"{materials_dir}/{material_fn}")[0]
+                bpy_materials[material_fn] = bpy_material
 
             ### APPLY MATERIALS
             for bpy_single_part in bpy_single_parts:
                 for single_part in part["single_parts"]:
                     if bpy_single_part.name.startswith(single_part["id"]):
-                        # ? What is the material ID?
+                        # Remove the Vertex Colors from the object
+                        bpy_material = remove_vertex_colors(bpy_single_part)
                         print(f"Apply material: {single_part['id']}: {single_part['material']}")
                         if single_part["material"] in bpy_materials.keys():
                             apply_material(bpy_single_part, bpy_materials[single_part["material"]])
