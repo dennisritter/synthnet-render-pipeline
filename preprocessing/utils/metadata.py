@@ -10,6 +10,8 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
     """
     raw_in = pd.read_excel(metadata_file)
 
+    # PART_NUMBER
+    part_number = raw_in.loc[:, 'Teilenummer'].astype(str)
     # PART_ID
     for p in raw_in.loc[:, 'Teilenummer']:
         raw_in['Teilenummer'] = raw_in['Teilenummer'].replace([p], str(p).replace(' ', '_').replace('/', '_'))
@@ -19,28 +21,28 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
         raw_in['Benennung'] = raw_in['Benennung'].replace([name], str(name).replace(' ', '_').replace('/', '_'))
     part_names = raw_in.loc[:, 'Benennung']
     # PART_HIERARCHY
-    part_hierarchy = raw_in.loc[:, 'Pos.-Nr.']
+    part_hierarchy = raw_in.loc[:, 'Pos.-Nr.'].astype(str)
     # PART_MATERIAL
-    part_materials = raw_in.loc[:, 'Werkstoff']
+    part_materials = raw_in.loc[:, 'Werkstoff'].astype(str)
     part_materials.fillna('-', inplace=True)
-
-    part_is_spare = []
-
-    # Change Bem. values to Boolean that denotes whether part is spare or not
-    # (V=Verschleißteil, E=Ersatzteil)
-    for i, p in enumerate(raw_in.loc[:, 'Bem.']):
-        if p == 'V' or p == 'E':
-            part_is_spare.append(True)
-        else:
-            part_is_spare.append(False)
+    # PART SURFACE
+    print(raw_in.info())
+    part_surface = raw_in.loc[:, ' Oberfläche'].astype(str)
+    # PART_IS_SPARE (E = Ersatzteil)
+    part_is_spare = [p.lower() == 'e' for p in raw_in.loc[:, 'Bem.'].astype(str)]
+    # PART_IS_WEAR (V = Verschleißteil)
+    part_is_wear = [p.lower() == 'v' for p in raw_in.loc[:, 'Bem.'].astype(str)]
 
     df = pd.DataFrame(
         data={
             'part_id': part_ids,
+            'part_number': part_number,
             'part_name': part_names,
             'part_hierarchy': part_hierarchy,
             'part_material': part_materials,
-            'part_is_spare': part_is_spare
+            'part_surface': part_surface,
+            'part_is_spare': part_is_spare,
+            'part_is_wear': part_is_wear
         })
 
     return df

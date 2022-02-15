@@ -17,6 +17,7 @@ def assign_materials_static(parts: list, metadata: 'pd.DataFrame') -> list[Part]
     """
     # Map materials of metadata to predefined materials
     MATERIAL_MAP = {
+        "nan": "default.blend",
         "-": "default.blend",
         "X5CrNi18-10": "steel.blend",
         "X8CrNiS18-9": "steel.blend",

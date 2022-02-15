@@ -218,7 +218,8 @@ data/*
 !data/.gitkeep
 !data/mini_example
 !data/render_configs
-# !data/drucker_example
 
 out/*
 !out/.gitkeep
+
+wandb/*

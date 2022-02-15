@@ -10,7 +10,7 @@ class SinglePart:
         self,
         id: str,
         name: str,
-        material: str = 'default',
+        material: str = 'none',
     ):
 
         ## Validate parameters

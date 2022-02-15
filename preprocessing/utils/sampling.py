@@ -6,13 +6,15 @@ from typing import Tuple
 import numpy as np
 
 
-def sphere_uniform(n_samples=100, r_factor=10.0) -> list:
+def sphere_uniform(n_samples: int = 100, r_factor: float = 10.0, seed: int = 42) -> list[list]:
     """ Returns a list of random points sampled on the unit sphere.
     
         Args:
             n_samples (int): Number of points to sample.
             r_factor (float): Radius factor to control the distance of objects to the sphere center.
     """
+    np.random.seed(seed)
+    random.seed(seed)
     points = []
     for i in range(n_samples):
         phi = random.uniform(0, 2 * math.pi)
@@ -27,9 +29,30 @@ def sphere_uniform(n_samples=100, r_factor=10.0) -> list:
     return points
 
 
-def sphere_equidistant(n_samples=100) -> list:
-    # TODO implement
-    pass
+def sphere_equidistant(n_samples: int = 100, r_factor=1.0, seed: int = 42) -> list[list]:
+    """Returns a list of regularly sampled points on the unit sphere using fibonacci lattice/ golden spiral
+    Args:
+        n_samples (int): Number of points to sample.. Defaults to 100.
+        r_factor (float): Radius factor to control the distance of objects to the sphere center.
+    Returns:
+        list: list of sampled points
+    """
+    np.random.seed(seed)
+    random.seed(seed)
+    points = []
+    # golden angle 3d
+    phi = math.pi * (3. - math.sqrt(5.))
+    for i in range(n_samples):
+        # golden angle increment
+        theta = phi * i
+        # y goes from 1 to -1
+        y = 1 - (i / float(n_samples - 1)) * 2 if n_samples > 1 else 0
+        # radius at y
+        r = math.sqrt(1 - y * y)
+        x = r * math.cos(theta)
+        z = r * math.sin(theta)
+        points.append([x * r_factor, y * r_factor, z * r_factor])
+    return points
 
 
 def range_uniform(
@@ -37,6 +60,7 @@ def range_uniform(
         xrange: Tuple[float, float] = (-1.0, 1.0),
         yrange: Tuple[float, float] = (-1.0, 1.0),
         zrange: Tuple[float, float] = (-1.0, 1.0),
+        seed: int = 42,
 ) -> 'np.ndarray':
     """ Return an array of points sampled on given ranges for each coordinate. 
 
@@ -46,6 +70,8 @@ def range_uniform(
             yrange (Tuple): min and max value for axis
             zrange (Tuple): min and max value for axis
     """
+    np.random.seed(seed)
+    random.seed(seed)
     randx = np.random.uniform(low=xrange[0], high=xrange[1], size=(n_samples, 1))
     randy = np.random.uniform(low=yrange[0], high=yrange[1], size=(n_samples, 1))
     randz = np.random.uniform(low=zrange[0], high=zrange[1], size=(n_samples, 1))

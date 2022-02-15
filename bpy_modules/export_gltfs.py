@@ -403,6 +403,12 @@ def add_image_to_blender(file_path: str) -> bpy.types.Image:
 
 
 def import_materials_from_blend(file_path):
+    """ Loads materials from .blend files and replaces all materials with those in the target blend file.
+
+        Args:
+            file_path (str): The path to the .blend file containing materials
+    
+    """
     materials = None
     with bpy.data.libraries.load(file_path, link=False) as (data_from, data_to):
         materials = data_from.materials
@@ -441,7 +447,7 @@ def get_random_color() -> list:
     return r, g, b, 1
 
 
-def apply_material(ob, material_id) -> bpy.types.Material:
+def apply_material(ob: bpy.types.Object, mat: bpy.types.Material) -> bpy.types.Material:
     """
     Apply material to given ob by material id
     Args:
@@ -449,16 +455,13 @@ def apply_material(ob, material_id) -> bpy.types.Material:
         material_id: name of material in scene to apply
     Returns:
     """
-    # Get material
-    mat = bpy.data.materials.get(material_id)
-    if mat is not None:
-        # Assign it to object
-        if ob.data.materials:
-            ob.data.materials.clear()
-        # no slots
-        ob.data.materials.append(mat)
-        return mat
-    return None
+    # Clear other mats?
+    if ob.data.materials:
+        ob.data.materials.clear()
+    ob.data.materials.append(mat)
+
+    # ob.data.materials.insert(0, mat)
+    return mat
 
 
 def create_light(name, data, collection=None):
@@ -510,9 +513,14 @@ def create_camera(name, data, collection=None):
         target = data["target"]
         camera_object.rotation_euler = look_at(mathutils.Vector(camera_object.location), mathutils.Vector(target))
 
+    # Roll camera around local Z-Axis by defined angle
     bpy.context.scene.transform_orientation_slots[0].type = 'LOCAL'
     if "local_rotation" in data.keys():
         camera_object.rotation_euler.rotate_axis("Z", data["local_rotation"][2])
+
+    # Set camera clipping start (meters)
+    camera_object.data.clip_start = 0.001
+
     return camera_object
 
 
@@ -541,6 +549,34 @@ def remove_markers(objs: list):
         bpy.types.TimelineMarkers.remove(obj)
 
 
+def remove_vertex_colors(obj: bpy.types.Object):
+    """Removes the Vertex Colors from the given object.
+
+    Args:
+        mat (bpy.types.Object): Blender object to remove the Vertex Colors from.
+    """
+    vertex_colors = obj.data.vertex_colors
+    while vertex_colors:
+        print(vertex_colors[0])
+        vertex_colors.remove(vertex_colors[0])
+
+
+def set_object_material_basecolor(obj: bpy.types.Object, color):
+    """Set the base color in the Principled BSDF node for the material of the given object.
+
+        Args: 
+            mat (bpy.types.Material)
+    """
+    mat = obj.data.materials[0]
+    # Remove Texture input from base color and set a color
+    print("LINKS:")
+    if mat.node_tree.nodes["Principled BSDF"].inputs[0].links:
+        print(mat.node_tree.nodes["Principled BSDF"].inputs[0].links[0])
+        base_color_link = mat.node_tree.nodes["Principled BSDF"].inputs[0].links[0]
+        mat.node_tree.links.remove(base_color_link)
+    mat.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = color
+
+
 #########################################
 
 # EXPORTER
@@ -549,6 +585,7 @@ def remove_markers(objs: list):
 
 
 class SceneExporter():
+    """The Scene Exporter exports scenes."""
 
     def __init__(self, rcfg: object, data_dir: str, blend_file: str, out_dir: str):
         # Set parts
@@ -664,21 +701,26 @@ class SceneExporter():
             part_mats = [sp_mat["material"] for sp_mat in part["single_parts"]]
             # import materials
             for material_fn in part_mats:
+                if material_fn == "none":
+                    continue
                 if material_fn in bpy_materials.keys():
                     continue
-                materials_from_file = import_materials_from_blend(f"{materials_dir}/{material_fn}")
-                # we assume the file contains only the single material and id it by the file name
-                bpy_materials[material_fn] = materials_from_file[0]
+                # NOTE: Only works for materials included/defined as .blend files
+                # If we use another material format, we need to first convert it to a Blender material
+                # NOTE: We assume the file contains only the single material and id it by the file name
+                bpy_material = import_materials_from_blend(f"{materials_dir}/{material_fn}")[0]
+                bpy_materials[material_fn] = bpy_material
 
             ### APPLY MATERIALS
             for bpy_single_part in bpy_single_parts:
                 for single_part in part["single_parts"]:
                     if bpy_single_part.name.startswith(single_part["id"]):
-                        # TODO: Apply actual Material
-                        # ? What is the material ID?
+                        # Remove the Vertex Colors from the object
+                        remove_vertex_colors(bpy_single_part)
                         print(f"Apply material: {single_part['id']}: {single_part['material']}")
                         if single_part["material"] in bpy_materials.keys():
-                            apply_material(bpy_single_part, bpy_materials[single_part["material"]].name)
+                            apply_material(bpy_single_part, bpy_materials[single_part["material"]])
+                            set_object_material_basecolor(bpy_single_part, (0.15, 0.15, 0.15, 1.0))
 
             ### Translate current part to world center
             # get the bounding sphere center
@@ -693,11 +735,12 @@ class SceneExporter():
                 render_object = part["blend_obj"]
                 render_camera = bpy_cameras[render_setup["camera_i"]]
                 render_lights = [bpy_lights[light_i] for light_i in render_setup["lights_i"]]
-                # TODO: Apply actual Envmap to scene/render
-                # render_envmap = add_hdri_map(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
-                # render_envmap = add_image_to_blender(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
-                # we attach the envmap to the camera in the scene to identify easily later for now
-                render_camera.data["ud_envmap"] = f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}"
+                if render_setup['envmap_fname'] != 'none':
+                    # TODO: Apply actual Envmap to scene/render
+                    # render_envmap = add_hdri_map(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
+                    # render_envmap = add_image_to_blender(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
+                    # we attach the envmap to the camera in the scene to identify easily later for now
+                    render_camera.data["ud_envmap"] = f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}"
                 # select objects to export
                 # NOTE: Sometimes not all single part objects are exported by adding the collection, so we add all single parts instead
                 # objects_to_export.append(render_object)

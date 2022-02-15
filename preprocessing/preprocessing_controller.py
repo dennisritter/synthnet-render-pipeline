@@ -18,10 +18,10 @@ RCFG_VAL_SCHEMA_FILE = './validation/schemas/rcfg_schema_v2.json'
 
 class PreprocessingController:
     SCENE_MODES = ['global', 'exclusive']
-    CAMERA_DEF_MODES = ['sphere-uniform']
+    CAMERA_DEF_MODES = ['sphere-uniform', 'sphere-equidistant']
     LIGHT_DEF_MODES = ['sphere-uniform', 'range-uniform']
-    MATERIAL_DEF_MODES = ['static']
-    ENVMAP_DEF_MODES = ['static']
+    MATERIAL_DEF_MODES = ['disabled', 'static']
+    ENVMAP_DEF_MODES = ['disabled', 'white', 'gray', 'static']
 
     def __init__(
         self,
@@ -34,6 +34,8 @@ class PreprocessingController:
         light_def_mode: str,
         material_def_mode: str,
         envmap_def_mode: str,
+        camera_seed: int,
+        light_seed: int,
     ):
 
         ## Validate parameters
@@ -65,6 +67,9 @@ class PreprocessingController:
         # validate envmap_def_mode
         assert isinstance(envmap_def_mode, str)
         assert envmap_def_mode.lower() in self.ENVMAP_DEF_MODES
+        # validate seeds
+        assert isinstance(camera_seed, int)
+        assert isinstance(light_seed, int)
 
         ## Assign options
         self.metadata_file = metadata_file
@@ -76,6 +81,8 @@ class PreprocessingController:
         self.light_def_mode = light_def_mode.lower()
         self.material_def_mode = material_def_mode.lower()
         self.envmap_def_mode = envmap_def_mode.lower()
+        self.camera_seed = camera_seed
+        self.light_seed = light_seed
 
         # Prepared metadata.xlsx file as pandas DataFrame
         # rows: parts
@@ -86,6 +93,7 @@ class PreprocessingController:
         # all parts
         self.global_scene = None
 
+        # Parse Parts
         tstart = timer_utils.time_now()
         LOGGER.info(LOG_DELIM)
         LOGGER.info(f'Parsing unique Parts and SingleParts from {metadata_file}')
@@ -101,6 +109,9 @@ class PreprocessingController:
         LOGGER.info(LOG_DELIM)
         LOGGER.info(f'Assigning materials [mode={self.material_def_mode}]')
 
+        # disabled: Do not add any materials (but 'none')
+        if self.material_def_mode == 'disabled':
+            pass
         # static: Read metadata materials and apply our materials depending
         # on a static metadata_material:our_material map
         if self.material_def_mode == 'static':
@@ -111,16 +122,11 @@ class PreprocessingController:
 
     def _sample_cameras(self, n_images: int):
         """ Assign Cameras to single parts depending on self.camera-def_mode. """
-        tstart = timer_utils.time_now()
-        LOGGER.info(LOG_DELIM)
-        LOGGER.info(f'Sampling cameras [mode={self.camera_def_mode}]')
-
         # Add cameras - sphere uniform
         if self.camera_def_mode == 'sphere-uniform':
-            cameras = define_cameras.get_cameras_sphere_uniform(n_images)
-
-        tend = timer_utils.time_since(tstart)
-        LOGGER.info(f'Done in {tend}')
+            cameras = define_cameras.get_cameras_sphere_uniform(n=n_images, seed=self.camera_seed)
+        if self.camera_def_mode == 'sphere-equidistant':
+            cameras = define_cameras.get_cameras_sphere_equidistant(n=n_images, seed=self.camera_seed)
 
         return cameras
 
@@ -128,25 +134,26 @@ class PreprocessingController:
     #       => Add param n_lights_per_scene: Tuple = (1, 1)
     def _sample_lights(self, n_images: int):
         """ Sample lightsetups depending on self.light_def_mode. """
-        tstart = timer_utils.time_now()
-        LOGGER.info(LOG_DELIM)
-        LOGGER.info(f'Sampling lights [mode={self.light_def_mode}]')
-
         # Add lights - sphere uniform
         if self.light_def_mode == 'sphere-uniform':
-            lights = define_lights.get_lights_sphere_uniform(n_images)
+            lights = define_lights.get_lights_sphere_uniform(n=n_images, seed=self.light_seed)
         # Add lights - random within range
         if self.light_def_mode == 'range-uniform':
-            lights = define_lights.get_lights_range_uniform(n_images)
-
-        tend = timer_utils.time_since(tstart)
-        LOGGER.info(f'Done in {tend}')
-
+            lights = define_lights.get_lights_range_uniform(n=n_images, seed=self.light_seed)
         return lights
 
-    def assign_envmaps(self):
+    def _assign_envmaps(self, n_images: int):
         """ Assign Environment Maps to single parts depending on self.envmap_def_mode. """
-        pass
+        # No envmaps
+        if self.envmap_def_mode == 'disabled':
+            envmaps = []
+        if self.envmap_def_mode == 'white':
+            envmaps = ['white.jpg' for _ in range(0, n_images)]
+        if self.envmap_def_mode == 'gray':
+            envmaps = ['gray.png' for _ in range(0, n_images)]
+        if self.envmap_def_mode == 'static':
+            envmaps = ['default.hdr' for _ in range(0, n_images)]
+        return envmaps
 
     # TODO: Refactor / WIP
     # TODO: Add parameter to better define lightsetups?
@@ -168,22 +175,27 @@ class PreprocessingController:
             render_setup = {
                 "camera_i": i,
                 "lights_i": [i],
-                "envmap_fname": "default.hdr",
+                "envmap_fname": envmaps[i] if len(envmaps) == len(cameras) else "none",
             }
             render_setups.append(render_setup)
         return render_setups
 
     # TODO: Add envmap support
     def build_scenes(self):
+        tstart = timer_utils.time_now()
+        LOGGER.info(LOG_DELIM)
+        LOGGER.info(f'Define Scenes [mode={self.scene_mode}]')
+
         if self.scene_mode == 'global':
             # Build scenes to use for each part
             # TODO: Add arguments for number of cameras and lights
             n_cameras = self.n_images
             n_lights = self.n_images
+            n_envmaps = self.n_images
 
             cameras = self._sample_cameras(n_cameras)
             lights = self._sample_lights(n_lights)
-            envmaps = ["default.hdr"]  # self.assign_envmaps()
+            envmaps = self._assign_envmaps(n_envmaps)
             render_setups = self._compose_render_setups(
                 cameras=cameras,
                 lights=lights,
@@ -200,11 +212,12 @@ class PreprocessingController:
             # TODO: Add arguments for number of cameras and lights
             n_cameras = self.n_images
             n_lights = self.n_images
+            n_envmaps = self.n_images
 
             for part in self.parts:
                 cameras = self._sample_cameras(n_cameras)
                 lights = self._sample_lights(n_lights)
-                envmaps = ["default.hdr"]  # self.assign_envmaps()
+                envmaps = self._assign_envmaps(n_envmaps)
                 render_setups = self._compose_render_setups(
                     cameras=cameras,
                     lights=lights,
@@ -216,7 +229,15 @@ class PreprocessingController:
                 scene.envmaps = envmaps
                 scene.render_setups = render_setups
                 part.scene = scene
-            pass
+
+        tend = timer_utils.time_since(tstart)
+        LOGGER.info(f'Done in {tend}')
+
+    def export_augmented_metadata(self, filename: str = 'metadata', fileformats: list[str] = ['csv', 'xlsx']):
+        if 'csv' in fileformats:
+            self.metadata.to_csv(path_or_buf=f"{self.output_dir}/{filename}.csv")
+        if 'xlsx' in fileformats:
+            self.metadata.to_excel(excel_writer=f"{self.output_dir}/{filename}.xlsx")
 
     def export_rcfg_json(self, filename: str = 'rcfg.json'):
         tstart = timer_utils.time_now()
