@@ -53,7 +53,7 @@ ENVMAPS_DIR="${RESOURCE_DIR}/envmaps"
 ##### OUTPUTS
 # Specify output root directory and a run description to create a unique output directory
 OUT_ROOT_DIR="./out"
-RUN_DESCRIPTION="drucker_se_su_static_static_256_12_png"
+RUN_DESCRIPTION="900841-00.00.00_drucker_su_su_disabled_gray_256_12"
 # will return a dir path like '$OUT_ROOT_DIR/$ID-$RUN_DESCRIPTION -> ./out/1-my-run
 OUT_DIR=`python scripts/utils/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION"`
 echo "Created output directory: $OUT_DIR"
@@ -62,10 +62,10 @@ echo "Created output directory: $OUT_DIR"
 # Set options
 N_IMAGES_PER_PART=12
 SCENE_MODE='exclusive'
-CAMERA_DEF_MODE='sphere-equidistant'
+CAMERA_DEF_MODE='sphere-uniform'
 LIGHT_DEF_MODE='sphere-uniform'
-MATERIAL_DEF_MODE='static'
-ENVMAP_DEF_MODE='static'
+MATERIAL_DEF_MODE='disabled'
+ENVMAP_DEF_MODE='gray'
 
 # Run Preprocessing
 PREPROCESSING_SECONDS_START=$SECONDS
@@ -145,7 +145,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     --render_quality $OUT_QUALITY \
     --render_format $OUT_FORMAT \
     --render_engine $ENGINE \
-    --comment "Printer with static materials and envmaps, random uniform sphere light sampling and equidistant camera sphere sampling with a linearly sampled camera roll angle." 
+    --comment "No comment" 
 fi
 ############################
 
