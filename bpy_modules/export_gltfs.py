@@ -513,9 +513,14 @@ def create_camera(name, data, collection=None):
         target = data["target"]
         camera_object.rotation_euler = look_at(mathutils.Vector(camera_object.location), mathutils.Vector(target))
 
+    # Roll camera around local Z-Axis by defined angle
     bpy.context.scene.transform_orientation_slots[0].type = 'LOCAL'
     if "local_rotation" in data.keys():
         camera_object.rotation_euler.rotate_axis("Z", data["local_rotation"][2])
+
+    # Set camera clipping start (meters)
+    camera_object.data.clip_start = 0.001
+
     return camera_object
 
 
