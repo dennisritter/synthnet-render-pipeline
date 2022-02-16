@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: synthnet-render-pipeline-pod
+spec:
+  restartPolicy: Never
+  containers:
+  - name: synthnet-render-pipeline
+    image: beuthdritter/synthnet-render-pipeline
+    volumeMounts:
+            - name: output-volume
+              mountPath: /workspace/out
+    command:
+      [
+        "bash",
+        "scripts/run_minimal_example.sh",
+        "3",
+        "42",
+        "43"
+      ]
+    resources:
+      requests:
+        memory: "40Gi"
+        cpu: "4"
+      limits:
+        nvidia.com/gpu: 1
+        memory: "80Gi"
+        cpu: "8"
+  nodeSelector:
+    gpu: v100
+  volumes:
+  - name: matterport3d-panorama-volume
+    persistentVolumeClaim:
+      claimName: matterport3d-panorama-pvc
+  - name: output-volume 
+    persistentVolumeClaim:
+      claimName: output-pvc
