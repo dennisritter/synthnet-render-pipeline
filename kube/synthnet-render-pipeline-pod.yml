@@ -29,9 +29,6 @@ spec:
   nodeSelector:
     gpu: v100
   volumes:
-  - name: matterport3d-panorama-volume
-    persistentVolumeClaim:
-      claimName: matterport3d-panorama-pvc
   - name: output-volume 
     persistentVolumeClaim:
       claimName: output-pvc
