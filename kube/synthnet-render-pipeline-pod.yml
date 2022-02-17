@@ -12,8 +12,12 @@ spec:
               mountPath: /workspace/out
     command:
       [
+        "conda",
+        "run",
+        "-n",
+        "py39-synthnet-render-pipeline",
         "bash",
-        "scripts/run_minimal_example.sh",
+        "scripts/runs_synthnet/900841-00.00.00_drucker_se_su_static_static_256_12.sh",
         "3",
         "42",
         "43"
@@ -21,11 +25,11 @@ spec:
     resources:
       requests:
         memory: "40Gi"
-        cpu: "4"
+        cpu: "32"
       limits:
         nvidia.com/gpu: 1
         memory: "80Gi"
-        cpu: "8"
+        cpu: "64"
   nodeSelector:
     gpu: v100
   volumes:
