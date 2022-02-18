@@ -119,7 +119,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     --res_y $RES_Y \
     --out_quality $OUT_QUALITY \
     --out_format $OUT_FORMAT \
-    --engine $ENGINE \ 
+    --engine $ENGINE \
     --device $DEVICE
     RENDER_SECONDS_END=$(($SECONDS-$RENDER_SECONDS_START))
 fi

@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: synthnet-render-pipeline-pod
+spec:
+  restartPolicy: Never
+  containers:
+  - name: synthnet-render-pipeline
+    image: beuthdritter/synthnet-render-pipeline
+    volumeMounts:
+            - name: output-volume
+              mountPath: /workspace/out
+    command:
+      [
+        "conda",
+        "run",
+        "-n",
+        "py39-synthnet-render-pipeline",
+        "bash",
+        "scripts/run_minimal_example_kube_gpu.sh",
+        "3",
+        "42",
+        "43"
+      ]
+    resources:
+      requests:
+        memory: "8Gi"
+      limits:
+        nvidia.com/gpu: 2
+        memory: "64Gi"
+  nodeSelector:
+    gpu: v100
+  volumes:
+  - name: output-volume 
+    persistentVolumeClaim:
+      claimName: output-pvc
