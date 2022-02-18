@@ -147,6 +147,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     --render_quality $OUT_QUALITY \
     --render_format $OUT_FORMAT \
     --render_engine $ENGINE \
+    --render_device $DEVICE \
     --comment "No comment" 
 fi
 ############################

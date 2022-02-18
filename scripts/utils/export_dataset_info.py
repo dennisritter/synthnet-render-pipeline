@@ -116,6 +116,12 @@ from types import SimpleNamespace
     required=True,
 )
 @click.option(
+    '--render_device',
+    help='Render device (CPU or GPU)',
+    type=str,
+    required=True,
+)
+@click.option(
     '--comment',
     help='(optional) Any kind of additional information about the dataset or the idea behind it',
     type=str,
