@@ -109,6 +109,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     OUT_QUALITY=100
     OUT_FORMAT="PNG"
     ENGINE="CYCLES"
+    DEVICE="GPU"
     # Run Export GLTFs
     RENDER_SECONDS_START=$SECONDS
     blender --background --python ./bpy_modules/render.py -- \
@@ -118,7 +119,8 @@ if [[ $RUN_MODE -ge 3 ]]; then
     --res_y $RES_Y \
     --out_quality $OUT_QUALITY \
     --out_format $OUT_FORMAT \
-    --engine $ENGINE
+    --engine $ENGINE \
+    --device $DEVICE
     RENDER_SECONDS_END=$(($SECONDS-$RENDER_SECONDS_START))
 fi
 ############################
