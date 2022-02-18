@@ -98,6 +98,23 @@ def clear_scene():
     bpy.ops.wm.read_homefile(use_empty=True)
 
 
+def setup_device(engine="CYCLES", device="CPU"):
+    # Render settings CYCLES GPU rendering
+    if engine.lower() == 'cycles' and device.lower() == 'gpu':
+        # Set the device_type
+        bpy.context.preferences.addons['cycles'].preferences.compute_device_type = 'CUDA'
+        # Set the device and feature set
+        bpy.context.scene.cycles.device = 'GPU'
+        # get_devices() to let Blender detects GPU device
+        bpy.context.preferences.addons['cycles'].preferences.get_devices()
+        print(bpy.context.preferences.addons['cycles'].preferences.compute_device_type)
+        for d in bpy.context.preferences.addons['cycles'].preferences.devices:
+            d["use"] = 0
+            if d["name"][:6] == 'NVIDIA':
+                d["use"] = 1
+            print(d["name"], d["use"])
+
+
 def load_gltf(file_path):
     bpy.ops.import_scene.gltf(filepath=file_path)
 
@@ -123,7 +140,8 @@ def render(render_fname,
            res_y: int = 256,
            out_format: str = "PNG",
            out_quality: int = 100,
-           engine: str = "CYCLES"):
+           engine: str = "CYCLES",
+           device: str = "GPU"):
     # Scene setup
     scene = bpy.context.scene
     scene.render.resolution_x = res_x
@@ -200,6 +218,12 @@ def get_args():
         default="CYCLES",
         type=str,
     )
+    parser.add_argument(
+        '--device',
+        help="The device used for rendering",
+        default="GPU",
+        type=str,
+    )
 
     args, _ = parser.parse_known_args(script_args)
     return args
@@ -217,6 +241,7 @@ if __name__ == '__main__':
     out_format = args.out_format
     out_quality = args.out_quality
     engine = args.engine
+    device = args.device
 
     sorted_input_files = sorted(os.listdir(in_dir), key=lambda x: x.split("_")[0])
     for glb_fname in sorted_input_files:
@@ -224,6 +249,7 @@ if __name__ == '__main__':
             continue
         clear_scene()
         load_gltf(os.path.join(in_dir, glb_fname))
+        setup_device(engine, device)
         render_fname = glb_fname[:-4]  # Remove .glb from glb filename
         render(
             render_fname=render_fname,
