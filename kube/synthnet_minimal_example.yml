@@ -17,19 +17,17 @@ spec:
         "-n",
         "py39-synthnet-render-pipeline",
         "bash",
-        "scripts/runs_synthnet/900841-00.00.00_drucker_se_su_static_static_256_12.sh",
+        "scripts/run_minimal_example_kube_gpu.sh",
         "3",
         "42",
         "43"
       ]
     resources:
       requests:
-        memory: "40Gi"
-        cpu: "32"
+        memory: "8Gi"
       limits:
-        nvidia.com/gpu: 1
-        memory: "80Gi"
-        cpu: "64"
+        nvidia.com/gpu: 2
+        memory: "64Gi"
   nodeSelector:
     gpu: v100
   volumes:
