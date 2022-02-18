@@ -107,12 +107,13 @@ def setup_device(engine="CYCLES", device="CPU"):
         bpy.context.scene.cycles.device = 'GPU'
         # get_devices() to let Blender detects GPU device
         bpy.context.preferences.addons['cycles'].preferences.get_devices()
-        print(bpy.context.preferences.addons['cycles'].preferences.compute_device_type)
         for d in bpy.context.preferences.addons['cycles'].preferences.devices:
-            d["use"] = 0
-            if d["name"][:6] == 'NVIDIA':
-                d["use"] = 1
-            print(d["name"], d["use"])
+            for k in d.keys():
+                print(f'{k}: {d[k]}')
+            print('---')
+            d["use"] = 1
+            if d["type"] == 0:  # type 0 -> CPU
+                d["use"] = 0
 
 
 def load_gltf(file_path):
