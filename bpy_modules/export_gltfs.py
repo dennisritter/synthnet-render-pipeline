@@ -569,9 +569,7 @@ def set_object_material_basecolor(obj: bpy.types.Object, color):
     """
     mat = obj.data.materials[0]
     # Remove Texture input from base color and set a color
-    print("LINKS:")
     if mat.node_tree.nodes["Principled BSDF"].inputs[0].links:
-        print(mat.node_tree.nodes["Principled BSDF"].inputs[0].links[0])
         base_color_link = mat.node_tree.nodes["Principled BSDF"].inputs[0].links[0]
         mat.node_tree.links.remove(base_color_link)
     mat.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = color
@@ -613,7 +611,7 @@ def get_bpy_materials(part, bpy_materials, materials_dir) -> dict:
         # NOTE: We assume the file contains only the single material and id it by the file name
         bpy_material = import_materials_from_blend(f"{materials_dir}/{material_fn}")[0]
         bpy_materials[material_fn] = bpy_material
-        return bpy_materials
+    return bpy_materials
 
 
 def apply_materials(part, bpy_single_parts, bpy_materials):
@@ -732,7 +730,7 @@ class SceneExporter():
             # TODO: Check if we can add envmaps directly to gltf
             # envmap_dir = f"{self.data_dir}/envmaps"
             # bpy_envmaps = [add_image_to_blender(f"{envmap_dir}/{envmap_fn}") for envmap_fn in rcfg_scene["envmaps"]]
-
+            print(bpy_materials)
             apply_materials(part, bpy_single_parts, bpy_materials)
 
             ### Translate current part to world center
