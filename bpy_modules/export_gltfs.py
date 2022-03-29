@@ -229,6 +229,7 @@ def export_gltf(bpy_objs_to_export: list, file_path: str):
         bpy_objs_to_export: The blender
         file_path (str): path to output gltf file
     """
+    select(bpy_objs_to_export)
     bpy.ops.export_scene.gltf(filepath=file_path,
                               export_format="GLB",
                               use_selection=True,
@@ -740,7 +741,9 @@ class SceneExporter():
             original_parents = unparent(bpy_single_parts)
             translate_objects_by(bpy_single_parts, -1 * bsphere_center)
 
+            # COLLECT OBJS TO EXPORT
             bpy_objs_to_export = []
+            # NOTE: Sometimes not all single part objects are exported by adding the collection, so we add all single parts instead
             bpy_objs_to_export += bpy_single_parts
             bpy_objs_to_export += bpy_cameras
             bpy_objs_to_export += bpy_lights
