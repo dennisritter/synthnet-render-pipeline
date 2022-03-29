@@ -723,13 +723,13 @@ class SceneExporter():
         # materials only need to be imported once each
         bpy_materials = {}
         for part in self.parts:
-            bpy_single_parts = get_bpy_single_parts(part)
             ### CREATE BPY SCENE COMPONENTS
+            bpy_single_parts = get_bpy_single_parts(part)
             bpy_cameras = get_bpy_cameras(part)
             bpy_lights = get_bpy_lights(part)
             bpy_materials = get_bpy_materials(part, bpy_materials, materials_dir=f"{self.data_dir}/materials")
-            ## Create bpy envmaps
-            # TODO see if we can integrate envmaps in the export_gltfs
+            # ENVMAPS
+            # TODO: Check if we can add envmaps directly to gltf
             # envmap_dir = f"{self.data_dir}/envmaps"
             # bpy_envmaps = [add_image_to_blender(f"{envmap_dir}/{envmap_fn}") for envmap_fn in rcfg_scene["envmaps"]]
 
@@ -757,13 +757,13 @@ class SceneExporter():
                 # select objects to export
                 # NOTE: Sometimes not all single part objects are exported by adding the collection, so we add all single parts instead
                 # objects_to_export.append(render_object)
-                objects_to_export += bpy_single_parts
-                objects_to_export.append(render_camera)
-                objects_to_export += render_lights
+                objs_to_export += bpy_single_parts
+                objs_to_export.append(render_camera)
+                objs_to_export += render_lights
                 select(objects_to_export)
 
                 ### EXPORT GLTF
-                export_gltf(f"{self.out_dir}/{part['id']}_{i}.glb")
+                export_gltf(objs_to_export=objs_to_export, file_path=f"{self.out_dir}/{part['id']}_{i}.glb")
 
             # Reparent single parts
             for p, c in zip(original_parents, bpy_single_parts):
