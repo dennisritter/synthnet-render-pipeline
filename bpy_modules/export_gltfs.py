@@ -581,7 +581,52 @@ def set_object_material_basecolor(obj: bpy.types.Object, color):
 
 # EXPORTER
 
+
 #########################################
+def get_bpy_single_parts(part) -> list:
+    # Get all BPY single parts of the current part
+    if isinstance(part["blend_obj"], bpy.types.Collection):
+        bpy_single_parts = part["blend_obj"].all_objects
+    else:
+        bpy_single_parts = [part["blend_obj"]]
+    return bpy_single_parts
+
+
+def get_bpy_cameras(part) -> list:
+    return [create_camera(f"camera_{i}", cam) for i, cam in enumerate(part["scene"]["cameras"])]
+
+
+def get_bpy_lights(part) -> list:
+    return [create_light(f"light_{i}", light) for i, light in enumerate(part["scene"]["lights"])]
+
+
+def get_bpy_materials(part, bpy_materials, materials_dir) -> dict:
+    part_mats = [sp_mat["material"] for sp_mat in part["single_parts"]]
+    # import materials
+    for material_fn in part_mats:
+        if material_fn == "none":
+            continue
+        if material_fn in bpy_materials.keys():
+            continue
+        # NOTE: Only works for materials included/defined as .blend files
+        # If we use another material format, we need to first convert it to a Blender material
+        # NOTE: We assume the file contains only the single material and id it by the file name
+        bpy_material = import_materials_from_blend(f"{materials_dir}/{material_fn}")[0]
+        bpy_materials[material_fn] = bpy_material
+        return bpy_materials
+
+
+def apply_materials(part, bpy_single_parts, bpy_materials):
+    for bpy_single_part in bpy_single_parts:
+        for single_part in part["single_parts"]:
+            if bpy_single_part.name.startswith(single_part["id"]):
+                # Remove the Vertex Colors from the object
+                remove_vertex_colors(bpy_single_part)
+                print(f"Apply material: {single_part['id']}: {single_part['material']}")
+                if single_part["material"] in bpy_materials.keys():
+                    apply_material(bpy_single_part, bpy_materials[single_part["material"]])
+                    set_object_material_basecolor(bpy_single_part, (0.15, 0.15, 0.15, 1.0))
+                continue
 
 
 class SceneExporter():
@@ -678,49 +723,17 @@ class SceneExporter():
         # materials only need to be imported once each
         bpy_materials = {}
         for part in self.parts:
-            # create empty scene
-            rcfg_scene = part["scene"]
-
-            # Get all BPY single parts of the current part
-            if isinstance(part["blend_obj"], bpy.types.Collection):
-                bpy_single_parts = part["blend_obj"].all_objects
-            else:
-                bpy_single_parts = [part["blend_obj"]]
-
+            bpy_single_parts = get_bpy_single_parts(part)
             ### CREATE BPY SCENE COMPONENTS
-            # Create bpy cameras
-            bpy_cameras = [create_camera(f"camera_{i}", cam) for i, cam in enumerate(rcfg_scene["cameras"])]
-            # Create bpy lights
-            bpy_lights = [create_light(f"light_{i}", light) for i, light in enumerate(rcfg_scene["lights"])]
+            bpy_cameras = get_bpy_cameras(part)
+            bpy_lights = get_bpy_lights(part)
+            bpy_materials = get_bpy_materials(part, bpy_materials, materials_dir=f"{self.data_dir}/materials")
             ## Create bpy envmaps
             # TODO see if we can integrate envmaps in the export_gltfs
             # envmap_dir = f"{self.data_dir}/envmaps"
             # bpy_envmaps = [add_image_to_blender(f"{envmap_dir}/{envmap_fn}") for envmap_fn in rcfg_scene["envmaps"]]
-            ## Create bpy materials
-            materials_dir = f"{self.data_dir}/materials"
-            part_mats = [sp_mat["material"] for sp_mat in part["single_parts"]]
-            # import materials
-            for material_fn in part_mats:
-                if material_fn == "none":
-                    continue
-                if material_fn in bpy_materials.keys():
-                    continue
-                # NOTE: Only works for materials included/defined as .blend files
-                # If we use another material format, we need to first convert it to a Blender material
-                # NOTE: We assume the file contains only the single material and id it by the file name
-                bpy_material = import_materials_from_blend(f"{materials_dir}/{material_fn}")[0]
-                bpy_materials[material_fn] = bpy_material
 
-            ### APPLY MATERIALS
-            for bpy_single_part in bpy_single_parts:
-                for single_part in part["single_parts"]:
-                    if bpy_single_part.name.startswith(single_part["id"]):
-                        # Remove the Vertex Colors from the object
-                        remove_vertex_colors(bpy_single_part)
-                        print(f"Apply material: {single_part['id']}: {single_part['material']}")
-                        if single_part["material"] in bpy_materials.keys():
-                            apply_material(bpy_single_part, bpy_materials[single_part["material"]])
-                            set_object_material_basecolor(bpy_single_part, (0.15, 0.15, 0.15, 1.0))
+            apply_materials(part, bpy_single_parts, bpy_materials)
 
             ### Translate current part to world center
             # get the bounding sphere center
