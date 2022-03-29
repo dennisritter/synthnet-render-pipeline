@@ -222,12 +222,12 @@ def add_object_to_collection(collection: bpy.types.Collection, object_to_add: bp
     collection.objects.link(object_to_add)
 
 
-def export_gltf(file_path: str, export_selected=True):
+def export_gltf(bpy_objs_to_export: list, file_path: str):
     """Export gltf
 
     Args:
+        bpy_objs_to_export: The blender
         file_path (str): path to output gltf file
-        export_selected (bool, optional): use selection when exporting. Defaults to True.
     """
     bpy.ops.export_scene.gltf(filepath=file_path,
                               export_format="GLB",
@@ -742,28 +742,34 @@ class SceneExporter():
             original_parents = unparent(bpy_single_parts)
             translate_objects_by(bpy_single_parts, -1 * bsphere_center)
 
-            # Handle RCFG render setups
-            for i, render_setup in enumerate(part["scene"]["render_setups"]):
-                objects_to_export = []
-                render_object = part["blend_obj"]
-                render_camera = bpy_cameras[render_setup["camera_i"]]
-                render_lights = [bpy_lights[light_i] for light_i in render_setup["lights_i"]]
-                if render_setup['envmap_fname'] != 'none':
-                    # TODO: Apply actual Envmap to scene/render
-                    # render_envmap = add_hdri_map(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
-                    # render_envmap = add_image_to_blender(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
-                    # we attach the envmap to the camera in the scene to identify easily later for now
-                    render_camera.data["ud_envmap"] = f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}"
-                # select objects to export
-                # NOTE: Sometimes not all single part objects are exported by adding the collection, so we add all single parts instead
-                # objects_to_export.append(render_object)
-                objs_to_export += bpy_single_parts
-                objs_to_export.append(render_camera)
-                objs_to_export += render_lights
-                select(objects_to_export)
+            bpy_objs_to_export = []
+            bpy_objs_to_export += bpy_single_parts
+            bpy_objs_to_export += bpy_cameras
+            bpy_objs_to_export += bpy_lights
+            export_gltf(bpy_objs_to_export=bpy_objs_to_export, file_path=f"{self.out_dir}/{part['id']}.glb")
 
-                ### EXPORT GLTF
-                export_gltf(objs_to_export=objs_to_export, file_path=f"{self.out_dir}/{part['id']}_{i}.glb")
+            # # Handle RCFG render setups
+            # for i, render_setup in enumerate(part["scene"]["render_setups"]):
+            #     objects_to_export = []
+            #     render_object = part["blend_obj"]
+            #     render_camera = bpy_cameras[render_setup["camera_i"]]
+            #     render_lights = [bpy_lights[light_i] for light_i in render_setup["lights_i"]]
+            #     if render_setup['envmap_fname'] != 'none':
+            #         # TODO: Apply actual Envmap to scene/render
+            #         # render_envmap = add_hdri_map(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
+            #         # render_envmap = add_image_to_blender(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
+            #         # we attach the envmap to the camera in the scene to identify easily later for now
+            #         render_camera.data["ud_envmap"] = f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}"
+            #     # select objects to export
+            #     # NOTE: Sometimes not all single part objects are exported by adding the collection, so we add all single parts instead
+            #     # objects_to_export.append(render_object)
+            #     bpy_objs_to_export += bpy_single_parts
+            #     bpy_objs_to_export.append(render_camera)
+            #     bpy_objs_to_export += render_lights
+            #     select(bpy_objs_to_export)
+
+            #     ### EXPORT GLTF
+            #     export_gltf(bpy_objs_to_export=bpy_objs_to_export, file_path=f"{self.out_dir}/{part['id']}_{i}.glb")
 
             # Reparent single parts
             for p, c in zip(original_parents, bpy_single_parts):
