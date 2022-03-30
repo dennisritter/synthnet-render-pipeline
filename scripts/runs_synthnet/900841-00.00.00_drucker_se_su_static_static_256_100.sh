@@ -113,13 +113,15 @@ if [[ $RUN_MODE -ge 3 ]]; then
     # Run Export GLTFs
     RENDER_SECONDS_START=$SECONDS
     blender --background --python ./bpy_modules/render.py -- \
-    --in_dir $GLTF_DIR \
+    --gltf_dir $GLTF_DIR \
+    --envmap_dir $RESOURCE_DIR/envmaps \
     --out_dir $OUT_DIR/render \
+    --rcfg_file="$OUT_DIR/$RCFG_NAME"
     --res_x $RES_X \
     --res_y $RES_Y \
     --out_quality $OUT_QUALITY \
     --out_format $OUT_FORMAT \
-    --engine $ENGINE
+    --engine $ENGINE \
     --device $GPU
     RENDER_SECONDS_END=$(($SECONDS-$RENDER_SECONDS_START))
 fi
@@ -147,6 +149,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     --render_quality $OUT_QUALITY \
     --render_format $OUT_FORMAT \
     --render_engine $ENGINE \
+    --render_device $DEVICE \
     --comment "Aluminium material = steel material; base color = 0.15, 0.15, 0.15, 1" 
 fi
 ############################

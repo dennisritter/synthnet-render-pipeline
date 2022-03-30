@@ -149,16 +149,14 @@ def get_scene_collections(parent_coll: bpy.types.Collection) -> Generator:
         yield from get_scene_collections(child_coll)
 
 
-def delete(objects: list):
+def delete_objects(objects: list) -> None:
     """Delete given objects
 
     Args:
-        object (bpy.types.Object): list of objects to delete
+        objects (list[bpy.types.Object]): list of blender objects to delete
     """
-    bpy.ops.object.select_all(action='DESELECT')
-    for ob in objects:
-        object.select = True
-    bpy.ops.object.delete()
+    for obj in objects:
+        bpy.data.objects.remove(obj, do_unlink=True)
 
 
 def create_scene(name: str) -> bpy.types.Scene:
@@ -222,13 +220,14 @@ def add_object_to_collection(collection: bpy.types.Collection, object_to_add: bp
     collection.objects.link(object_to_add)
 
 
-def export_gltf(file_path: str, export_selected=True):
+def export_gltf(bpy_objs_to_export: list, file_path: str):
     """Export gltf
 
     Args:
+        bpy_objs_to_export: The blender
         file_path (str): path to output gltf file
-        export_selected (bool, optional): use selection when exporting. Defaults to True.
     """
+    select(bpy_objs_to_export)
     bpy.ops.export_scene.gltf(filepath=file_path,
                               export_format="GLB",
                               use_selection=True,
@@ -496,7 +495,6 @@ def create_camera(name, data, collection=None):
         data: data containing [type, position, orientation/target, focal_length]
     Returns: camera object
     """
-    #TODO make assertions that camera data contains certain keys
     # create camera data
     camera_data = bpy.data.cameras.new(name)
     camera_data.type = data["type"] if "type" in data.keys() else "PERSP"
@@ -569,9 +567,7 @@ def set_object_material_basecolor(obj: bpy.types.Object, color):
     """
     mat = obj.data.materials[0]
     # Remove Texture input from base color and set a color
-    print("LINKS:")
     if mat.node_tree.nodes["Principled BSDF"].inputs[0].links:
-        print(mat.node_tree.nodes["Principled BSDF"].inputs[0].links[0])
         base_color_link = mat.node_tree.nodes["Principled BSDF"].inputs[0].links[0]
         mat.node_tree.links.remove(base_color_link)
     mat.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = color
@@ -581,7 +577,52 @@ def set_object_material_basecolor(obj: bpy.types.Object, color):
 
 # EXPORTER
 
+
 #########################################
+def get_bpy_single_parts(part) -> list:
+    # Get all BPY single parts of the current part
+    if isinstance(part["blend_obj"], bpy.types.Collection):
+        bpy_single_parts = part["blend_obj"].all_objects
+    else:
+        bpy_single_parts = [part["blend_obj"]]
+    return bpy_single_parts
+
+
+def get_bpy_cameras(part) -> list:
+    return [create_camera(f"camera_{i}", cam) for i, cam in enumerate(part["scene"]["cameras"])]
+
+
+def get_bpy_lights(part) -> list:
+    return [create_light(f"light_{i}", light) for i, light in enumerate(part["scene"]["lights"])]
+
+
+def get_bpy_materials(part, bpy_materials, materials_dir) -> dict:
+    part_mats = [sp_mat["material"] for sp_mat in part["single_parts"]]
+    # import materials
+    for material_fn in part_mats:
+        if material_fn == "none":
+            continue
+        if material_fn in bpy_materials.keys():
+            continue
+        # NOTE: Only works for materials included/defined as .blend files
+        # If we use another material format, we need to first convert it to a Blender material
+        # NOTE: We assume the file contains only the single material and id it by the file name
+        bpy_material = import_materials_from_blend(f"{materials_dir}/{material_fn}")[0]
+        bpy_materials[material_fn] = bpy_material
+    return bpy_materials
+
+
+def apply_materials(part, bpy_single_parts, bpy_materials):
+    for bpy_single_part in bpy_single_parts:
+        for single_part in part["single_parts"]:
+            if bpy_single_part.name.startswith(single_part["id"]):
+                # Remove the Vertex Colors from the object
+                remove_vertex_colors(bpy_single_part)
+                print(f"Apply material: {single_part['id']}: {single_part['material']}")
+                if single_part["material"] in bpy_materials.keys():
+                    apply_material(bpy_single_part, bpy_materials[single_part["material"]])
+                    set_object_material_basecolor(bpy_single_part, (0.15, 0.15, 0.15, 1.0))
+                continue
 
 
 class SceneExporter():
@@ -678,49 +719,17 @@ class SceneExporter():
         # materials only need to be imported once each
         bpy_materials = {}
         for part in self.parts:
-            # create empty scene
-            rcfg_scene = part["scene"]
-
-            # Get all BPY single parts of the current part
-            if isinstance(part["blend_obj"], bpy.types.Collection):
-                bpy_single_parts = part["blend_obj"].all_objects
-            else:
-                bpy_single_parts = [part["blend_obj"]]
-
             ### CREATE BPY SCENE COMPONENTS
-            # Create bpy cameras
-            bpy_cameras = [create_camera(f"camera_{i}", cam) for i, cam in enumerate(rcfg_scene["cameras"])]
-            # Create bpy lights
-            bpy_lights = [create_light(f"light_{i}", light) for i, light in enumerate(rcfg_scene["lights"])]
-            ## Create bpy envmaps
-            # TODO see if we can integrate envmaps in the export_gltfs
+            bpy_single_parts = get_bpy_single_parts(part)
+            bpy_cameras = get_bpy_cameras(part)
+            bpy_lights = get_bpy_lights(part)
+            bpy_materials = get_bpy_materials(part, bpy_materials, materials_dir=f"{self.data_dir}/materials")
+            # ENVMAPS
+            # TODO: Check if we can add envmaps directly to gltf
             # envmap_dir = f"{self.data_dir}/envmaps"
             # bpy_envmaps = [add_image_to_blender(f"{envmap_dir}/{envmap_fn}") for envmap_fn in rcfg_scene["envmaps"]]
-            ## Create bpy materials
-            materials_dir = f"{self.data_dir}/materials"
-            part_mats = [sp_mat["material"] for sp_mat in part["single_parts"]]
-            # import materials
-            for material_fn in part_mats:
-                if material_fn == "none":
-                    continue
-                if material_fn in bpy_materials.keys():
-                    continue
-                # NOTE: Only works for materials included/defined as .blend files
-                # If we use another material format, we need to first convert it to a Blender material
-                # NOTE: We assume the file contains only the single material and id it by the file name
-                bpy_material = import_materials_from_blend(f"{materials_dir}/{material_fn}")[0]
-                bpy_materials[material_fn] = bpy_material
-
-            ### APPLY MATERIALS
-            for bpy_single_part in bpy_single_parts:
-                for single_part in part["single_parts"]:
-                    if bpy_single_part.name.startswith(single_part["id"]):
-                        # Remove the Vertex Colors from the object
-                        remove_vertex_colors(bpy_single_part)
-                        print(f"Apply material: {single_part['id']}: {single_part['material']}")
-                        if single_part["material"] in bpy_materials.keys():
-                            apply_material(bpy_single_part, bpy_materials[single_part["material"]])
-                            set_object_material_basecolor(bpy_single_part, (0.15, 0.15, 0.15, 1.0))
+            print(bpy_materials)
+            apply_materials(part, bpy_single_parts, bpy_materials)
 
             ### Translate current part to world center
             # get the bounding sphere center
@@ -729,32 +738,28 @@ class SceneExporter():
             original_parents = unparent(bpy_single_parts)
             translate_objects_by(bpy_single_parts, -1 * bsphere_center)
 
-            # Handle RCFG render setups
-            for i, render_setup in enumerate(part["scene"]["render_setups"]):
-                objects_to_export = []
-                render_object = part["blend_obj"]
-                render_camera = bpy_cameras[render_setup["camera_i"]]
-                render_lights = [bpy_lights[light_i] for light_i in render_setup["lights_i"]]
-                if render_setup['envmap_fname'] != 'none':
-                    # TODO: Apply actual Envmap to scene/render
-                    # render_envmap = add_hdri_map(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
-                    # render_envmap = add_image_to_blender(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
-                    # we attach the envmap to the camera in the scene to identify easily later for now
-                    render_camera.data["ud_envmap"] = f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}"
-                # select objects to export
-                # NOTE: Sometimes not all single part objects are exported by adding the collection, so we add all single parts instead
-                # objects_to_export.append(render_object)
-                objects_to_export += bpy_single_parts
-                objects_to_export.append(render_camera)
-                objects_to_export += render_lights
-                select(objects_to_export)
+            # COLLECT OBJS TO EXPORT
+            bpy_objs_to_export = []
+            # NOTE: Sometimes not all single part objects are exported by adding the collection, so we add all single parts instead
+            bpy_objs_to_export += bpy_single_parts
+            bpy_objs_to_export += bpy_cameras
+            bpy_objs_to_export += bpy_lights
+            export_gltf(bpy_objs_to_export=bpy_objs_to_export, file_path=f"{self.out_dir}/{part['id']}.glb")
 
-                ### EXPORT GLTF
-                export_gltf(f"{self.out_dir}/{part['id']}_{i}.glb")
+            # if render_setup['envmap_fname'] != 'none':
+            #         # render_envmap = add_hdri_map(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
+            #         # render_envmap = add_image_to_blender(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
+            #         # TODO: Apply actual Envmap to scene/render
+            #         # we attach the envmap to the camera in the scene to identify easily later for now
+            #         render_camera.data["ud_envmap"] = f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}"
 
             # Reparent single parts
             for p, c in zip(original_parents, bpy_single_parts):
                 parent([c], p)
+
+            # delete cameras and lights that are not needed anymore
+            delete_objects(bpy_cameras)
+            delete_objects(bpy_lights)
 
 
 def get_args():
@@ -815,9 +820,3 @@ if __name__ == '__main__':
     tend = time.time() - tstart
     print('-' * 20)
     print(f'Done GLTF Export in {tend}')
-
-# def add_module_to_blender(name, path):
-#     spec = importlib.util.spec_from_file_location(name, path)
-#     module = importlib.util.module_from_spec(spec)
-#     sys.modules[spec.name] = module
-#     spec.loader.exec_module(module)
