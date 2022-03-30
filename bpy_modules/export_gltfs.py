@@ -149,16 +149,14 @@ def get_scene_collections(parent_coll: bpy.types.Collection) -> Generator:
         yield from get_scene_collections(child_coll)
 
 
-def delete(objects: list):
+def delete_objects(objects: list) -> None:
     """Delete given objects
 
     Args:
-        object (bpy.types.Object): list of objects to delete
+        objects (list[bpy.types.Object]): list of blender objects to delete
     """
-    bpy.ops.object.select_all(action='DESELECT')
-    for ob in objects:
-        object.select = True
-    bpy.ops.object.delete()
+    for obj in objects:
+        bpy.data.objects.remove(obj, do_unlink=True)
 
 
 def create_scene(name: str) -> bpy.types.Scene:
@@ -497,7 +495,6 @@ def create_camera(name, data, collection=None):
         data: data containing [type, position, orientation/target, focal_length]
     Returns: camera object
     """
-    #TODO make assertions that camera data contains certain keys
     # create camera data
     camera_data = bpy.data.cameras.new(name)
     camera_data.type = data["type"] if "type" in data.keys() else "PERSP"
@@ -749,32 +746,20 @@ class SceneExporter():
             bpy_objs_to_export += bpy_lights
             export_gltf(bpy_objs_to_export=bpy_objs_to_export, file_path=f"{self.out_dir}/{part['id']}.glb")
 
-            # # Handle RCFG render setups
-            # for i, render_setup in enumerate(part["scene"]["render_setups"]):
-            #     objects_to_export = []
-            #     render_object = part["blend_obj"]
-            #     render_camera = bpy_cameras[render_setup["camera_i"]]
-            #     render_lights = [bpy_lights[light_i] for light_i in render_setup["lights_i"]]
-            #     if render_setup['envmap_fname'] != 'none':
-            #         # TODO: Apply actual Envmap to scene/render
+            # if render_setup['envmap_fname'] != 'none':
             #         # render_envmap = add_hdri_map(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
             #         # render_envmap = add_image_to_blender(f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}")
+            #         # TODO: Apply actual Envmap to scene/render
             #         # we attach the envmap to the camera in the scene to identify easily later for now
             #         render_camera.data["ud_envmap"] = f"{self.data_dir}/envmaps/{render_setup['envmap_fname']}"
-            #     # select objects to export
-            #     # NOTE: Sometimes not all single part objects are exported by adding the collection, so we add all single parts instead
-            #     # objects_to_export.append(render_object)
-            #     bpy_objs_to_export += bpy_single_parts
-            #     bpy_objs_to_export.append(render_camera)
-            #     bpy_objs_to_export += render_lights
-            #     select(bpy_objs_to_export)
-
-            #     ### EXPORT GLTF
-            #     export_gltf(bpy_objs_to_export=bpy_objs_to_export, file_path=f"{self.out_dir}/{part['id']}_{i}.glb")
 
             # Reparent single parts
             for p, c in zip(original_parents, bpy_single_parts):
                 parent([c], p)
+
+            # delete cameras and lights that are not needed anymore
+            delete_objects(bpy_cameras)
+            delete_objects(bpy_lights)
 
 
 def get_args():
@@ -835,9 +820,3 @@ if __name__ == '__main__':
     tend = time.time() - tstart
     print('-' * 20)
     print(f'Done GLTF Export in {tend}')
-
-# def add_module_to_blender(name, path):
-#     spec = importlib.util.spec_from_file_location(name, path)
-#     module = importlib.util.module_from_spec(spec)
-#     sys.modules[spec.name] = module
-#     spec.loader.exec_module(module)
