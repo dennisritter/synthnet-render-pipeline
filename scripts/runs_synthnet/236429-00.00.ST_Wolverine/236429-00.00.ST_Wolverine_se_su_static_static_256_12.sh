@@ -44,9 +44,9 @@ echo "- - - - - - - - - - - - - - - - - - - - "
 ##### RESOURCES
 # Resource directory path. Contains Environment maps, materials, CAD data and metadata. 
 # (relative to project root)
-RESOURCE_DIR="./data/900841-00.00.00_drucker"
-TOPEX_METADATA_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.xlsx"
-TOPEX_BLENDER_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.blend"
+RESOURCE_DIR="./data/236429-00.00.ST_Wolverine"
+TOPEX_METADATA_FILE="${RESOURCE_DIR}/236429-00.00.ST_Wolverine.xlsx"
+TOPEX_BLENDER_FILE="${RESOURCE_DIR}/236429-00.00.00_Wolverine.blend"
 MATERIALS_DIR="${RESOURCE_DIR}/materials"
 ENVMAPS_DIR="${RESOURCE_DIR}/envmaps"
 
