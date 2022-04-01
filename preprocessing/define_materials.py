@@ -62,6 +62,7 @@ def assign_materials_static(parts: list, metadata: 'pd.DataFrame') -> list[Part]
         "Makrolon farblos 099": "plastic.blend",
         "Makrolon farblos 6mm": "plastic.blend",
         "Makrolon 2760(grau 6mm)": "plastic.blend",
+        "Makrolon 2760(grau) 6mm": "plastic.blend",
         "Makrolon": "plastic.blend",
         "Maaaggraaloooon :-)  farblos 6mm": "plastic.blend",
         "Schaumstoff": "plastic.blend",
