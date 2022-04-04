@@ -26,7 +26,7 @@ spec:
       requests:
         memory: "16Gi"
       limits:
-        nvidia.com/gpu: 2
+        nvidia.com/gpu: 1
         memory: "64Gi"
   nodeSelector:
     gpu: v100
