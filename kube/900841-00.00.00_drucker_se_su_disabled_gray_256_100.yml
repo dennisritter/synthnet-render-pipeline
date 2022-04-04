@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: synthnet-drucker-se-su-st-st-256-100
+  name: synthnet-drucker-se-su-disabled-gray-256-100
 spec:
   restartPolicy: Never
   containers:
-  - name: synthnet-drucker-se-su-st-st-256-100
+  - name: synthnet-drucker-se-su-disabled-gray-256-100
     image: beuthdritter/synthnet-render-pipeline
     volumeMounts:
             - name: output-volume
@@ -17,7 +17,7 @@ spec:
         "-n",
         "py39-synthnet-render-pipeline",
         "bash",
-        "scripts/runs_synthnet/900841-00.00.00_drucker_se_su_static_static_256_100.sh",
+        "scripts/runs_synthnet/900841-00.00.00_drucker/900841-00.00.00_drucker_se_su_disabled_gray_256_100.sh",
         "3",
         "42",
         "43"
