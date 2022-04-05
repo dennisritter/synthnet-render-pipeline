@@ -1,4 +1,5 @@
 """ Functions for material definition of single parts"""
+import random
 import pandas as pd
 import logging
 
@@ -15,6 +16,7 @@ def assign_materials_static(parts: list, metadata: 'pd.DataFrame') -> list[Part]
             metdata (pd.DataFrame): Prepared metadata DataFrame 
     
     """
+
     # Map materials of metadata to predefined materials
     MATERIAL_MAP = {
         "nan": "default.blend",
@@ -103,5 +105,24 @@ def assign_materials_static(parts: list, metadata: 'pd.DataFrame') -> list[Part]
 
     if unmapped_metadata_materials:
         LOGGER.warning(f'--UNMAPPED METADATA_MATERIALS: {unmapped_metadata_materials}')
+
+    return parts
+
+
+def assign_materials_random(parts: list,
+                            metadata: 'pd.DataFrame',
+                            materials: list = ["default.blend", "steel.blend", "brass.blend", "plastic.blend"],
+                            seed: int = 42) -> list[Part]:
+    """ Returns a list of Part objects with assigned materials of all SingleParts. 
+    
+        Args:
+            parts (list<Part>): A list of Part objects.
+            metdata (pd.DataFrame): Prepared metadata DataFrame 
+    
+    """
+    random.seed(seed)
+    for part in parts:
+        for single_part in part.single_parts:
+            single_part.material = random.choice(materials)
 
     return parts

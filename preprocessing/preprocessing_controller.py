@@ -20,7 +20,7 @@ class PreprocessingController:
     SCENE_MODES = ['global', 'exclusive']
     CAMERA_DEF_MODES = ['sphere-uniform', 'sphere-equidistant']
     LIGHT_DEF_MODES = ['sphere-uniform', 'range-uniform']
-    MATERIAL_DEF_MODES = ['disabled', 'static']
+    MATERIAL_DEF_MODES = ['disabled', 'static', 'random']
     ENVMAP_DEF_MODES = ['disabled', 'white', 'gray', 'static']
 
     def __init__(
@@ -116,6 +116,9 @@ class PreprocessingController:
         # on a static metadata_material:our_material map
         if self.material_def_mode == 'static':
             self.parts = define_materials.assign_materials_static(self.parts, self.metadata)
+        # random: Assign a random material to each part
+        if self.material_def_mode == 'random':
+            self.parts = define_materials.assign_materials_random(self.parts, self.metadata)
 
         tend = timer_utils.time_since(tstart)
         LOGGER.info(f'Done in {tend}')
