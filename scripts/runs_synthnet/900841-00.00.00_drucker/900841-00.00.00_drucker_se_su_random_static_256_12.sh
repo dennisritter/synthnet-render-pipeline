@@ -44,16 +44,16 @@ echo "- - - - - - - - - - - - - - - - - - - - "
 ##### RESOURCES
 # Resource directory path. Contains Environment maps, materials, CAD data and metadata. 
 # (relative to project root)
-RESOURCE_DIR="./data/drucker_fotos"
-TOPEX_METADATA_FILE="${RESOURCE_DIR}/drucker_fotos.xlsx"
-TOPEX_BLENDER_FILE="${RESOURCE_DIR}/drucker_fotos.blend"
+RESOURCE_DIR="./data/900841-00.00.00_drucker"
+TOPEX_METADATA_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.xlsx"
+TOPEX_BLENDER_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.blend"
 MATERIALS_DIR="${RESOURCE_DIR}/materials"
 ENVMAPS_DIR="${RESOURCE_DIR}/envmaps"
 
 ##### OUTPUTS
 # Specify output root directory and a run description to create a unique output directory
 OUT_ROOT_DIR="./out"
-RUN_DESCRIPTION="druckerfotos_su_su_static_static_256_12"
+RUN_DESCRIPTION="900841-00.00.00_drucker_se_su_random_static_256_12"
 # will return a dir path like '$OUT_ROOT_DIR/$ID-$RUN_DESCRIPTION -> ./out/1-my-run
 OUT_DIR=`python scripts/utils/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION"`
 echo "Created output directory: $OUT_DIR"
@@ -62,9 +62,9 @@ echo "Created output directory: $OUT_DIR"
 # Set options
 N_IMAGES_PER_PART=12
 SCENE_MODE='exclusive'
-CAMERA_DEF_MODE='sphere-uniform'
+CAMERA_DEF_MODE='sphere-equidistant'
 LIGHT_DEF_MODE='sphere-uniform'
-MATERIAL_DEF_MODE='static'
+MATERIAL_DEF_MODE='random'
 ENVMAP_DEF_MODE='static'
 
 # Run Preprocessing
@@ -109,15 +109,21 @@ if [[ $RUN_MODE -ge 3 ]]; then
     OUT_QUALITY=100
     OUT_FORMAT="PNG"
     ENGINE="CYCLES"
+    DEVICE="GPU"
     # Run Export GLTFs
+    RENDER_SECONDS_START=$SECONDS
     blender --background --python ./bpy_modules/render.py -- \
-    --in_dir $GLTF_DIR \
+    --gltf_dir $GLTF_DIR \
+    --envmap_dir $RESOURCE_DIR/envmaps \
     --out_dir $OUT_DIR/render \
+    --rcfg_file="$OUT_DIR/$RCFG_NAME" \
     --res_x $RES_X \
     --res_y $RES_Y \
     --out_quality $OUT_QUALITY \
     --out_format $OUT_FORMAT \
-    --engine $ENGINE
+    --engine $ENGINE \
+    --device $DEVICE
+    RENDER_SECONDS_END=$(($SECONDS-$RENDER_SECONDS_START))
 fi
 ############################
 
@@ -143,7 +149,8 @@ if [[ $RUN_MODE -ge 3 ]]; then
     --render_quality $OUT_QUALITY \
     --render_format $OUT_FORMAT \
     --render_engine $ENGINE \
-    --comment "No comment" 
+    --render_device $DEVICE \
+    --comment "base color = 0.15, 0.15, 0.15, 1; random materials from ['default.blend, steel.blend, brass.blend, plastic.blend']" 
 fi
 ############################
 

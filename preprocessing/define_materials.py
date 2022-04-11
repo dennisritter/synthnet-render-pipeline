@@ -1,4 +1,5 @@
 """ Functions for material definition of single parts"""
+import random
 import pandas as pd
 import logging
 
@@ -15,6 +16,7 @@ def assign_materials_static(parts: list, metadata: 'pd.DataFrame') -> list[Part]
             metdata (pd.DataFrame): Prepared metadata DataFrame 
     
     """
+
     # Map materials of metadata to predefined materials
     MATERIAL_MAP = {
         "nan": "default.blend",
@@ -22,27 +24,63 @@ def assign_materials_static(parts: list, metadata: 'pd.DataFrame') -> list[Part]
         "X5CrNi18-10": "steel.blend",
         "X8CrNiS18-9": "steel.blend",
         "Stahl": "steel.blend",
+        "St 37-k": "steel.blend",
         "38 Si 7": "steel.blend",
         "Edelstahl": "steel.blend",
         "X 10 CrNiS 18 9": "steel.blend",
         "Ck45": "steel.blend",
         "X 10CrNiS 18 9": "steel.blend",
         "Stahl 8.8": "steel.blend",
+        "115CrV3(Silberstahl)": "steel.blend",
         "Silberstahl": "steel.blend",
+        "Stahlblech": "steel.blend",
         "X20Cr13": "steel.blend",
         "Stahl 9.8": "steel.blend",
+        "16MnCr5": "steel.blend",
+        "C45 o ä": "steel.blend",
+        "C45W": "steel.blend",
+        "C45W o.ä": "steel.blend",
+        "C45W o.ä.": "steel.blend",
+        "Starwelle": "steel.blend",
+        "14301": "steel.blend",
+        "Metallausführung": "steel.blend",
         "AlMgSi1": "aluminium.blend",
         "AlMg4,5Mn": "aluminium.blend",
         "Al": "aluminium.blend",
         "AlCuMgPb": "aluminium.blend",
         "CuZn37": "brass.blend",
         "CuZn40": "brass.blend",
+        "Rotguß": "brass.blend",
         "PA12": "plastic.blend",
         "X 10 CrNi S 18 9": "plastic.blend",
         "Kunststoff": "plastic.blend",
         "Polycarbonat": "plastic.blend",
         "Polyamid": "plastic.blend",
         "Trespa": "plastic.blend",
+        "Trespa nw": "plastic.blend",
+        "Trespa nw 6mm": "plastic.blend",
+        "Trespa nw; 6mm": "plastic.blend",
+        "Trespa nw 10mm": "plastic.blend",
+        "Makrolon farblos 099": "plastic.blend",
+        "Makrolon farblos 6mm": "plastic.blend",
+        "Makrolon 2760(grau 6mm)": "plastic.blend",
+        "Makrolon 2760(grau) 6mm": "plastic.blend",
+        "Makrolon": "plastic.blend",
+        "Maaaggraaloooon :-)  farblos 6mm": "plastic.blend",
+        "Schaumstoff": "plastic.blend",
+        "PA": "plastic.blend",
+        "PS": "plastic.blend",
+        "PVC": "plastic.blend",
+        "Silikon SI 50±5ShA": "plastic.blend",
+        "POM weiss": "plastic.blend",
+        "Delrin - POM": "plastic.blend",
+        "Polycarbonat farblos 8mm": "plastic.blend",
+        "Polycarbonat farblos 6mm": "plastic.blend",
+        "Polycarbonat 6mm": "plastic.blend",
+        "Murtfeld grün": "plastic.blend",
+        "Murtfeld S grün": "plastic.blend",
+        "Folie lila": "plastic.blend",
+        "Fils 2,5mm": "plastic.blend",
     }
     LOGGER.debug(f"--STATIC MATERIAL_MAP: {list(MATERIAL_MAP.keys())}")
 
@@ -67,5 +105,24 @@ def assign_materials_static(parts: list, metadata: 'pd.DataFrame') -> list[Part]
 
     if unmapped_metadata_materials:
         LOGGER.warning(f'--UNMAPPED METADATA_MATERIALS: {unmapped_metadata_materials}')
+
+    return parts
+
+
+def assign_materials_random(parts: list,
+                            metadata: 'pd.DataFrame',
+                            materials: list = ["default.blend", "steel.blend", "brass.blend", "plastic.blend"],
+                            seed: int = 42) -> list[Part]:
+    """ Returns a list of Part objects with assigned materials of all SingleParts. 
+    
+        Args:
+            parts (list<Part>): A list of Part objects.
+            metdata (pd.DataFrame): Prepared metadata DataFrame 
+    
+    """
+    random.seed(seed)
+    for part in parts:
+        for single_part in part.single_parts:
+            single_part.material = random.choice(materials)
 
     return parts

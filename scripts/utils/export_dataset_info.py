@@ -116,6 +116,12 @@ from types import SimpleNamespace
     required=True,
 )
 @click.option(
+    '--render_device',
+    help='Render device (CPU or GPU)',
+    type=str,
+    required=True,
+)
+@click.option(
     '--comment',
     help='(optional) Any kind of additional information about the dataset or the idea behind it',
     type=str,
@@ -142,6 +148,7 @@ def main(**kwargs):
     render_quality = args.render_quality
     render_format = args.render_format
     render_engine = args.render_engine
+    render_device = args.render_device
     comment = args.comment
 
     with open(rcfg_file, 'r') as f:
@@ -176,6 +183,7 @@ def main(**kwargs):
             "render_quality": render_quality,
             "render_format": render_format,
             "render_engine": render_engine,
+            "render_device": render_device,
         },
     }
     out_fname = "dataset_info.json"

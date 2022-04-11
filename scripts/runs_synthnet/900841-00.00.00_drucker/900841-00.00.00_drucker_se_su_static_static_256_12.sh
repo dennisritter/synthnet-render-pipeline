@@ -53,7 +53,7 @@ ENVMAPS_DIR="${RESOURCE_DIR}/envmaps"
 ##### OUTPUTS
 # Specify output root directory and a run description to create a unique output directory
 OUT_ROOT_DIR="./out"
-RUN_DESCRIPTION="900841-00.00.00_drucker_su_su_static_gray_256_12"
+RUN_DESCRIPTION="900841-00.00.00_drucker_se_su_static_static_256_12"
 # will return a dir path like '$OUT_ROOT_DIR/$ID-$RUN_DESCRIPTION -> ./out/1-my-run
 OUT_DIR=`python scripts/utils/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION"`
 echo "Created output directory: $OUT_DIR"
@@ -62,10 +62,10 @@ echo "Created output directory: $OUT_DIR"
 # Set options
 N_IMAGES_PER_PART=12
 SCENE_MODE='exclusive'
-CAMERA_DEF_MODE='sphere-uniform'
+CAMERA_DEF_MODE='sphere-equidistant'
 LIGHT_DEF_MODE='sphere-uniform'
 MATERIAL_DEF_MODE='static'
-ENVMAP_DEF_MODE='gray'
+ENVMAP_DEF_MODE='static'
 
 # Run Preprocessing
 PREPROCESSING_SECONDS_START=$SECONDS
@@ -109,16 +109,20 @@ if [[ $RUN_MODE -ge 3 ]]; then
     OUT_QUALITY=100
     OUT_FORMAT="PNG"
     ENGINE="CYCLES"
+    DEVICE="GPU"
     # Run Export GLTFs
     RENDER_SECONDS_START=$SECONDS
     blender --background --python ./bpy_modules/render.py -- \
-    --in_dir $GLTF_DIR \
+    --gltf_dir $GLTF_DIR \
+    --envmap_dir $RESOURCE_DIR/envmaps \
     --out_dir $OUT_DIR/render \
+    --rcfg_file="$OUT_DIR/$RCFG_NAME" \
     --res_x $RES_X \
     --res_y $RES_Y \
     --out_quality $OUT_QUALITY \
     --out_format $OUT_FORMAT \
-    --engine $ENGINE
+    --engine $ENGINE \
+    --device $DEVICE
     RENDER_SECONDS_END=$(($SECONDS-$RENDER_SECONDS_START))
 fi
 ############################
@@ -145,7 +149,8 @@ if [[ $RUN_MODE -ge 3 ]]; then
     --render_quality $OUT_QUALITY \
     --render_format $OUT_FORMAT \
     --render_engine $ENGINE \
-    --comment "NOTE: Aluminium material == Steel material" 
+    --render_device $DEVICE \
+    --comment "Aluminium material = steel material; base color = 0.15, 0.15, 0.15, 1" 
 fi
 ############################
 

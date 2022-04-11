@@ -4,6 +4,7 @@ import os
 import time
 import bpy
 import mathutils
+import json
 
 import builtins as __builtin__
 
@@ -98,6 +99,29 @@ def clear_scene():
     bpy.ops.wm.read_homefile(use_empty=True)
 
 
+def objs_set_hide_render(objs: list, hide_render: bool):
+    for obj in objs:
+        obj.hide_render = hide_render
+
+
+def setup_device(engine="CYCLES", device="CPU"):
+    # Render settings CYCLES GPU rendering
+    if engine.lower() == 'cycles' and device.lower() == 'gpu':
+        # Set the device_type
+        bpy.context.preferences.addons['cycles'].preferences.compute_device_type = 'CUDA'
+        # Set the device and feature set
+        bpy.context.scene.cycles.device = 'GPU'
+        # get_devices() to let Blender detects GPU device
+        bpy.context.preferences.addons['cycles'].preferences.get_devices()
+        for d in bpy.context.preferences.addons['cycles'].preferences.devices:
+            for k in d.keys():
+                print(f'{k}: {d[k]}')
+            print('---')
+            d["use"] = 1
+            if d["type"] == 0:  # type 0 -> CPU
+                d["use"] = 0
+
+
 def load_gltf(file_path):
     bpy.ops.import_scene.gltf(filepath=file_path)
 
@@ -109,21 +133,24 @@ def load_gltf(file_path):
         bpy.context.scene.world = new_world
 
     # NOTE: Hack to load envmap path from extras data of first camera
-    camera_with_envmap = [obj for obj in bpy.context.scene.objects if obj.type == 'CAMERA'][0]
-    if "ud_envmap" in camera_with_envmap.data.keys():
-        envmap = camera_with_envmap.data["ud_envmap"]
-        print(f"Adding Envmap: {envmap}")
-        bpy_envmap = add_image_to_blender(envmap)
-        add_hdri_map(envmap)
+    # camera_with_envmap = [obj for obj in bpy.context.scene.objects if obj.type == 'CAMERA'][0]
+    # if "ud_envmap" in camera_with_envmap.data.keys():
+    #     envmap = camera_with_envmap.data["ud_envmap"]
+    #     print(f"Adding Envmap: {envmap}")
+    #     bpy_envmap = add_image_to_blender(envmap)
+    #     add_hdri_map(envmap)
 
 
-def render(render_fname,
-           out_dir,
+def render(rcfg_data: dict,
+           part_id: str,
+           envmap_dir: str,
+           out_dir: str,
            res_x: int = 256,
            res_y: int = 256,
            out_format: str = "PNG",
            out_quality: int = 100,
-           engine: str = "CYCLES"):
+           engine: str = "CYCLES",
+           device: str = "GPU"):
     # Scene setup
     scene = bpy.context.scene
     scene.render.resolution_x = res_x
@@ -133,19 +160,39 @@ def render(render_fname,
     scene.render.engine = engine
     # set transparency to true at this point to hide envmap
     scene.render.film_transparent = True
-    cameras = [obj for obj in scene.objects if obj.type == 'CAMERA']
 
-    # render loop
-    for i, cam in enumerate(cameras):
-        bpy.context.scene.camera = cam
+    cameras = [obj for obj in scene.objects if obj.type == 'CAMERA']
+    lights = [obj for obj in scene.objects if obj.type == 'LIGHT']
+
+    for part in rcfg_data["parts"]:
+        if part["id"] == part_id:
+            render_setups = part["scene"]["render_setups"]
+            break
+
+    # Hide all lights
+    objs_set_hide_render(lights, True)
+    # Render Loop
+    for i, render_setup in enumerate(render_setups):
+        render_camera = cameras[render_setup["camera_i"]]
+        render_lights = [lights[light_i] for light_i in render_setup["lights_i"]]
+        # Activate lights for this render
+        objs_set_hide_render(render_lights, False)
+        render_envmap_fn = f"{envmap_dir}/{render_setup['envmap_fname']}"
+        add_image_to_blender(render_envmap_fn)
+        add_hdri_map(render_envmap_fn)
+
+        bpy.context.scene.camera = render_camera
         # Change camera zoom to see whole object
         bpy.ops.object.select_by_type(extend=False, type='MESH')
         bpy.ops.view3d.camera_to_view_selected()
         # Zoom out a little
         # translate_objects_by([cam], mathutils.Vector((0, 0, 0.5)))
 
-        bpy.context.scene.render.filepath = f"{out_dir}/{render_fname}_{i}"
+        bpy.context.scene.render.filepath = f"{out_dir}/{part_id}_{i}"
         bpy.ops.render.render(write_still=True)
+
+        # Hide lights again after rendered
+        objs_set_hide_render(render_lights, True)
 
 
 def get_args():
@@ -156,14 +203,26 @@ def get_args():
     script_args = all_arguments[double_dash_index + 1:]
 
     parser.add_argument(
-        '--in_dir',
+        '--gltf_dir',
         help="Directory with gltf files.",
+        type=str,
+        required=True,
+    )
+    parser.add_argument(
+        '--envmap_dir',
+        help="Data directory for materials, envmaps and other dependencies.",
         type=str,
         required=True,
     )
     parser.add_argument(
         '--out_dir',
         help="Directory to save the rendered images in.",
+        type=str,
+        required=True,
+    )
+    parser.add_argument(
+        '--rcfg_file',
+        help="Render configuration file.",
         type=str,
         required=True,
     )
@@ -200,6 +259,12 @@ def get_args():
         default="CYCLES",
         type=str,
     )
+    parser.add_argument(
+        '--device',
+        help="The device used for rendering",
+        default="GPU",
+        type=str,
+    )
 
     args, _ = parser.parse_known_args(script_args)
     return args
@@ -210,23 +275,33 @@ if __name__ == '__main__':
     args = get_args()
     print(f"Running Rendering with args:\n{args}")
 
-    in_dir = args.in_dir
+    gltf_dir = args.gltf_dir
+    envmap_dir = args.envmap_dir
     out_dir = args.out_dir
+    rcfg_file = args.rcfg_file
     res_x = args.res_x
     res_y = args.res_y
     out_format = args.out_format
     out_quality = args.out_quality
     engine = args.engine
+    device = args.device
 
-    sorted_input_files = sorted(os.listdir(in_dir), key=lambda x: x.split("_")[0])
+    # Load RCFG data
+    with open(rcfg_file, "r") as rcfg_json:
+        rcfg_data = json.load(rcfg_json)
+
+    sorted_input_files = sorted(os.listdir(gltf_dir), key=lambda x: x.split("_")[0])
     for glb_fname in sorted_input_files:
         if not glb_fname.endswith(".glb"):
             continue
         clear_scene()
-        load_gltf(os.path.join(in_dir, glb_fname))
-        render_fname = glb_fname[:-4]  # Remove .glb from glb filename
+        load_gltf(os.path.join(gltf_dir, glb_fname))
+        setup_device(engine, device)
+        part_id = glb_fname[:-4]  # Remove .glb from glb filename
         render(
-            render_fname=render_fname,
+            rcfg_data=rcfg_data,
+            part_id=part_id,
+            envmap_dir=envmap_dir,
             out_dir=out_dir,
             res_x=res_x,
             res_y=res_y,
@@ -236,4 +311,4 @@ if __name__ == '__main__':
         )
 
     tend = time.time() - tstart
-    print(f"Rendered {len(os.listdir(in_dir))} imgs in {tend} seconds")
+    print(f"Rendered {len(os.listdir(gltf_dir))} imgs in {tend} seconds")
