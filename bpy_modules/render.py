@@ -1,0 +1,314 @@
+""" Render gltf files via Blender Software """
+import argparse
+import os
+import time
+import bpy
+import mathutils
+import json
+
+import builtins as __builtin__
+
+#########################################
+
+# PRINT TO SYSTEM CONSOLE
+
+#########################################
+
+
+def console_print(*args, **kwargs):
+    for a in bpy.context.screen.areas:
+        if a.type == 'CONSOLE':
+            c = {}
+            c['area'] = a
+            c['space_data'] = a.spaces.active
+            c['region'] = a.regions[-1]
+            c['window'] = bpy.context.window
+            c['screen'] = bpy.context.screen
+            s = " ".join([str(arg) for arg in args])
+            for line in s.split("\n"):
+                bpy.ops.console.scrollback_append(c, text=line)
+
+
+def print(*args, **kwargs):
+    console_print(*args, **kwargs)  # to Python Console
+    __builtin__.print(*args, **kwargs)  # to System Console
+
+
+#########################################
+
+# RENDER
+
+#########################################
+
+
+def add_image_to_blender(file_path: str) -> bpy.types.Image:
+    """Add image to .blend file
+
+    Args:
+        file_path (str): path to image file
+
+    Returns:
+        bpy.types.Image: created image node
+    """
+    return bpy.data.images.load(file_path, check_existing=True)
+
+
+def add_hdri_map(file_path: str) -> list:
+    """Add hdri map to .blend
+
+    Args:
+        file_path (str): path to image file
+
+    Returns:
+        list(bpy.types.Material, bpy.types.EnvironmentTexture): [description]
+    """
+    # Get the environment node tree of the current scene
+    node_tree = bpy.context.scene.world.node_tree
+    tree_nodes = node_tree.nodes
+    # Clear all nodes
+    tree_nodes.clear()
+    # Add Background node
+    node_background = tree_nodes.new(type='ShaderNodeBackground')
+    # Add Environment Texture node
+    node_environment = tree_nodes.new('ShaderNodeTexEnvironment')
+    # Load and assign the image to the node property
+    node_environment.image = bpy.data.images.load(file_path)  # Relative path
+    node_environment.location = -300, 0
+    # Add Output node
+    node_output = tree_nodes.new(type='ShaderNodeOutputWorld')
+    node_output.location = 200, 0
+    # Link all nodes
+    links = node_tree.links
+    link = links.new(node_environment.outputs["Color"], node_background.inputs["Color"])
+    link = links.new(node_background.outputs["Background"], node_output.inputs["Surface"])
+    return node_background, node_environment
+
+
+def translate_objects_by(objects: list, translate_by: mathutils.Vector):
+    """Translate objects by given vector
+
+    Args:
+        objects (list): objects to translate
+        translate_by (mathutils.Vector): vector to translate by
+    """
+    for ob in objects:
+        ob.location += translate_by
+
+
+def clear_scene():
+    bpy.ops.wm.read_homefile(use_empty=True)
+
+
+def objs_set_hide_render(objs: list, hide_render: bool):
+    for obj in objs:
+        obj.hide_render = hide_render
+
+
+def setup_device(engine="CYCLES", device="CPU"):
+    # Render settings CYCLES GPU rendering
+    if engine.lower() == 'cycles' and device.lower() == 'gpu':
+        # Set the device_type
+        bpy.context.preferences.addons['cycles'].preferences.compute_device_type = 'CUDA'
+        # Set the device and feature set
+        bpy.context.scene.cycles.device = 'GPU'
+        # get_devices() to let Blender detects GPU device
+        bpy.context.preferences.addons['cycles'].preferences.get_devices()
+        for d in bpy.context.preferences.addons['cycles'].preferences.devices:
+            for k in d.keys():
+                print(f'{k}: {d[k]}')
+            print('---')
+            d["use"] = 1
+            if d["type"] == 0:  # type 0 -> CPU
+                d["use"] = 0
+
+
+def load_gltf(file_path):
+    bpy.ops.import_scene.gltf(filepath=file_path)
+
+    bpy_world = bpy.context.scene.world
+    if bpy_world is None:
+        # create a new world
+        new_world = bpy.data.worlds.new("World")
+        new_world.use_nodes = True
+        bpy.context.scene.world = new_world
+
+    # NOTE: Hack to load envmap path from extras data of first camera
+    # camera_with_envmap = [obj for obj in bpy.context.scene.objects if obj.type == 'CAMERA'][0]
+    # if "ud_envmap" in camera_with_envmap.data.keys():
+    #     envmap = camera_with_envmap.data["ud_envmap"]
+    #     print(f"Adding Envmap: {envmap}")
+    #     bpy_envmap = add_image_to_blender(envmap)
+    #     add_hdri_map(envmap)
+
+
+def render(rcfg_data: dict,
+           part_id: str,
+           envmap_dir: str,
+           out_dir: str,
+           res_x: int = 256,
+           res_y: int = 256,
+           out_format: str = "PNG",
+           out_quality: int = 100,
+           engine: str = "CYCLES",
+           device: str = "GPU"):
+    # Scene setup
+    scene = bpy.context.scene
+    scene.render.resolution_x = res_x
+    scene.render.resolution_y = res_y
+    scene.render.image_settings.quality = out_quality
+    scene.render.image_settings.file_format = out_format
+    scene.render.engine = engine
+    # set transparency to true at this point to hide envmap
+    scene.render.film_transparent = True
+
+    cameras = [obj for obj in scene.objects if obj.type == 'CAMERA']
+    lights = [obj for obj in scene.objects if obj.type == 'LIGHT']
+
+    for part in rcfg_data["parts"]:
+        if part["id"] == part_id:
+            render_setups = part["scene"]["render_setups"]
+            break
+
+    # Hide all lights
+    objs_set_hide_render(lights, True)
+    # Render Loop
+    for i, render_setup in enumerate(render_setups):
+        render_camera = cameras[render_setup["camera_i"]]
+        render_lights = [lights[light_i] for light_i in render_setup["lights_i"]]
+        # Activate lights for this render
+        objs_set_hide_render(render_lights, False)
+        render_envmap_fn = f"{envmap_dir}/{render_setup['envmap_fname']}"
+        add_image_to_blender(render_envmap_fn)
+        add_hdri_map(render_envmap_fn)
+
+        bpy.context.scene.camera = render_camera
+        # Change camera zoom to see whole object
+        bpy.ops.object.select_by_type(extend=False, type='MESH')
+        bpy.ops.view3d.camera_to_view_selected()
+        # Zoom out a little
+        # translate_objects_by([cam], mathutils.Vector((0, 0, 0.5)))
+
+        bpy.context.scene.render.filepath = f"{out_dir}/{part_id}_{i}"
+        bpy.ops.render.render(write_still=True)
+
+        # Hide lights again after rendered
+        objs_set_hide_render(render_lights, True)
+
+
+def get_args():
+    parser = argparse.ArgumentParser()
+    # Only consider script args, ignore blender args
+    _, all_arguments = parser.parse_known_args()
+    double_dash_index = all_arguments.index('--')
+    script_args = all_arguments[double_dash_index + 1:]
+
+    parser.add_argument(
+        '--gltf_dir',
+        help="Directory with gltf files.",
+        type=str,
+        required=True,
+    )
+    parser.add_argument(
+        '--envmap_dir',
+        help="Data directory for materials, envmaps and other dependencies.",
+        type=str,
+        required=True,
+    )
+    parser.add_argument(
+        '--out_dir',
+        help="Directory to save the rendered images in.",
+        type=str,
+        required=True,
+    )
+    parser.add_argument(
+        '--rcfg_file',
+        help="Render configuration file.",
+        type=str,
+        required=True,
+    )
+    parser.add_argument(
+        '--res_x',
+        help="Pixel Resolution in X direction.",
+        default=256,
+        type=int,
+    )
+    parser.add_argument(
+        '--res_y',
+        help="Pixel Resolution in Y direction.",
+        default=256,
+        type=int,
+    )
+    parser.add_argument(
+        '--out_quality',
+        help="The output quality [0, 100].",
+        default=100,
+        type=int,
+        metavar="[0, 100]",
+        choices=range(0, 101),
+    )
+    parser.add_argument(
+        '--out_format',
+        help="Output image format",
+        default="PNG",
+        type=str,
+        choices=["JPEG", "PNG"],
+    )
+    parser.add_argument(
+        '--engine',
+        help="Rendering engine",
+        default="CYCLES",
+        type=str,
+    )
+    parser.add_argument(
+        '--device',
+        help="The device used for rendering",
+        default="GPU",
+        type=str,
+    )
+
+    args, _ = parser.parse_known_args(script_args)
+    return args
+
+
+if __name__ == '__main__':
+    tstart = time.time()
+    args = get_args()
+    print(f"Running Rendering with args:\n{args}")
+
+    gltf_dir = args.gltf_dir
+    envmap_dir = args.envmap_dir
+    out_dir = args.out_dir
+    rcfg_file = args.rcfg_file
+    res_x = args.res_x
+    res_y = args.res_y
+    out_format = args.out_format
+    out_quality = args.out_quality
+    engine = args.engine
+    device = args.device
+
+    # Load RCFG data
+    with open(rcfg_file, "r") as rcfg_json:
+        rcfg_data = json.load(rcfg_json)
+
+    sorted_input_files = sorted(os.listdir(gltf_dir), key=lambda x: x.split("_")[0])
+    for glb_fname in sorted_input_files:
+        if not glb_fname.endswith(".glb"):
+            continue
+        clear_scene()
+        load_gltf(os.path.join(gltf_dir, glb_fname))
+        setup_device(engine, device)
+        part_id = glb_fname[:-4]  # Remove .glb from glb filename
+        render(
+            rcfg_data=rcfg_data,
+            part_id=part_id,
+            envmap_dir=envmap_dir,
+            out_dir=out_dir,
+            res_x=res_x,
+            res_y=res_y,
+            out_format=out_format,
+            out_quality=out_quality,
+            engine=engine,
+        )
+
+    tend = time.time() - tstart
+    print(f"Rendered {len(os.listdir(gltf_dir))} imgs in {tend} seconds")

@@ -1,0 +1,185 @@
+{
+    "title": "GLTF Export Configuration.",
+    "description": "Definition of scene- and object-configurations to build scenes that are exported as GLTF files",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": [
+        "global_scene",
+        "parts"
+    ],
+    "properties": {
+        "global_scene": {
+            "type": "object",
+            "description": "Scene definition that is applied to all part_scenes",
+            "required": [
+                "lights",
+                "cameras",
+                "envmaps"
+            ],
+            "properties": {
+                "lights": {
+                    "$ref": "/schemas/lights"
+                },
+                "cameras": {
+                    "$ref": "/schemas/cameras"
+                }
+            }
+        },
+        "parts": {
+            "type": "array",
+            "description": "Scene definition that is applied to this part",
+            "items": {
+                "type": "object",
+                "description": "A scene description for a part",
+                "required": [
+                    "id",
+                    "name",
+                    "hierarchy",
+                    "lights",
+                    "cameras",
+                    "envmaps",
+                    "single_parts"
+                ],
+                "properties": {
+                    "part_id": {
+                        "type": "string",
+                        "description": "The identifier for this part"
+                    },
+                    "part_name": {
+                        "type": "string",
+                        "description": "The part's name"
+                    },
+                    "part_hierarchy": {
+                        "type": "string",
+                        "description": "The hierarchy of this part"
+                    },
+                    "lights": {
+                        "$ref": "/schemas/lights"
+                    },
+                    "cameras": {
+                        "$ref": "/schemas/cameras"
+                    },
+                    "single_parts": {
+                        "type": "array",
+                        "description": "The single parts this assembly is assembled of",
+                        "items": {
+                            "$ref": "/schemas/single_part"
+                        }
+                    }
+                }
+            }
+        },
+        "$defs": {
+            "point3d": {
+                "$id": "/schemas/point_3d",
+                "type": "array",
+                "description": "A 3D point position defined by it's X,Y,Z coordinates",
+                "items": {
+                    "type": "number",
+                    "description": "[X,Y,Z] coordinates"
+                }
+            },
+            "color_rgb": {
+                "$id": "/schemas/color_rgb",
+                "type": "array",
+                "description": "A color in RGB colorspace",
+                "items": {
+                    "type": "number",
+                    "description": "[R,G,B] color components of the color"
+                }
+            },
+            "cameras": {
+                "$id": "/schemas/cameras",
+                "type": "array",
+                "description": "A list of camera definitions",
+                "items": {
+                    "$ref": "/schemas/camera"
+                }
+            },
+            "camera": {
+                "$id": "/schemas/camera",
+                "type": "object",
+                "description": "A Camera, defined by it's properties",
+                "required": [
+                    "camera_type",
+                    "position",
+                    "direction"
+                ],
+                "properties": {
+                    "camera_type": {
+                        "type": "string",
+                        "description": "The camera type. (orthographic, perspective)"
+                    },
+                    "position": {
+                        "$ref": "/schemas/point_3d"
+                    },
+                    "direction": {
+                        "$ref": "/schemas/point_3d"
+                    }
+                }
+            },
+            "lights": {
+                "$id": "/schemas/lights",
+                "type": "array",
+                "description": "A list of light definitions",
+                "items": {
+                    "$ref": "/schemas/light"
+                }
+            },
+            "light": {
+                "$id": "/schemas/light",
+                "type": "object",
+                "description": "A light, defined by it's properties",
+                "required": [
+                    "light_type",
+                    "position",
+                    "color",
+                    "intensity"
+                ],
+                "properties": {
+                    "light_type": {
+                        "type": "string",
+                        "description": "The light type"
+                    },
+                    "position": {
+                        "$ref": "/schemas/point_3d"
+                    },
+                    "direction": {
+                        "$ref": "/schemas/point_3d"
+                    },
+                    "color": {
+                        "$ref": "/schemas/color_rgb"
+                    },
+                    "intensity": {
+                        "type": "number",
+                        "description": "The light intensity"
+                    }
+                }
+            },
+            "single_part": {
+                "$id": "/schemas/single_part",
+                "type": "object",
+                "description": "The single parts of of this assembly",
+                "required": [
+                    "part_id",
+                    "part_name",
+                    "part_material"
+                ],
+                "properties": {
+                    "part_id": {
+                        "type": "string",
+                        "description": "The part identifier"
+                    },
+                    "part_name": {
+                        "type": "string",
+                        "description": "The name of this part"
+                    },
+                    "part_material": {
+                        "type": "string",
+                        "description": "The material of this single part"
+                    }
+                }
+            }
+        }
+    }
+}

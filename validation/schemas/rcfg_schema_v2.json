@@ -1,0 +1,251 @@
+{
+    "title": "GLTF Rendering Configuration V2.",
+    "description": "Definition of scene- and object-configurations to build scenes that are exported as GLTF files",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": [
+        "global_scene",
+        "parts"
+    ],
+    "properties": {
+        "global_scene": {
+            "description": "Scene definitions that are used for all parts",
+            "$ref": "/schemas/scene"
+        },
+        "parts": {
+            "type": "array",
+            "description": "List of machine parts to render/export gltfs",
+            "items": {
+                "type": "object",
+                "description": "A machine part",
+                "required": [
+                    "id",
+                    "name",
+                    "hierarchy",
+                    "single_parts",
+                    "scene"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "The identifier for this part"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "The part's name"
+                    },
+                    "hierarchy": {
+                        "type": "string",
+                        "description": "The hierarchy of this part"
+                    },
+                    "single_parts": {
+                        "type": "array",
+                        "description": "The single parts this assembly is assembled of or the part itself if it's a single part",
+                        "items": {
+                            "$ref": "/schemas/single_part"
+                        }
+                    },
+                    "scene": {
+                        "description": "Scene definition for this part",
+                        "$ref": "/schemas/scene"
+                    }
+                }
+            }
+        },
+        "$defs": {
+            "point3d": {
+                "$id": "/schemas/point_3d",
+                "type": "array",
+                "description": "A 3D point position defined by it's X,Y,Z coordinates",
+                "items": {
+                    "type": "number",
+                    "description": "[X,Y,Z] coordinates"
+                }
+            },
+            "color_rgb": {
+                "$id": "/schemas/color_rgb",
+                "type": "array",
+                "description": "A color in RGB colorspace",
+                "items": {
+                    "type": "number",
+                    "description": "[R,G,B] color components of the color"
+                }
+            },
+            "cameras": {
+                "$id": "/schemas/cameras",
+                "type": "array",
+                "description": "A list of camera definitions",
+                "items": {
+                    "$ref": "/schemas/camera"
+                }
+            },
+            "camera": {
+                "$id": "/schemas/camera",
+                "type": "object",
+                "description": "A Camera, defined by it's properties",
+                "required": [
+                    "position",
+                    "type_camera",
+                    "target",
+                    "focal_length",
+                    "local_rotation"
+                ],
+                "properties": {
+                    "position": {
+                        "$ref": "/schemas/point_3d"
+                    },
+                    "type_camera": {
+                        "type": "string",
+                        "description": "The camera type. CAMERA_TYPES = ['persp', 'ortho', 'pano']"
+                    },
+                    "target": {
+                        "$ref": "/schemas/point_3d"
+                    },
+                    "focal_length": {
+                        "type": "number",
+                        "description": "Focal length setting of the camera"
+                    },
+                    "local_rotation": {
+                        "type": "array",
+                        "description": "XYZ local rotation angles in radians",
+                        "items": {
+                            "type": "number"
+                        }
+                    }
+                }
+            },
+            "lights": {
+                "$id": "/schemas/lights",
+                "type": "array",
+                "description": "A list of light definitions",
+                "items": {
+                    "$ref": "/schemas/light"
+                }
+            },
+            "light": {
+                "$id": "/schemas/light",
+                "type": "object",
+                "description": "A light, defined by it's properties",
+                "required": [
+                    "type_light",
+                    "position",
+                    "intensity",
+                    "target"
+                ],
+                "properties": {
+                    "type_light": {
+                        "type": "string",
+                        "description": "The light type"
+                    },
+                    "position": {
+                        "$ref": "/schemas/point_3d"
+                    },
+                    "target": {
+                        "$ref": "/schemas/point_3d"
+                    },
+                    "intensity": {
+                        "type": "number",
+                        "description": "The lights intensity"
+                    }
+                }
+            },
+            "envmaps": {
+                "$id": "/schemas/envmaps",
+                "type": "array",
+                "description": "File path to an environment map",
+                "items": {
+                    "$ref": "/schemas/envmap"
+                }
+            },
+            "envmap": {
+                "$id": "/schemas/envmap",
+                "type": "string",
+                "description": "Filename (unique) of an environment map"
+            },
+            "render_setups": {
+                "$id": "/schemas/render_setups",
+                "type": "array",
+                "description": "List of render descriptins that contain references to cameras, lights and envmaps stored in respective lists.",
+                "items": {
+                    "$ref": "/schemas/render_setup"
+                }
+            },
+            "render_setup": {
+                "$id": "/schemas/render_setup",
+                "type": "object",
+                "description": "Describes a render setup. References a camera, lights and envmap used for a rendering",
+                "required": [
+                    "camera_i",
+                    "lights_i",
+                    "envmap_fname"
+                ],
+                "properties": {
+                    "camera_i": {
+                        "type": "integer",
+                        "description": "Index of a camera in the scenes' camera list"
+                    },
+                    "lights_i": {
+                        "type": "array",
+                        "description": "Indices of lights in the scenes' list of lights"
+                    },
+                    "envmap_fname": {
+                        "type": "string",
+                        "description": "filename of an environment map"
+                    }
+                }
+            },
+            "scene": {
+                "$id": "/schemas/scene",
+                "type": [
+                    "object",
+                    "null"
+                ],
+                "description": "A Scene definition that contains lists of all cameras, lights and envmaps referenced by their respective indices in the list of render_setups",
+                "required": [
+                    "lights",
+                    "cameras",
+                    "envmaps",
+                    "render_setups"
+                ],
+                "properties": {
+                    "lights": {
+                        "$ref": "/schemas/lights"
+                    },
+                    "cameras": {
+                        "$ref": "/schemas/cameras"
+                    },
+                    "envmaps": {
+                        "$ref": "/schemas/envmaps"
+                    },
+                    "render_setups": {
+                        "$ref": "/schemas/render_setups"
+                    }
+                }
+            },
+            "single_part": {
+                "$id": "/schemas/single_part",
+                "type": "object",
+                "description": "The single parts of of this assembly",
+                "required": [
+                    "id",
+                    "name",
+                    "material"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "The part identifier"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "The name of this part"
+                    },
+                    "material": {
+                        "type": "string",
+                        "description": "The material of this single part"
+                    }
+                }
+            }
+        }
+    }
+}
