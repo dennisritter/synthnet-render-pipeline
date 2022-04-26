@@ -7,9 +7,15 @@ spec:
   containers:
   - name: synthnet-drucker-se-su-random-static-256-12
     image: beuthdritter/synthnet-render-pipeline
+    env:
+      - name: GOOGLE_APPLICATION_CREDENTIALS
+        value: /etc/gcp/synthnet-gcs.json
     volumeMounts:
             - name: output-volume
               mountPath: /workspace/out
+            - name: synthnet-gcs-key-volume
+              mountPath: /etc/gcp
+              readOnly: true
     command:
       [
         "conda",
@@ -34,3 +40,6 @@ spec:
   - name: output-volume 
     persistentVolumeClaim:
       claimName: output-pvc
+  - name: synthnet-gcs-key-volume
+    secret:
+      secretName: synthnet-gcs-key
