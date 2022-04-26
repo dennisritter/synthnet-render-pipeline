@@ -7,9 +7,15 @@ spec:
   containers:
   - name: synthnet-drucker-se-su-st-st-256-100
     image: beuthdritter/synthnet-render-pipeline
+    env:
+      - name: GOOGLE_APPLICATION_CREDENTIALS
+        value: /etc/gcp/synthnet-gcs.json
     volumeMounts:
             - name: output-volume
               mountPath: /workspace/out
+            - name: synthnet-gcs-key-volume
+              mountPath: /etc/gcp
+              readOnly: true
     command:
       [
         "conda",
@@ -26,7 +32,7 @@ spec:
       requests:
         memory: "16Gi"
       limits:
-        nvidia.com/gpu: 2
+        nvidia.com/gpu: 1
         memory: "64Gi"
   nodeSelector:
     gpu: v100
@@ -34,3 +40,6 @@ spec:
   - name: output-volume 
     persistentVolumeClaim:
       claimName: output-pvc
+  - name: synthnet-gcs-key-volume
+    secret:
+      secretName: synthnet-gcs-key

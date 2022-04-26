@@ -6,7 +6,7 @@ spec:
   restartPolicy: Never
   containers:
   - name: synthnet-render-pipeline
-    image: beuthdritter/synthnet-rendering-pipeline
+    image: beuthdritter/synthnet-render-pipeline
     env:
       - name: GOOGLE_APPLICATION_CREDENTIALS
         value: /etc/gcp/synthnet-gcs.json
