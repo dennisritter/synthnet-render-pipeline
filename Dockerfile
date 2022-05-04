@@ -1,5 +1,5 @@
 # Base Image
-FROM nytimes/blender:3.0-gpu-ubuntu18.04
+FROM nytimes/blender:3.1-gpu-ubuntu18.04
 
 
 ENV PATH="/root/miniconda3/bin:${PATH}"

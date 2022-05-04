@@ -7,7 +7,7 @@ The purpose of the SynthNet Rendering Pipeline is to parse a Blender file and ex
 # Getting Started
 
 ## Linux
-1. Install [Blender](https://www.blender.org) 3.0.0 or later and make sure you can run it from your Terminal
+1. Install [Blender](https://www.blender.org) 3.1.0 or later and make sure you can run it from your Terminal
 ```bash
 blender -v
 ```
