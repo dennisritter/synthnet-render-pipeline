@@ -104,22 +104,71 @@ def objs_set_hide_render(objs: list, hide_render: bool):
         obj.hide_render = hide_render
 
 
-def setup_device(engine="CYCLES", device="CPU"):
+def setup_gpu_cycles():
     # Render settings CYCLES GPU rendering
+    # Set the device_type
+    bpy.context.preferences.addons['cycles'].preferences.compute_device_type = 'CUDA'
+    # Set the device and feature set
+    bpy.context.scene.cycles.device = 'GPU'
+    # get_devices() to let Blender detects GPU device
+    bpy.context.preferences.addons['cycles'].preferences.get_devices()
+    for d in bpy.context.preferences.addons['cycles'].preferences.devices:
+        for k in d.keys():
+            print(f'{k}: {d[k]}')
+        print('---')
+        d["use"] = 1
+        if d["type"] == 0:  # type 0 -> CPU
+            d["use"] = 0
+
+
+def apply_render_settings(
+    engine: str = "CYCLES",
+    device: str = "GPU",
+    res_x: int = 256,
+    res_y: int = 256,
+    out_format: str = "PNG",
+    out_quality: int = 100,
+):
+    scene = bpy.context.scene
+
+    scene.render.engine = engine
+    scene.render.resolution_x = res_x
+    scene.render.resolution_y = res_y
+    scene.render.film_transparent = True
+    scene.render.image_settings.quality = out_quality
+    scene.render.image_settings.file_format = out_format
+
+    if engine.lower() == 'cycles':
+        scene.cycles.seed = 0
+        scene.cycles.feature_set = 'SUPPORTED'
+
+        scene.cycles.samples = 4096
+        scene.cycles.use_adaptive_sampling = True
+        scene.cycles.adaptive_threshold = 0.01
+        scene.cycles.time_limit = 0
+
+        scene.cycles.use_denoising = True
+        scene.cycles.denoiser = 'OPENIMAGEDENOISE'
+
+        scene.cycles.denoising_input_passes = 'RGB_ALBEDO_NORMAL'
+        scene.cycles.min_light_bounces = 0
+        scene.cycles.min_transparent_bounces = 0
+        scene.cycles.light_sampling_threshold = 0.01
+
+        scene.cycles.max_bounces = 12
+        scene.cycles.diffuse_bounces = 4
+        scene.cycles.glossy_bounces = 4
+        scene.cycles.transmission_bounces = 12
+        scene.cycles.volume_bounces = 0
+        scene.cycles.transparent_max_bounces = 8
+        scene.cycles.sample_clamp_direct = 0
+        scene.cycles.sample_clamp_indirect = 10
+        scene.cycles.blur_glossy = 1
+
+        scene.render.use_persistent_data = True
+
     if engine.lower() == 'cycles' and device.lower() == 'gpu':
-        # Set the device_type
-        bpy.context.preferences.addons['cycles'].preferences.compute_device_type = 'CUDA'
-        # Set the device and feature set
-        bpy.context.scene.cycles.device = 'GPU'
-        # get_devices() to let Blender detects GPU device
-        bpy.context.preferences.addons['cycles'].preferences.get_devices()
-        for d in bpy.context.preferences.addons['cycles'].preferences.devices:
-            for k in d.keys():
-                print(f'{k}: {d[k]}')
-            print('---')
-            d["use"] = 1
-            if d["type"] == 0:  # type 0 -> CPU
-                d["use"] = 0
+        setup_gpu_cycles()
 
 
 def load_gltf(file_path):
@@ -141,25 +190,14 @@ def load_gltf(file_path):
     #     add_hdri_map(envmap)
 
 
-def render(rcfg_data: dict,
-           part_id: str,
-           envmap_dir: str,
-           out_dir: str,
-           res_x: int = 256,
-           res_y: int = 256,
-           out_format: str = "PNG",
-           out_quality: int = 100,
-           engine: str = "CYCLES",
-           device: str = "GPU"):
-    # Scene setup
+def render(
+    rcfg_data: dict,
+    part_id: str,
+    envmap_dir: str,
+    out_dir: str,
+):
+    # # Scene setup
     scene = bpy.context.scene
-    scene.render.resolution_x = res_x
-    scene.render.resolution_y = res_y
-    scene.render.image_settings.quality = out_quality
-    scene.render.image_settings.file_format = out_format
-    scene.render.engine = engine
-    # set transparency to true at this point to hide envmap
-    scene.render.film_transparent = True
 
     cameras = [obj for obj in scene.objects if obj.type == 'CAMERA']
     lights = [obj for obj in scene.objects if obj.type == 'LIGHT']
@@ -188,11 +226,45 @@ def render(rcfg_data: dict,
         # Zoom out a little
         # translate_objects_by([cam], mathutils.Vector((0, 0, 0.5)))
 
-        bpy.context.scene.render.filepath = f"{out_dir}/{part_id}_{i}"
+        bpy.context.scene.render.filepath = f"{out_dir}/render/{part_id}_{i}"
         bpy.ops.render.render(write_still=True)
 
         # Hide lights again after rendered
         objs_set_hide_render(render_lights, True)
+    render_settings = {
+        "engine": bpy.context.scene.render.engine,
+        "resolution_x": bpy.context.scene.render.resolution_x,
+        "resolution_y": bpy.context.scene.render.resolution_y,
+        "film_transparent": bpy.context.scene.render.film_transparent,
+        "quality": bpy.context.scene.render.image_settings.quality,
+        "file_format": bpy.context.scene.render.image_settings.file_format,
+        "cycles": {
+            "seed": bpy.context.scene.cycles.seed,
+            "feature_set": bpy.context.scene.cycles.feature_set,
+            "samples": bpy.context.scene.cycles.samples,
+            "use_adaptive_sampling": bpy.context.scene.cycles.use_adaptive_sampling,
+            "adaptive_threshold": bpy.context.scene.cycles.adaptive_threshold,
+            "time_limit": bpy.context.scene.cycles.time_limit,
+            "use_denoising": bpy.context.scene.cycles.use_denoising,
+            "denoiser": bpy.context.scene.cycles.denoiser,
+            "denoising_input_passes": bpy.context.scene.cycles.denoising_input_passes,
+            "min_light_bounces": bpy.context.scene.cycles.min_light_bounces,
+            "min_transparent_bounces": bpy.context.scene.cycles.min_transparent_bounces,
+            "light_sampling_threshold": bpy.context.scene.cycles.light_sampling_threshold,
+            "max_bounces": bpy.context.scene.cycles.max_bounces,
+            "diffuse_bounces": bpy.context.scene.cycles.diffuse_bounces,
+            "glossy_bounces": bpy.context.scene.cycles.glossy_bounces,
+            "transmission_bounces": bpy.context.scene.cycles.transmission_bounces,
+            "volume_bounces": bpy.context.scene.cycles.volume_bounces,
+            "transparent_max_bounces": bpy.context.scene.cycles.transparent_max_bounces,
+            "sample_clamp_direct": bpy.context.scene.cycles.sample_clamp_direct,
+            "sample_clamp_indirect": bpy.context.scene.cycles.sample_clamp_indirect,
+            "blur_glossy": bpy.context.scene.cycles.blur_glossy,
+            "use_persistent_data": bpy.context.scene.render.use_persistent_data,
+        }
+    }
+    with open(f'{out_dir}/render_settings.json', 'w') as outfile:
+        json.dump(render_settings, outfile)
 
 
 def get_args():
@@ -291,23 +363,27 @@ if __name__ == '__main__':
         rcfg_data = json.load(rcfg_json)
 
     sorted_input_files = sorted(os.listdir(gltf_dir), key=lambda x: x.split("_")[0])
+
     for glb_fname in sorted_input_files:
         if not glb_fname.endswith(".glb"):
             continue
         clear_scene()
         load_gltf(os.path.join(gltf_dir, glb_fname))
-        setup_device(engine, device)
         part_id = glb_fname[:-4]  # Remove .glb from glb filename
+
+        apply_render_settings(
+            device=device,
+            engine=engine,
+            res_x=res_x,
+            res_y=res_y,
+            out_format=out_format,
+            out_quality=out_quality,
+        )
         render(
             rcfg_data=rcfg_data,
             part_id=part_id,
             envmap_dir=envmap_dir,
             out_dir=out_dir,
-            res_x=res_x,
-            res_y=res_y,
-            out_format=out_format,
-            out_quality=out_quality,
-            engine=engine,
         )
 
     tend = time.time() - tstart

@@ -1,4 +1,4 @@
-name: py39-synthnet-render-pipeline
+name: py39-synthnet-rendering-pipeline
 channels:
   - defaults
   - anaconda
