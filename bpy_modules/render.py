@@ -134,10 +134,9 @@ def apply_render_settings(
     scene.render.engine = engine
     scene.render.resolution_x = res_x
     scene.render.resolution_y = res_y
+    scene.render.film_transparent = True
     scene.render.image_settings.quality = out_quality
     scene.render.image_settings.file_format = out_format
-    # Hide Envmap
-    scene.render.film_transparent = True
 
     if engine.lower() == 'cycles':
         scene.cycles.seed = 0
@@ -149,8 +148,8 @@ def apply_render_settings(
         scene.cycles.time_limit = 0
 
         scene.cycles.use_denoising = True
-        scene.cycles.denoiser = 'OPTIX'
-        # scene.cycles.denoiser = 'OPENIMAGEDENOISE'
+        scene.cycles.denoiser = 'OPENIMAGEDENOISE'
+
         scene.cycles.denoising_input_passes = 'RGB_ALBEDO_NORMAL'
         scene.cycles.min_light_bounces = 0
         scene.cycles.min_transparent_bounces = 0
@@ -227,11 +226,45 @@ def render(
         # Zoom out a little
         # translate_objects_by([cam], mathutils.Vector((0, 0, 0.5)))
 
-        bpy.context.scene.render.filepath = f"{out_dir}/{part_id}_{i}"
+        bpy.context.scene.render.filepath = f"{out_dir}/render/{part_id}_{i}"
         bpy.ops.render.render(write_still=True)
 
         # Hide lights again after rendered
         objs_set_hide_render(render_lights, True)
+    render_settings = {
+        "engine": bpy.context.scene.render.engine,
+        "resolution_x": bpy.context.scene.render.resolution_x,
+        "resolution_y": bpy.context.scene.render.resolution_y,
+        "film_transparent": bpy.context.scene.render.film_transparent,
+        "quality": bpy.context.scene.render.image_settings.quality,
+        "file_format": bpy.context.scene.render.image_settings.file_format,
+        "cycles": {
+            "seed": bpy.context.scene.cycles.seed,
+            "feature_set": bpy.context.scene.cycles.feature_set,
+            "samples": bpy.context.scene.cycles.samples,
+            "use_adaptive_sampling": bpy.context.scene.cycles.use_adaptive_sampling,
+            "adaptive_threshold": bpy.context.scene.cycles.adaptive_threshold,
+            "time_limit": bpy.context.scene.cycles.time_limit,
+            "use_denoising": bpy.context.scene.cycles.use_denoising,
+            "denoiser": bpy.context.scene.cycles.denoiser,
+            "denoising_input_passes": bpy.context.scene.cycles.denoising_input_passes,
+            "min_light_bounces": bpy.context.scene.cycles.min_light_bounces,
+            "min_transparent_bounces": bpy.context.scene.cycles.min_transparent_bounces,
+            "light_sampling_threshold": bpy.context.scene.cycles.light_sampling_threshold,
+            "max_bounces": bpy.context.scene.cycles.max_bounces,
+            "diffuse_bounces": bpy.context.scene.cycles.diffuse_bounces,
+            "glossy_bounces": bpy.context.scene.cycles.glossy_bounces,
+            "transmission_bounces": bpy.context.scene.cycles.transmission_bounces,
+            "volume_bounces": bpy.context.scene.cycles.volume_bounces,
+            "transparent_max_bounces": bpy.context.scene.cycles.transparent_max_bounces,
+            "sample_clamp_direct": bpy.context.scene.cycles.sample_clamp_direct,
+            "sample_clamp_indirect": bpy.context.scene.cycles.sample_clamp_indirect,
+            "blur_glossy": bpy.context.scene.cycles.blur_glossy,
+            "use_persistent_data": bpy.context.scene.render.use_persistent_data,
+        }
+    }
+    with open(f'{out_dir}/render_settings.json', 'w') as outfile:
+        json.dump(render_settings, outfile)
 
 
 def get_args():
