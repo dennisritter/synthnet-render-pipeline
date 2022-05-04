@@ -115,7 +115,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     blender --background --python ./bpy_modules/render.py -- \
     --gltf_dir $GLTF_DIR \
     --envmap_dir $RESOURCE_DIR/envmaps \
-    --out_dir $OUT_DIR/render \
+    --out_dir $OUT_DIR \
     --rcfg_file="$OUT_DIR/$RCFG_NAME" \
     --res_x $RES_X \
     --res_y $RES_Y \
