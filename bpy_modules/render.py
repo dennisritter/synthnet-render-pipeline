@@ -140,7 +140,33 @@ def apply_render_settings(
     scene.render.film_transparent = True
 
     if engine.lower() == 'cycles':
-        scene.cycles.samples = 1024
+        scene.cycles.seed = 0
+        scene.cycles.feature_set = 'SUPPORTED'
+
+        scene.cycles.samples = 4096
+        scene.cycles.use_adaptive_sampling = True
+        scene.cycles.adaptive_threshold = 0.01
+        scene.cycles.time_limit = 0
+
+        scene.cycles.use_denoising = True
+        scene.cycles.denoiser = 'OPTIX'
+        # scene.cycles.denoiser = 'OPENIMAGEDENOISE'
+        scene.cycles.denoising_input_passes = 'RGB_ALBEDO_NORMAL'
+        scene.cycles.min_light_bounces = 0
+        scene.cycles.min_transparent_bounces = 0
+        scene.cycles.light_sampling_threshold = 0.01
+
+        scene.cycles.max_bounces = 12
+        scene.cycles.diffuse_bounces = 4
+        scene.cycles.glossy_bounces = 4
+        scene.cycles.transmission_bounces = 12
+        scene.cycles.volume_bounces = 0
+        scene.cycles.transparent_max_bounces = 8
+        scene.cycles.sample_clamp_direct = 0
+        scene.cycles.sample_clamp_indirect = 10
+        scene.cycles.blur_glossy = 1
+
+        scene.render.use_persistent_data = True
 
     if engine.lower() == 'cycles' and device.lower() == 'gpu':
         setup_gpu_cycles()
@@ -305,21 +331,21 @@ if __name__ == '__main__':
 
     sorted_input_files = sorted(os.listdir(gltf_dir), key=lambda x: x.split("_")[0])
 
-    apply_render_settings(
-        device=device,
-        engine=engine,
-        res_x=res_x,
-        res_y=res_y,
-        out_format=out_format,
-        out_quality=out_quality,
-    )
-
     for glb_fname in sorted_input_files:
         if not glb_fname.endswith(".glb"):
             continue
         clear_scene()
         load_gltf(os.path.join(gltf_dir, glb_fname))
         part_id = glb_fname[:-4]  # Remove .glb from glb filename
+
+        apply_render_settings(
+            device=device,
+            engine=engine,
+            res_x=res_x,
+            res_y=res_y,
+            out_format=out_format,
+            out_quality=out_quality,
+        )
         render(
             rcfg_data=rcfg_data,
             part_id=part_id,
