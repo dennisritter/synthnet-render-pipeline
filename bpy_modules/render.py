@@ -104,22 +104,46 @@ def objs_set_hide_render(objs: list, hide_render: bool):
         obj.hide_render = hide_render
 
 
-def setup_device(engine="CYCLES", device="CPU"):
+def setup_gpu_cycles():
     # Render settings CYCLES GPU rendering
+    # Set the device_type
+    bpy.context.preferences.addons['cycles'].preferences.compute_device_type = 'CUDA'
+    # Set the device and feature set
+    bpy.context.scene.cycles.device = 'GPU'
+    # get_devices() to let Blender detects GPU device
+    bpy.context.preferences.addons['cycles'].preferences.get_devices()
+    for d in bpy.context.preferences.addons['cycles'].preferences.devices:
+        for k in d.keys():
+            print(f'{k}: {d[k]}')
+        print('---')
+        d["use"] = 1
+        if d["type"] == 0:  # type 0 -> CPU
+            d["use"] = 0
+
+
+def apply_render_settings(
+    engine: str = "CYCLES",
+    device: str = "GPU",
+    res_x: int = 256,
+    res_y: int = 256,
+    out_format: str = "PNG",
+    out_quality: int = 100,
+):
+    scene = bpy.context.scene
+
+    scene.render.engine = engine
+    scene.render.resolution_x = res_x
+    scene.render.resolution_y = res_y
+    scene.render.image_settings.quality = out_quality
+    scene.render.image_settings.file_format = out_format
+    # Hide Envmap
+    scene.render.film_transparent = True
+
+    if engine.lower() == 'cycles':
+        scene.cycles.samples = 1024
+
     if engine.lower() == 'cycles' and device.lower() == 'gpu':
-        # Set the device_type
-        bpy.context.preferences.addons['cycles'].preferences.compute_device_type = 'CUDA'
-        # Set the device and feature set
-        bpy.context.scene.cycles.device = 'GPU'
-        # get_devices() to let Blender detects GPU device
-        bpy.context.preferences.addons['cycles'].preferences.get_devices()
-        for d in bpy.context.preferences.addons['cycles'].preferences.devices:
-            for k in d.keys():
-                print(f'{k}: {d[k]}')
-            print('---')
-            d["use"] = 1
-            if d["type"] == 0:  # type 0 -> CPU
-                d["use"] = 0
+        setup_gpu_cycles()
 
 
 def load_gltf(file_path):
@@ -141,25 +165,14 @@ def load_gltf(file_path):
     #     add_hdri_map(envmap)
 
 
-def render(rcfg_data: dict,
-           part_id: str,
-           envmap_dir: str,
-           out_dir: str,
-           res_x: int = 256,
-           res_y: int = 256,
-           out_format: str = "PNG",
-           out_quality: int = 100,
-           engine: str = "CYCLES",
-           device: str = "GPU"):
-    # Scene setup
+def render(
+    rcfg_data: dict,
+    part_id: str,
+    envmap_dir: str,
+    out_dir: str,
+):
+    # # Scene setup
     scene = bpy.context.scene
-    scene.render.resolution_x = res_x
-    scene.render.resolution_y = res_y
-    scene.render.image_settings.quality = out_quality
-    scene.render.image_settings.file_format = out_format
-    scene.render.engine = engine
-    # set transparency to true at this point to hide envmap
-    scene.render.film_transparent = True
 
     cameras = [obj for obj in scene.objects if obj.type == 'CAMERA']
     lights = [obj for obj in scene.objects if obj.type == 'LIGHT']
@@ -291,23 +304,27 @@ if __name__ == '__main__':
         rcfg_data = json.load(rcfg_json)
 
     sorted_input_files = sorted(os.listdir(gltf_dir), key=lambda x: x.split("_")[0])
+
+    apply_render_settings(
+        device=device,
+        engine=engine,
+        res_x=res_x,
+        res_y=res_y,
+        out_format=out_format,
+        out_quality=out_quality,
+    )
+
     for glb_fname in sorted_input_files:
         if not glb_fname.endswith(".glb"):
             continue
         clear_scene()
         load_gltf(os.path.join(gltf_dir, glb_fname))
-        setup_device(engine, device)
         part_id = glb_fname[:-4]  # Remove .glb from glb filename
         render(
             rcfg_data=rcfg_data,
             part_id=part_id,
             envmap_dir=envmap_dir,
             out_dir=out_dir,
-            res_x=res_x,
-            res_y=res_y,
-            out_format=out_format,
-            out_quality=out_quality,
-            engine=engine,
         )
 
     tend = time.time() - tstart
