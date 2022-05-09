@@ -148,7 +148,7 @@ def apply_render_settings(
         scene.cycles.time_limit = 0
 
         scene.cycles.use_denoising = True
-        scene.cycles.denoiser = 'OPENIMAGEDENOISE'
+        scene.cycles.denoiser = 'OPTIX'
 
         scene.cycles.denoising_input_passes = 'RGB_ALBEDO_NORMAL'
         scene.cycles.min_light_bounces = 0
