@@ -7,7 +7,6 @@ import mathutils
 import json
 
 import builtins as __builtin__
-
 #########################################
 
 # PRINT TO SYSTEM CONSOLE
@@ -32,6 +31,102 @@ def console_print(*args, **kwargs):
 def print(*args, **kwargs):
     console_print(*args, **kwargs)  # to Python Console
     __builtin__.print(*args, **kwargs)  # to System Console
+
+
+#########################################
+
+# MATERIALS
+
+#########################################
+
+
+def remove_vertex_colors(obj: bpy.types.Object):
+    """Removes the Vertex Colors from the given object.
+
+    Args:
+        mat (bpy.types.Object): Blender object to remove the Vertex Colors from.
+    """
+    vertex_colors = obj.data.vertex_colors
+    while vertex_colors:
+        print(vertex_colors[0])
+        vertex_colors.remove(vertex_colors[0])
+
+
+def set_object_material_basecolor(obj: bpy.types.Object, color):
+    """Set the base color in the Principled BSDF node for the material of the given object.
+
+        Args: 
+            mat (bpy.types.Material)
+    """
+    mat = obj.data.materials[0]
+    # Remove Texture input from base color and set a color
+    if mat.node_tree.nodes["Principled BSDF"].inputs[0].links:
+        base_color_link = mat.node_tree.nodes["Principled BSDF"].inputs[0].links[0]
+        mat.node_tree.links.remove(base_color_link)
+    mat.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = color
+
+
+def import_materials_from_blend(file_path):
+    """ Loads materials from .blend files and replaces all materials with those in the target blend file.
+
+        Args:
+            file_path (str): The path to the .blend file containing materials
+    """
+    materials = None
+    with bpy.data.libraries.load(file_path, link=False) as (data_from, data_to):
+        materials = data_from.materials
+        data_to.materials = data_from.materials
+    return materials
+
+
+def get_bpy_materials(materials_dir: str) -> dict:
+    """ Returns a dictionary of blender materials read from the materials directory.
+
+        The materials_dir should contain .blend files that contain exactly one material.
+        The name of the .blend file should match the material name in that file.
+    """
+    bpy_materials = {}
+    for material_fn in os.listdir(material_dir):
+        if material_fn.endswith('.blend'):
+            bpy_materials[material_fn] = import_materials_from_blend(f"{materials_dir}/{material_fn}")[0]
+    print(bpy_materials)
+    return bpy_materials
+
+
+def apply_material(ob: bpy.types.Object, mat: bpy.types.Material) -> bpy.types.Material:
+    """
+    Apply material to given ob by material id
+    Args:
+        ob: object in scene to apply material to
+        material_id: name of material in scene to apply
+    Returns:
+    """
+    # Clear other mats?
+    if ob.data.materials:
+        ob.data.materials.clear()
+    ob.data.materials.append(mat)
+
+    # ob.data.materials.insert(0, mat)
+    return mat
+
+
+def apply_materials(scene: bpy.types.Scene, rcfg_part: dict, bpy_materials: dict):
+    for bpy_obj in scene.objects:
+        # Reset obj color for all mesh objects
+        if bpy_obj.type == 'MESH':
+            remove_vertex_colors(bpy_obj)
+            # set_object_material_basecolor(bpy_obj, (0.15, 0.15, 0.15, 1.0))
+            # Check for obj references in render config
+            for rcfg_single_part in rcfg_part["single_parts"]:
+                if bpy_obj.name.startswith(rcfg_single_part["id"]):
+                    # Do nothing if no material defined
+                    if rcfg_single_part["material"] in ["none", None]:
+                        print(f"Apply material: {bpy_obj.name}: {rcfg_single_part['material']}")
+                        continue
+                    # Apply material to mesh obj
+                    print(f"Apply material: {bpy_obj.name}: {rcfg_single_part['material']}")
+                    apply_material(bpy_obj, bpy_materials[rcfg_single_part['material']])
+                    break
 
 
 #########################################
@@ -191,22 +286,16 @@ def load_gltf(file_path):
 
 
 def render(
-    rcfg_data: dict,
+    scene,
+    rcfg_part: dict,
     part_id: str,
     envmap_dir: str,
     out_dir: str,
 ):
-    # # Scene setup
-    scene = bpy.context.scene
-
     cameras = [obj for obj in scene.objects if obj.type == 'CAMERA']
     lights = [obj for obj in scene.objects if obj.type == 'LIGHT']
 
-    for part in rcfg_data["parts"]:
-        if part["id"] == part_id:
-            render_setups = part["scene"]["render_setups"]
-            break
-
+    render_setups = rcfg_part["scene"]["render_setups"]
     # Hide all lights
     objs_set_hide_render(lights, True)
     # Render Loop
@@ -231,6 +320,7 @@ def render(
 
         # Hide lights again after rendered
         objs_set_hide_render(render_lights, True)
+    # Write render settings into object and export as json
     render_settings = {
         "engine": bpy.context.scene.render.engine,
         "resolution_x": bpy.context.scene.render.resolution_x,
@@ -281,8 +371,14 @@ def get_args():
         required=True,
     )
     parser.add_argument(
+        '--material_dir',
+        help="Data directory for materials.",
+        type=str,
+        required=True,
+    )
+    parser.add_argument(
         '--envmap_dir',
-        help="Data directory for materials, envmaps and other dependencies.",
+        help="Data directory for envmaps.",
         type=str,
         required=True,
     )
@@ -348,6 +444,7 @@ if __name__ == '__main__':
     print(f"Running Rendering with args:\n{args}")
 
     gltf_dir = args.gltf_dir
+    material_dir = args.material_dir
     envmap_dir = args.envmap_dir
     out_dir = args.out_dir
     rcfg_file = args.rcfg_file
@@ -370,7 +467,18 @@ if __name__ == '__main__':
         clear_scene()
         load_gltf(os.path.join(gltf_dir, glb_fname))
         part_id = glb_fname[:-4]  # Remove .glb from glb filename
+        scene = bpy.context.scene
+        bpy_materials = get_bpy_materials(material_dir)
+        for part in rcfg_data["parts"]:
+            if part["id"] == part_id:
+                rcfg_part = part
+                break
 
+        apply_materials(
+            scene,
+            rcfg_part,
+            bpy_materials,
+        )
         apply_render_settings(
             device=device,
             engine=engine,
@@ -380,7 +488,8 @@ if __name__ == '__main__':
             out_quality=out_quality,
         )
         render(
-            rcfg_data=rcfg_data,
+            scene,
+            rcfg_part=rcfg_part,
             part_id=part_id,
             envmap_dir=envmap_dir,
             out_dir=out_dir,

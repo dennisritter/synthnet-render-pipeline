@@ -114,6 +114,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     RENDER_SECONDS_START=$SECONDS
     blender --background --python ./bpy_modules/render.py -- \
     --gltf_dir $GLTF_DIR \
+    --material_dir $RESOURCE_DIR/materials \
     --envmap_dir $RESOURCE_DIR/envmaps \
     --out_dir $OUT_DIR \
     --rcfg_file="$OUT_DIR/$RCFG_NAME" \
