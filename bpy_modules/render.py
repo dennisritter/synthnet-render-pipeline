@@ -7,7 +7,6 @@ import mathutils
 import json
 
 import builtins as __builtin__
-
 #########################################
 
 # PRINT TO SYSTEM CONSOLE
@@ -32,6 +31,45 @@ def console_print(*args, **kwargs):
 def print(*args, **kwargs):
     console_print(*args, **kwargs)  # to Python Console
     __builtin__.print(*args, **kwargs)  # to System Console
+
+
+#########################################
+
+# MATERIALS
+
+#########################################
+
+
+def import_materials_from_blend(file_path):
+    """ Loads materials from .blend files and replaces all materials with those in the target blend file.
+
+        Args:
+            file_path (str): The path to the .blend file containing materials
+    """
+    materials = None
+    with bpy.data.libraries.load(file_path, link=False) as (data_from, data_to):
+        materials = data_from.materials
+        data_to.materials = data_from.materials
+    return materials
+
+
+def get_bpy_materials(materials_dir: str):
+    """ Returns a dictionary of blender materials read from the materials directory.
+
+        The materials_dir should contain .blend files that contain exactly one material.
+        The name of the .blend file should match the material name in that file.
+    """
+    bpy_materials = {}
+    for material_fn in os.listdir(material_dir):
+        if material_fn.endswith('.blend'):
+            bpy_materials[material_fn] = import_materials_from_blend(f"{materials_dir}/{material_fn}")[0]
+
+
+def apply_materials(scene: bpy.types.Scene, rcfg_part: dict, bpy_materials: dict):
+    for single_part in rcfg_part["single_parts"]:
+        print(single_part)
+        for obj in scene.objects:
+            print(obj)
 
 
 #########################################
@@ -190,19 +228,13 @@ def load_gltf(file_path):
     #     add_hdri_map(envmap)
 
 
-def apply_materials(part_id: str, rcfg_part: dict):
-    pass
-
-
 def render(
+    scene,
     rcfg_part: dict,
     part_id: str,
     envmap_dir: str,
     out_dir: str,
 ):
-    # # Scene setup
-    scene = bpy.context.scene
-
     cameras = [obj for obj in scene.objects if obj.type == 'CAMERA']
     lights = [obj for obj in scene.objects if obj.type == 'LIGHT']
 
@@ -366,6 +398,7 @@ if __name__ == '__main__':
     engine = args.engine
     device = args.device
 
+    bpy_materials = get_bpy_materials(material_dir)
     # Load RCFG data
     with open(rcfg_file, "r") as rcfg_json:
         rcfg_data = json.load(rcfg_json)
@@ -378,13 +411,14 @@ if __name__ == '__main__':
         clear_scene()
         load_gltf(os.path.join(gltf_dir, glb_fname))
         part_id = glb_fname[:-4]  # Remove .glb from glb filename
+        scene = bpy.context.scene
 
         for part in rcfg_data["parts"]:
             if part["id"] == part_id:
                 rcfg_part = part
                 break
 
-        apply_materials(part_id, rcfg_part)
+        apply_materials(scene, rcfg_part, bpy_materials)
         apply_render_settings(
             device=device,
             engine=engine,
@@ -393,12 +427,13 @@ if __name__ == '__main__':
             out_format=out_format,
             out_quality=out_quality,
         )
-        render(
-            rcfg_part=rcfg_part,
-            part_id=part_id,
-            envmap_dir=envmap_dir,
-            out_dir=out_dir,
-        )
+        # render(
+        #     scene,
+        #     rcfg_part=rcfg_part,
+        #     part_id=part_id,
+        #     envmap_dir=envmap_dir,
+        #     out_dir=out_dir,
+        # )
 
     tend = time.time() - tstart
     print(f"Rendered {len(os.listdir(gltf_dir))} imgs in {tend} seconds")
