@@ -723,13 +723,20 @@ class SceneExporter():
             bpy_single_parts = get_bpy_single_parts(part)
             bpy_cameras = get_bpy_cameras(part)
             bpy_lights = get_bpy_lights(part)
-            bpy_materials = get_bpy_materials(part, bpy_materials, materials_dir=f"{self.data_dir}/materials")
+            # MATERIALS
+            # NOTE: Moved material assignment to render.py as advanced materials are not properly converted from blender->gltf
+            #       Just Uncomment if you use basic materials only using blenders Principled BSDF shader node or other materials
+            #       that can be mapped to gltf properly
+            # bpy_materials = get_bpy_materials(part, bpy_materials, materials_dir=f"{self.data_dir}/materials")
+            #
+            # print(bpy_materials)
+            # apply_materials(part, bpy_single_parts, bpy_materials)
+
+            # ----------
             # ENVMAPS
             # TODO: Check if we can add envmaps directly to gltf
             # envmap_dir = f"{self.data_dir}/envmaps"
             # bpy_envmaps = [add_image_to_blender(f"{envmap_dir}/{envmap_fn}") for envmap_fn in rcfg_scene["envmaps"]]
-            print(bpy_materials)
-            apply_materials(part, bpy_single_parts, bpy_materials)
 
             ### Translate current part to world center
             # get the bounding sphere center

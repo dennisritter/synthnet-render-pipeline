@@ -148,7 +148,7 @@ def apply_render_settings(
         scene.cycles.time_limit = 0
 
         scene.cycles.use_denoising = True
-        scene.cycles.denoiser = 'OPTIX'
+        scene.cycles.denoiser = 'OPENIMAGEDENOISE'
 
         scene.cycles.denoising_input_passes = 'RGB_ALBEDO_NORMAL'
         scene.cycles.min_light_bounces = 0
@@ -190,9 +190,14 @@ def load_gltf(file_path):
     #     add_hdri_map(envmap)
 
 
+def apply_materials(rcfg_data: dict):
+    pass
+
+
 def render(
     rcfg_data: dict,
     part_id: str,
+    material_dir: str,
     envmap_dir: str,
     out_dir: str,
 ):
@@ -231,6 +236,7 @@ def render(
 
         # Hide lights again after rendered
         objs_set_hide_render(render_lights, True)
+    # Write render settings into object and export as json
     render_settings = {
         "engine": bpy.context.scene.render.engine,
         "resolution_x": bpy.context.scene.render.resolution_x,
@@ -281,8 +287,14 @@ def get_args():
         required=True,
     )
     parser.add_argument(
+        '--material_dir',
+        help="Data directory for materials.",
+        type=str,
+        required=True,
+    )
+    parser.add_argument(
         '--envmap_dir',
-        help="Data directory for materials, envmaps and other dependencies.",
+        help="Data directory for envmaps.",
         type=str,
         required=True,
     )
@@ -348,6 +360,7 @@ if __name__ == '__main__':
     print(f"Running Rendering with args:\n{args}")
 
     gltf_dir = args.gltf_dir
+    material_dir = args.material_dir
     envmap_dir = args.envmap_dir
     out_dir = args.out_dir
     rcfg_file = args.rcfg_file
@@ -371,6 +384,7 @@ if __name__ == '__main__':
         load_gltf(os.path.join(gltf_dir, glb_fname))
         part_id = glb_fname[:-4]  # Remove .glb from glb filename
 
+        apply_materials(part_id)
         apply_render_settings(
             device=device,
             engine=engine,
@@ -383,6 +397,7 @@ if __name__ == '__main__':
             rcfg_data=rcfg_data,
             part_id=part_id,
             envmap_dir=envmap_dir,
+            material_dir=material_dir,
             out_dir=out_dir,
         )
 
