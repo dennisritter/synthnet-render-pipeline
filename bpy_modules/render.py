@@ -190,14 +190,13 @@ def load_gltf(file_path):
     #     add_hdri_map(envmap)
 
 
-def apply_materials(rcfg_data: dict):
+def apply_materials(part_id: str, rcfg_part: dict):
     pass
 
 
 def render(
-    rcfg_data: dict,
+    rcfg_part: dict,
     part_id: str,
-    material_dir: str,
     envmap_dir: str,
     out_dir: str,
 ):
@@ -207,11 +206,7 @@ def render(
     cameras = [obj for obj in scene.objects if obj.type == 'CAMERA']
     lights = [obj for obj in scene.objects if obj.type == 'LIGHT']
 
-    for part in rcfg_data["parts"]:
-        if part["id"] == part_id:
-            render_setups = part["scene"]["render_setups"]
-            break
-
+    render_setups = rcfg_part["scene"]["render_setups"]
     # Hide all lights
     objs_set_hide_render(lights, True)
     # Render Loop
@@ -384,7 +379,12 @@ if __name__ == '__main__':
         load_gltf(os.path.join(gltf_dir, glb_fname))
         part_id = glb_fname[:-4]  # Remove .glb from glb filename
 
-        apply_materials(part_id)
+        for part in rcfg_data["parts"]:
+            if part["id"] == part_id:
+                rcfg_part = part
+                break
+
+        apply_materials(part_id, rcfg_part)
         apply_render_settings(
             device=device,
             engine=engine,
@@ -394,10 +394,9 @@ if __name__ == '__main__':
             out_quality=out_quality,
         )
         render(
-            rcfg_data=rcfg_data,
+            rcfg_part=rcfg_part,
             part_id=part_id,
             envmap_dir=envmap_dir,
-            material_dir=material_dir,
             out_dir=out_dir,
         )
 
