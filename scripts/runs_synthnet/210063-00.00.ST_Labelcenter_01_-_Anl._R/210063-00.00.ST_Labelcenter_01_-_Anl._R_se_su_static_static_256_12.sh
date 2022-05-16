@@ -116,7 +116,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     --gltf_dir $GLTF_DIR \
     --material_dir $RESOURCE_DIR/materials \
     --envmap_dir $RESOURCE_DIR/envmaps \
-    --out_dir $OUT_DIR/render \
+    --out_dir $OUT_DIR \
     --rcfg_file="$OUT_DIR/$RCFG_NAME" \
     --res_x $RES_X \
     --res_y $RES_Y \
