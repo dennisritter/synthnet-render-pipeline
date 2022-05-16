@@ -114,6 +114,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     RENDER_SECONDS_START=$SECONDS
     blender --background --python ./bpy_modules/render.py -- \
     --gltf_dir $GLTF_DIR \
+    --material_dir $RESOURCE_DIR/materials \
     --envmap_dir $RESOURCE_DIR/envmaps \
     --out_dir $OUT_DIR/render \
     --rcfg_file="$OUT_DIR/$RCFG_NAME" \
@@ -150,7 +151,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     --render_format $OUT_FORMAT \
     --render_engine $ENGINE \
     --render_device $DEVICE \
-    --comment "Aluminium material = steel material; base color = 0.15, 0.15, 0.15, 1" 
+    --comment "" 
 fi
 ############################
 
