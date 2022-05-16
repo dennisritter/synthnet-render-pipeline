@@ -26,8 +26,8 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
     part_materials = raw_in.loc[:, 'Werkstoff'].astype(str)
     part_materials.fillna('-', inplace=True)
     # PART SURFACE
-    print(raw_in.info())
     part_surface = raw_in.loc[:, ' Oberfläche'].astype(str)
+    part_surface.fillna('-', inplace=True)
     # PART_IS_SPARE (E = Ersatzteil)
     part_is_spare = [p.lower() == 'e' for p in raw_in.loc[:, 'Bem.'].astype(str)]
     # PART_IS_WEAR (V = Verschleißteil)
