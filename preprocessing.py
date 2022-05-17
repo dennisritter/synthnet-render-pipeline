@@ -23,6 +23,12 @@ LOG_DELIM = '* ' * 20
     required=True,
 )
 @click.option(
+    '--materials_dir',
+    help='Path to blender materials directory',
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True),
+    required=True,
+)
+@click.option(
     '--out_dir',
     help='Output root directory (created if not existent)',
     type=click.Path(exists=False, file_okay=False, dir_okay=True),
@@ -95,6 +101,7 @@ def main(**kwargs):
 
     metadata_file = args.metadata_file
     blend_file = args.blend_file
+    materials_dir = args.materials_dir
     out_dir = args.out_dir
     n_images_per_part = args.n_images_per_part
     scene_mode = args.scene_mode
@@ -120,6 +127,7 @@ def main(**kwargs):
     ppc = PreprocessingController(
         metadata_file=metadata_file,
         blend_file=blend_file,
+        materials_dir=materials_dir,
         output_dir=out_dir,
         n_images=n_images_per_part,
         scene_mode=scene_mode,

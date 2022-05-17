@@ -27,6 +27,7 @@ class PreprocessingController:
         self,
         metadata_file: str,
         blend_file: str,
+        materials_dir: str,
         output_dir: str,
         n_images: int,
         scene_mode: str,
@@ -45,6 +46,9 @@ class PreprocessingController:
         # validate blend_file
         assert isinstance(blend_file, str)
         assert os.path.isfile(blend_file)
+        # validate materials_dir
+        assert isinstance(materials_dir, str)
+        assert os.path.isdir(materials_dir)
         # validate output_dir
         assert isinstance(output_dir, str)
         os.makedirs(output_dir, exist_ok=True)
@@ -74,6 +78,7 @@ class PreprocessingController:
         ## Assign options
         self.metadata_file = metadata_file
         self.blend_file = blend_file
+        self.materials_dir = materials_dir
         self.output_dir = output_dir
         self.n_images = n_images
         self.scene_mode = scene_mode.lower()
@@ -115,7 +120,11 @@ class PreprocessingController:
         # static: Read metadata materials and apply our materials depending
         # on a static metadata_material:our_material map
         if self.material_def_mode == 'static':
-            self.parts = define_materials.assign_materials_static(self.parts, self.metadata)
+            self.parts = define_materials.assign_materials_static(
+                self.parts,
+                self.metadata,
+                self.materials_dir,
+            )
         # random: Assign a random material to each part
         if self.material_def_mode == 'random':
             self.parts = define_materials.assign_materials_random(self.parts, self.metadata)
