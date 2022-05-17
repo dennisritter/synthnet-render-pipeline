@@ -708,6 +708,8 @@ class SceneExporter():
         print(f'part_ids: {len(part_ids)}')
         print(f'matched: {len(matches)}')
         print(f'unmatched: {len(unmatched_part_ids)}')
+        for unmatched in unmatched_part_ids:
+            print(unmatched)
         print(f'- ' * 20)
         return matches
 
