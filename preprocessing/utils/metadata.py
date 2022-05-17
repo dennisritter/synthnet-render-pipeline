@@ -35,15 +35,47 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
     brass = ["CuZn37"]
     plastic = ["Kunststoff", "PA12", "Trespa", "ABS"]
     plexiglas = ["Acrylglas", "Polycarbonat"]
-    part_materials = part_materials.replace(dict.fromkeys(steel, 'steel'))
-    part_materials = part_materials.replace(dict.fromkeys(aluminium, 'aluminium'))
-    part_materials = part_materials.replace(dict.fromkeys(brass, 'brass'))
-    part_materials = part_materials.replace(dict.fromkeys(plastic, 'plastic'))
-    part_materials = part_materials.replace(dict.fromkeys(plexiglas, 'plexiglas'))
-    # PART SURFACE
+    material_mapping = [(aluminium, 'aluminium'), (steel, 'steel'), (brass, 'brass'), (plastic, 'plastic'),
+                        (plexiglas, 'plexiglas')]
+    for mm in material_mapping:
+        part_materials = part_materials.replace(dict.fromkeys(mm[0], mm[1]))
+    # PART SURFACE & COLOR
+    # 1. to lower case
+    # 2. Replace NA values
+    # 3. Polish and split surface and color values
     part_surface = raw_in.loc[:, ' Oberfläche'].astype(str)
+    part_surface = part_surface.str.lower()
     part_surface.fillna('-', inplace=True)
     part_surface = part_surface.replace('nan', '-')
+    part_color = part_surface.copy()
+    # SURFACE
+    anodized = ["schwarz eloxiert", "ral 7015 eloxiert", "topex-lila eloxiert", "natur eloxiert"]
+    hardcoated = ["hartcoatiert"]
+    sandblasted = ["sandgestrahlt"]
+    vernickelt = ["vernickelt"]
+    verzinkt = ["verzinkt"]
+    brushed = ["blank"]
+    glossy = ["glossy"]
+    matte = ["matte"]
+    undefined = ["grau", "grün", "neutralweiss", "schwarz", "schwarz eingefärbt", "transparent"]
+    surface_mapping = [(undefined, "-"), (anodized, "anodized"), (hardcoated, "hardcoated"),
+                       (sandblasted, "sandblasted"), (vernickelt, "vernickelt"), (verzinkt, "verzinkt"),
+                       (brushed, "brushed"), (glossy, "glossy"), (matte, "matte")]
+    for sm in surface_mapping:
+        part_surface = part_surface.replace(dict.fromkeys(sm[0], sm[1]))
+    # COLOR
+    black = ["schwarz", "schwarz eingefärbt", "schwarz eloxiert"]
+    grey = ["grau"]
+    ral7015 = ["ral 7015 eloxiert"]
+    green = ["grün"]
+    purple = ["topex-lila eloxiert"]
+    white = ["neutralweiss"]
+    natural = ["natur eloxiert", "sandgestrahlt", "hartcoatiert", "vernickelt", "verzinkt", "blank"]
+    transparent = ["transparent"]
+    colors_mapping = [(black, "black"), (grey, "grey"), (ral7015, "ral7015"), (green, "green"), (purple, "purple"),
+                      (white, "white"), (natural, "natural"), (transparent, "transparent")]
+    for cm in colors_mapping:
+        part_color = part_color.replace(dict.fromkeys(cm[0], cm[1]))
     # PART_IS_SPARE (E = Ersatzteil)
     part_is_spare = [p.lower() == 'e' for p in raw_in.loc[:, 'Bem.'].astype(str)]
     # PART_IS_WEAR (V = Verschleißteil)
@@ -57,6 +89,7 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
             'part_hierarchy': part_hierarchy,
             'part_material': part_materials,
             'part_surface': part_surface,
+            'part_color': part_color,
             'part_is_spare': part_is_spare,
             'part_is_wear': part_is_wear
         })
