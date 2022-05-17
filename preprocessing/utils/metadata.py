@@ -42,25 +42,26 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
     # PART SURFACE & COLOR
     # 1. to lower case
     # 2. Replace NA values
-    # 3. Polish and split surface and color values
+    # 3. Re-Map and split surface and color values
     part_surface = raw_in.loc[:, ' Oberfläche'].astype(str)
     part_surface = part_surface.str.lower()
     part_surface.fillna('-', inplace=True)
     part_surface = part_surface.replace('nan', '-')
     part_color = part_surface.copy()
     # SURFACE
-    anodized = ["schwarz eloxiert", "ral 7015 eloxiert", "topex-lila eloxiert", "natur eloxiert"]
+    anodized = ["schwarz eloxiert", "ral 7015 eloxiert", "topex-lila eloxiert", "natur eloxiert", "eloxiert"]
     hardcoated = ["hartcoatiert"]
     sandblasted = ["sandgestrahlt"]
-    vernickelt = ["vernickelt"]
-    verzinkt = ["verzinkt"]
+    nickelcoated = ["vernickelt"]
+    galvanized = ["verzinkt"]
     brushed = ["blank"]
+    burnished = ["brüniert"]
     glossy = ["glossy"]
     matte = ["matte"]
     undefined = ["grau", "grün", "neutralweiss", "schwarz", "schwarz eingefärbt", "transparent"]
     surface_mapping = [(undefined, "-"), (anodized, "anodized"), (hardcoated, "hardcoated"),
-                       (sandblasted, "sandblasted"), (vernickelt, "vernickelt"), (verzinkt, "verzinkt"),
-                       (brushed, "brushed"), (glossy, "glossy"), (matte, "matte")]
+                       (sandblasted, "sandblasted"), (nickelcoated, "nickelcoated"), (galvanized, "galvanized"),
+                       (brushed, "brushed"), (burnished, "burnished"), (glossy, "glossy"), (matte, "matte")]
     for sm in surface_mapping:
         part_surface = part_surface.replace(dict.fromkeys(sm[0], sm[1]))
     # COLOR
@@ -70,7 +71,7 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
     green = ["grün"]
     purple = ["topex-lila eloxiert"]
     white = ["neutralweiss"]
-    natural = ["natur eloxiert", "sandgestrahlt", "hartcoatiert", "vernickelt", "verzinkt", "blank"]
+    natural = ["natur eloxiert", "sandgestrahlt", "hartcoatiert", "vernickelt", "verzinkt", "blank", "brüniert"]
     transparent = ["transparent"]
     colors_mapping = [(black, "black"), (grey, "grey"), (ral7015, "ral7015"), (green, "green"), (purple, "purple"),
                       (white, "white"), (natural, "natural"), (transparent, "transparent")]
@@ -93,5 +94,22 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
             'part_is_spare': part_is_spare,
             'part_is_wear': part_is_wear
         })
+
+    DEFAULT_MATERIAL = "steel"
+    DEFAULT_COLOR = "natural"
+    DEFAULT_SURFACE = {
+        "steel": "brushed",
+        "aluminium": "anodized",
+        "brass": "brushed",
+        "plastic": "matte",
+        "plexiglas": "glossy"
+    }
+    df["part_material"].replace('-', DEFAULT_MATERIAL, inplace=True)
+    df["part_color"].replace('-', DEFAULT_COLOR, inplace=True)
+    for material, surface in DEFAULT_SURFACE.items():
+        df.loc[df.part_material == material, "part_surface"] = df.loc[df.part_material == material,
+                                                                      "part_surface"].replace('-',
+                                                                                              surface,
+                                                                                              inplace=False)
 
     return df
