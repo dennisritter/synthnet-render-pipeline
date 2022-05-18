@@ -9,6 +9,8 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
             metadata_file (str): .xlsx file of the metadata. 
     """
     raw_in = pd.read_excel(metadata_file)
+    # Remove SolidWorks Toolbox parts
+    raw_in.drop(raw_in[raw_in["Benennung 2"] == "SolidWorks Toolbox"].index, inplace=True)
 
     # PART_NUMBER
     part_number = raw_in.loc[:, 'Teilenummer'].astype(str)
@@ -95,6 +97,7 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
             'part_is_wear': part_is_wear
         })
 
+    # Set defaults for material, surface, color
     DEFAULT_MATERIAL = "steel"
     DEFAULT_COLOR = "natural"
     DEFAULT_SURFACE = {
