@@ -45,7 +45,7 @@ def assign_materials_static(parts: list, metadata: 'pd.DataFrame', materials_dir
 def assign_materials_random(
     parts: list,
     metadata: 'pd.DataFrame',
-    materials: list,
+    materials_dir: str,
     seed: int = 42,
 ) -> list[Part]:
     """ Returns a list of Part objects with assigned materials of all SingleParts. 
@@ -55,6 +55,7 @@ def assign_materials_random(
             metdata (pd.DataFrame): Prepared metadata DataFrame 
     
     """
+    materials = os.listdir(materials_dir)
     random.seed(seed)
     for part in parts:
         for single_part in part.single_parts:

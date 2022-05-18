@@ -127,7 +127,11 @@ class PreprocessingController:
             )
         # random: Assign a random material to each part
         if self.material_def_mode == 'random':
-            self.parts = define_materials.assign_materials_random(self.parts, self.metadata)
+            self.parts = define_materials.assign_materials_random(
+                self.parts,
+                self.metadata,
+                self.materials_dir,
+            )
 
         tend = timer_utils.time_since(tstart)
         LOGGER.info(f'Done in {tend}')
