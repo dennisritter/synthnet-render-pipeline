@@ -5,6 +5,9 @@ FROM nytimes/blender:3.1-gpu-ubuntu18.04
 ENV PATH="/root/miniconda3/bin:${PATH}"
 ARG PATH="/root/miniconda3/bin:${PATH}"
 
+RUN rm /etc/apt/sources.list.d/cuda.list
+RUN rm /etc/apt/sources.list.d/nvidia-ml.list
+
 RUN apt-get update
 RUN apt-get install curl -y
 RUN apt-get install -y wget && rm -rf /var/lib/apt/lists/*
@@ -26,7 +29,7 @@ COPY . .
 # Install dependencies
 RUN conda env create --file environment.yml
 # Activate environment on shell init
-RUN echo "conda activate py39-synthnet-render-pipeline" >> ~/.bashrc
+RUN echo "conda activate py39-synthnet-rendering-pipeline" >> ~/.bashrc
 # RUN conda activate py39-synthnet-render-pipeline
 
 # ENV PYTHONPATH "${PYTHONPATH}:/workspace"
