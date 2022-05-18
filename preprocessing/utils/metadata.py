@@ -9,6 +9,7 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
             metadata_file (str): .xlsx file of the metadata. 
     """
     raw_in = pd.read_excel(metadata_file)
+
     # Remove SolidWorks Toolbox parts
     raw_in.drop(raw_in[raw_in["Benennung 2"] == "SolidWorks Toolbox"].index, inplace=True)
 
