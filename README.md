@@ -64,7 +64,7 @@ The [Rendering](./bpy_modules/render.py) process reads GLTF files exported by th
 
 See the example start script below
 ```bash
-blender -b -P ./bpy_modules/render.py -- --gltf_dir /path/to/gltf_files --envmap_dir /path/to/envmap_files --out_dir /path/to/output_dir --rcfg_file /path/to/rcfg_file.json --res_x 256 --res_y 256 --out_quality 100 --out_format JPEG --engine CYCLES --device GPU
+blender -b -P ./bpy_modules/render.py -- --gltf_dir /path/to/gltf_files --material_dir /path/to/material_files --envmap_dir /path/to/envmap_files --out_dir /path/to/output_dir --rcfg_file /path/to/rcfg_file.json --res_x 256 --res_y 256 --out_quality 100 --out_format JPEG --engine CYCLES --device GPU
 ```
 
 # Outputs

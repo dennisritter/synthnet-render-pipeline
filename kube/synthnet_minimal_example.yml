@@ -6,7 +6,7 @@ spec:
   restartPolicy: Never
   containers:
   - name: synthnet-render-pipeline
-    image: beuthdritter/synthnet-render-pipeline
+    image: registry.bht-berlin.de/iisy/synthnet/rendering-pipeline
     env:
       - name: GOOGLE_APPLICATION_CREDENTIALS
         value: /etc/gcp/synthnet-gcs.json
@@ -21,7 +21,7 @@ spec:
         "conda",
         "run",
         "-n",
-        "py39-synthnet-render-pipeline",
+        "py39-synthnet-rendering-pipeline",
         "bash",
         "scripts/run_minimal_example_kube_gpu.sh",
         "3",
@@ -34,6 +34,8 @@ spec:
       limits:
         nvidia.com/gpu: 1
         memory: "64Gi"
+  imagePullSecrets:
+  - name: private-registry-auth
   nodeSelector:
     gpu: v100
   volumes:

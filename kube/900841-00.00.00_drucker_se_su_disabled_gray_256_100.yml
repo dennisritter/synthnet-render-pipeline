@@ -6,7 +6,7 @@ spec:
   restartPolicy: Never
   containers:
   - name: synthnet-drucker-se-su-disabled-gray-256-100
-    image: beuthdritter/synthnet-render-pipeline
+    image: registry.bht-berlin.de/iisy/synthnet/rendering-pipeline
     env:
       - name: GOOGLE_APPLICATION_CREDENTIALS
         value: /etc/gcp/synthnet-gcs.json
@@ -21,7 +21,7 @@ spec:
         "conda",
         "run",
         "-n",
-        "py39-synthnet-render-pipeline",
+        "py39-synthnet-rendering-pipeline",
         "bash",
         "scripts/runs_synthnet/900841-00.00.00_drucker/900841-00.00.00_drucker_se_su_disabled_gray_256_100.sh",
         "3",
@@ -34,6 +34,8 @@ spec:
       limits:
         nvidia.com/gpu: 1
         memory: "64Gi"
+  imagePullSecrets:
+  - name: private-registry-auth
   nodeSelector:
     gpu: v100
   volumes:

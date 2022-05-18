@@ -72,6 +72,7 @@ PREPROCESSING_SECONDS_START=$SECONDS
 python preprocessing.py \
 --metadata_file $TOPEX_METADATA_FILE \
 --blend_file $TOPEX_BLENDER_FILE \
+--materials_dir $MATERIALS_DIR \
 --out_dir $OUT_DIR \
 --n_images_per_part $N_IMAGES_PER_PART \
 --scene_mode $SCENE_MODE \
@@ -114,8 +115,8 @@ if [[ $RUN_MODE -ge 3 ]]; then
     RENDER_SECONDS_START=$SECONDS
     blender --background --python ./bpy_modules/render.py -- \
     --gltf_dir $GLTF_DIR \
-    --material_dir $RESOURCE_DIR/materials \
-    --envmap_dir $RESOURCE_DIR/envmaps \
+    --material_dir $MATERIALS_DIR \
+    --envmap_dir $ENVMAPS_DIR \
     --out_dir $OUT_DIR \
     --rcfg_file="$OUT_DIR/$RCFG_NAME" \
     --res_x $RES_X \
