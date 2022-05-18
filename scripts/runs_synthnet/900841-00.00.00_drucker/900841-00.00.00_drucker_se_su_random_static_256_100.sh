@@ -152,7 +152,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     --render_format $OUT_FORMAT \
     --render_engine $ENGINE \
     --render_device $DEVICE \
-    --comment "base color = 0.15, 0.15, 0.15, 1; random materials from ['default.blend, steel.blend, brass.blend, plastic.blend']" 
+    --comment "" 
 fi
 ############################
 
