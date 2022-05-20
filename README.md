@@ -52,11 +52,11 @@ python preprocessing.py --help
 ```
 ---
 ## GLTF Export
-The [GLTF Export](./bpy_modules/export_gltfs.py) reads the RCFG created by the preprocessing step and a structured .blend file of a machine. Then it uses the [Blender API](https://docs.blender.org/api/current/index.html) to create cameras and lights, assigns materials to single parts and loads environment maps according to the RCFG. Finally, a .GLB file is exported for every frame that should be rendered. (WIP: We want to export one GLB/part instead of one for each render)
+The [GLTF Export](./bpy_modules/export_gltfs.py) reads the RCFG created by the preprocessing step and a structured .blend file of a machine. Then it uses the [Blender API](https://docs.blender.org/api/current/index.html) to create cameras and lights. Subsequently, a .GLB file is exported for every part and assembly of the machine that is defined in the RCFG.
 
 See the example start script below
 ```bash
-blender -b -P ./bpy_modules/export_gltfs.py -- --rcfg_file /path/to/rcfg_file.json --data_dir path/to/resources --out_dir path/to/out_dir
+blender -b -P ./bpy_modules/export_gltfs.py -- --rcfg_file /path/to/rcfg_file.json --out_dir path/to/out_dir
 ```
 ---
 ## Rendering
@@ -73,7 +73,7 @@ blender -b -P ./bpy_modules/render.py -- --gltf_dir /path/to/gltf_files --materi
 Data that are used as inputs for the rendering pipeline.
 
 ## Render Configuration (RCFG)
-The render configuration (RCFG) is a JSON file that determines the scene components and render setups for each machine part. besides the rendered objects this includes cameras, lights, materials and environment maps. The RCFG file must follow the [Config Schema](./validation/schemas/rcfg_schema_v2.json).
+The render configuration (RCFG) is a JSON file that determines the scene components and render setups for each machine part. besides the rendered objects this includes cameras, lights. The RCFG file must follow the [Config Schema](./validation/schemas/rcfg_schema_v2.json).
 
 ## GLTF
 .GLB files that are exported by the export_gltf.py script.

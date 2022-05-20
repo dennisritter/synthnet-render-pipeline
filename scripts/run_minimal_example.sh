@@ -96,7 +96,6 @@ if [[ $RUN_MODE -ge 2 ]]; then
     EXPORT_SECONDS_START=$SECONDS
     blender $TOPEX_BLENDER_FILE --background --python ./bpy_modules/export_gltfs.py -- \
     --rcfg_file $RCFG_FILE \
-    --data_dir $RESOURCE_DIR \
     --out_dir $GLTF_DIR 
     EXPORT_SECONDS_END=$(($SECONDS-$EXPORT_SECONDS_START))
 fi
