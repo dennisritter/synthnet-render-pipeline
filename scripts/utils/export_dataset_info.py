@@ -38,12 +38,6 @@ from types import SimpleNamespace
     required=True,
 )
 @click.option(
-    '--scene_mode',
-    help='Were scenes samples global (all parts same scene) or exclusive (all parts exclusive scene)',
-    type=str,
-    required=True,
-)
-@click.option(
     '--camera_def_mode',
     help='How cameras were sampled/defined during preprocessing',
     type=str,

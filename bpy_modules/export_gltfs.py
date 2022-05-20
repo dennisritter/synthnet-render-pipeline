@@ -522,9 +522,6 @@ class SceneExporter():
             # Keep parts only if a matching blend_obj has been identified
             if part["id"] in render_parts_ids:
                 part["blend_obj"] = render_parts_obj[render_parts_ids.index(part["id"])]
-                # If a global_scene is defined, assign it as a part scene
-                if rcfg["global_scene"]:
-                    part["scene"] = rcfg["global_scene"]
                 self.parts.append(part)
 
     def _get_render_parts(self, part_ids: list, root_collection) -> list[tuple]:
