@@ -1,4 +1,4 @@
-![](./docs/imgs/example_renders.jpg)
+![](./docs/imgs/example_renders.png)
 
 # SynthNet Rendering Pipeline
 
