@@ -63,7 +63,6 @@ cp -R $RESOURCE_DIR "${OUT_DIR}/input_data"
 ########## PREPROCESSING ##########
 # Set options
 N_IMAGES_PER_PART=100
-SCENE_MODE='exclusive'
 CAMERA_DEF_MODE='sphere-equidistant'
 LIGHT_DEF_MODE='sphere-uniform'
 MATERIAL_DEF_MODE='static'
@@ -77,7 +76,6 @@ python preprocessing.py \
 --materials_dir $MATERIALS_DIR \
 --out_dir $OUT_DIR \
 --n_images_per_part $N_IMAGES_PER_PART \
---scene_mode $SCENE_MODE \
 --camera_def_mode $CAMERA_DEF_MODE \
 --light_def_mode $LIGHT_DEF_MODE \
 --material_def_mode $MATERIAL_DEF_MODE \
