@@ -60,11 +60,11 @@ blender -b -P ./bpy_modules/export_gltfs.py -- --rcfg_file /path/to/rcfg_file.js
 ```
 ---
 ## Rendering
-The [Rendering](./bpy_modules/render.py) process reads GLTF files exported by the *GLTF Export* and simply renders them.
+The [Rendering](./bpy_modules/render.py) process reads GLTF files exported by the *GLTF Export* and renders them according to the render setups defined in the RCFG for each part. The render module also adds defined materials to each part and adds a specified environment map to the scene for each render.
 
 See the example start script below
 ```bash
-blender -b -P ./bpy_modules/render.py -- --gltf_dir /path/to/gltf_files --material_dir /path/to/material_files --envmap_dir /path/to/envmap_files --out_dir /path/to/output_dir --rcfg_file /path/to/rcfg_file.json --res_x 256 --res_y 256 --out_quality 100 --out_format JPEG --engine CYCLES --device GPU
+blender -b -P ./bpy_modules/render.py -- --gltf_dir /path/to/gltf_files --material_dir /path/to/material_files --envmap_dir /path/to/envmap_files --rcfg_file /path/to/rcfg_file.json --out_dir /path/to/output_dir --res_x 256 --res_y 256 --out_quality 100 --out_format PNG --engine CYCLES --device GPU
 ```
 
 # Outputs
