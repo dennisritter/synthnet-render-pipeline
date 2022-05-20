@@ -38,12 +38,6 @@ from types import SimpleNamespace
     required=True,
 )
 @click.option(
-    '--scene_mode',
-    help='Were scenes samples global (all parts same scene) or exclusive (all parts exclusive scene)',
-    type=str,
-    required=True,
-)
-@click.option(
     '--camera_def_mode',
     help='How cameras were sampled/defined during preprocessing',
     type=str,
@@ -135,7 +129,6 @@ def main(**kwargs):
     camera_seed = args.camera_seed
     light_seed = args.light_seed
     n_images_per_part = args.n_images_per_part
-    scene_mode = args.scene_mode
     camera_def_mode = args.camera_def_mode
     light_def_mode = args.light_def_mode
     material_def_mode = args.material_def_mode
@@ -170,7 +163,6 @@ def main(**kwargs):
         "preprocessing": {
             "camera_seed": camera_seed,
             "light_seed": light_seed,
-            "scene_mode": scene_mode,
             "camera_def_mode": camera_def_mode,
             "light_def_mode": light_def_mode,
             "material_def_mode": material_def_mode,

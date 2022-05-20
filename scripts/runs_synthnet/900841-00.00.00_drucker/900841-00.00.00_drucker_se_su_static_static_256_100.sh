@@ -57,11 +57,12 @@ RUN_DESCRIPTION="900841-00.00.00_drucker_se_su_static_static_256_100"
 # will return a dir path like '$OUT_ROOT_DIR/$ID-$RUN_DESCRIPTION -> ./out/1-my-run
 OUT_DIR=`python scripts/utils/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION"`
 echo "Created output directory: $OUT_DIR"
+# Copy input data into the out dir
+cp -R $RESOURCE_DIR "${OUT_DIR}/input_data"
 
 ########## PREPROCESSING ##########
 # Set options
 N_IMAGES_PER_PART=100
-SCENE_MODE='exclusive'
 CAMERA_DEF_MODE='sphere-equidistant'
 LIGHT_DEF_MODE='sphere-uniform'
 MATERIAL_DEF_MODE='static'
@@ -75,7 +76,6 @@ python preprocessing.py \
 --materials_dir $MATERIALS_DIR \
 --out_dir $OUT_DIR \
 --n_images_per_part $N_IMAGES_PER_PART \
---scene_mode $SCENE_MODE \
 --camera_def_mode $CAMERA_DEF_MODE \
 --light_def_mode $LIGHT_DEF_MODE \
 --material_def_mode $MATERIAL_DEF_MODE \
@@ -96,7 +96,6 @@ if [[ $RUN_MODE -ge 2 ]]; then
     EXPORT_SECONDS_START=$SECONDS
     blender $TOPEX_BLENDER_FILE --background --python ./bpy_modules/export_gltfs.py -- \
     --rcfg_file $RCFG_FILE \
-    --data_dir $RESOURCE_DIR \
     --out_dir $GLTF_DIR 
     EXPORT_SECONDS_END=$(($SECONDS-$EXPORT_SECONDS_START))
 fi
