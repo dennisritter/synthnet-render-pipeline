@@ -3,7 +3,7 @@ from types import SimpleNamespace
 import logging
 import click
 
-from utils import fs_utils, logger_utils, timer_utils
+from utils import logger_utils, timer_utils
 from preprocessing.preprocessing_controller import PreprocessingController
 
 LOG_DELIM = '* ' * 20
@@ -23,6 +23,12 @@ LOG_DELIM = '* ' * 20
     required=True,
 )
 @click.option(
+    '--materials_dir',
+    help='Path to blender materials directory',
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, readable=True),
+    required=True,
+)
+@click.option(
     '--out_dir',
     help='Output root directory (created if not existent)',
     type=click.Path(exists=False, file_okay=False, dir_okay=True),
@@ -35,14 +41,6 @@ LOG_DELIM = '* ' * 20
     type=click.INT,
     show_default=True,
     default=10,
-)
-@click.option(
-    '--scene_mode',
-    help='Camera definition mode',
-    type=click.Choice(choices=PreprocessingController.SCENE_MODES),
-    show_default=True,
-    show_choices=True,
-    default=PreprocessingController.SCENE_MODES[0],
 )
 @click.option(
     '--camera_def_mode',
@@ -95,9 +93,9 @@ def main(**kwargs):
 
     metadata_file = args.metadata_file
     blend_file = args.blend_file
+    materials_dir = args.materials_dir
     out_dir = args.out_dir
     n_images_per_part = args.n_images_per_part
-    scene_mode = args.scene_mode
     camera_def_mode = args.camera_def_mode
     light_def_mode = args.light_def_mode
     material_def_mode = args.material_def_mode
@@ -120,9 +118,9 @@ def main(**kwargs):
     ppc = PreprocessingController(
         metadata_file=metadata_file,
         blend_file=blend_file,
+        materials_dir=materials_dir,
         output_dir=out_dir,
         n_images=n_images_per_part,
-        scene_mode=scene_mode,
         camera_def_mode=camera_def_mode,
         light_def_mode=light_def_mode,
         material_def_mode=material_def_mode,
