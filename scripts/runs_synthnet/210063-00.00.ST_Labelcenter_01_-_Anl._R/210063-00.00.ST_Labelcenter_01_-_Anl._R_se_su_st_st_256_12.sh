@@ -44,16 +44,16 @@ echo "- - - - - - - - - - - - - - - - - - - - "
 ##### RESOURCES
 # Resource directory path. Contains Environment maps, materials, CAD data and metadata. 
 # (relative to project root)
-RESOURCE_DIR="./data/236429-00.00.ST_Wolverine"
-TOPEX_METADATA_FILE="${RESOURCE_DIR}/236429-00.00.ST_Wolverine.xlsx"
-TOPEX_BLENDER_FILE="${RESOURCE_DIR}/236429-00.00.00_Wolverine.blend"
+RESOURCE_DIR="./data/210063-00.00.ST_Labelcenter_01_-_Anl._R"
+TOPEX_METADATA_FILE="${RESOURCE_DIR}/210063-00.00.ST_Labelcenter_01_-_Anl._R.xlsx"
+TOPEX_BLENDER_FILE="${RESOURCE_DIR}/210063-00.00.00_Labelcenter_01_-_Anl._R.blend"
 MATERIALS_DIR="${RESOURCE_DIR}/materials"
 ENVMAPS_DIR="${RESOURCE_DIR}/envmaps"
 
 ##### OUTPUTS
 # Specify output root directory and a run description to create a unique output directory
 OUT_ROOT_DIR="./out"
-RUN_DESCRIPTION="236429-00.00.ST_Wolverine_se_su_static_static_256_12"
+RUN_DESCRIPTION="210063-00.00.ST_Labelcenter_01_-_Anl._R_se_su_static_static_256_12"
 # will return a dir path like '$OUT_ROOT_DIR/$ID-$RUN_DESCRIPTION -> ./out/1-my-run
 OUT_DIR=`python scripts/utils/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION"`
 echo "Created output directory: $OUT_DIR"
@@ -137,7 +137,6 @@ if [[ $RUN_MODE -ge 3 ]]; then
     --camera_seed $CAMERA_SEED \
     --light_seed $LIGHT_SEED \
     --n_images_per_part $N_IMAGES_PER_PART \
-    --scene_mode $SCENE_MODE \
     --camera_def_mode $CAMERA_DEF_MODE \
     --light_def_mode $LIGHT_DEF_MODE \
     --material_def_mode $MATERIAL_DEF_MODE \

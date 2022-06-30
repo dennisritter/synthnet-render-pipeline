@@ -53,7 +53,7 @@ ENVMAPS_DIR="${RESOURCE_DIR}/envmaps"
 ##### OUTPUTS
 # Specify output root directory and a run description to create a unique output directory
 OUT_ROOT_DIR="./out"
-RUN_DESCRIPTION="900841-00.00.00_drucker_se_su_static_static_256_12"
+RUN_DESCRIPTION="900841-00.00.00_drucker_se_su_static_static_512_32"
 # will return a dir path like '$OUT_ROOT_DIR/$ID-$RUN_DESCRIPTION -> ./out/1-my-run
 OUT_DIR=`python scripts/utils/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION"`
 echo "Created output directory: $OUT_DIR"
@@ -62,7 +62,7 @@ cp -R $RESOURCE_DIR "${OUT_DIR}/input_data"
 
 ########## PREPROCESSING ##########
 # Set options
-N_IMAGES_PER_PART=12
+N_IMAGES_PER_PART=32
 CAMERA_DEF_MODE='sphere-equidistant'
 LIGHT_DEF_MODE='sphere-uniform'
 MATERIAL_DEF_MODE='static'
@@ -104,8 +104,8 @@ fi
 ########## RENDER ##########
 if [[ $RUN_MODE -ge 3 ]]; then
     # Set options
-    RES_X=256
-    RES_Y=256
+    RES_X=512
+    RES_Y=512
     OUT_QUALITY=100
     OUT_FORMAT="PNG"
     ENGINE="CYCLES"
@@ -137,7 +137,6 @@ if [[ $RUN_MODE -ge 3 ]]; then
     --camera_seed $CAMERA_SEED \
     --light_seed $LIGHT_SEED \
     --n_images_per_part $N_IMAGES_PER_PART \
-    --scene_mode $SCENE_MODE \
     --camera_def_mode $CAMERA_DEF_MODE \
     --light_def_mode $LIGHT_DEF_MODE \
     --material_def_mode $MATERIAL_DEF_MODE \
@@ -151,7 +150,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     --render_format $OUT_FORMAT \
     --render_engine $ENGINE \
     --render_device $DEVICE \
-    --comment "" 
+    --comment "Renders for Nyris Scanning App." 
 fi
 ############################
 

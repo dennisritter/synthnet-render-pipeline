@@ -44,16 +44,16 @@ echo "- - - - - - - - - - - - - - - - - - - - "
 ##### RESOURCES
 # Resource directory path. Contains Environment maps, materials, CAD data and metadata. 
 # (relative to project root)
-RESOURCE_DIR="./data/900841-00.00.00_drucker"
-TOPEX_METADATA_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.xlsx"
-TOPEX_BLENDER_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.blend"
+RESOURCE_DIR="./data/900841-05.00.ST_spare_parts"
+TOPEX_METADATA_FILE="${RESOURCE_DIR}/900841-05.00.ST_spare_parts.xlsx"
+TOPEX_BLENDER_FILE="${RESOURCE_DIR}/900841-05.00.ST_spare_parts.blend"
 MATERIALS_DIR="${RESOURCE_DIR}/materials"
 ENVMAPS_DIR="${RESOURCE_DIR}/envmaps"
 
 ##### OUTPUTS
 # Specify output root directory and a run description to create a unique output directory
 OUT_ROOT_DIR="./out"
-RUN_DESCRIPTION="900841-00.00.00_drucker_se_su_static_gray_256_100"
+RUN_DESCRIPTION="900841-05.00.ST_spare_parts_se_su_st_st_256_30"
 # will return a dir path like '$OUT_ROOT_DIR/$ID-$RUN_DESCRIPTION -> ./out/1-my-run
 OUT_DIR=`python scripts/utils/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION"`
 echo "Created output directory: $OUT_DIR"
@@ -62,11 +62,11 @@ cp -R $RESOURCE_DIR "${OUT_DIR}/input_data"
 
 ########## PREPROCESSING ##########
 # Set options
-N_IMAGES_PER_PART=100
+N_IMAGES_PER_PART=30
 CAMERA_DEF_MODE='sphere-equidistant'
 LIGHT_DEF_MODE='sphere-uniform'
 MATERIAL_DEF_MODE='static'
-ENVMAP_DEF_MODE='gray'
+ENVMAP_DEF_MODE='static'
 
 # Run Preprocessing
 PREPROCESSING_SECONDS_START=$SECONDS
@@ -137,7 +137,6 @@ if [[ $RUN_MODE -ge 3 ]]; then
     --camera_seed $CAMERA_SEED \
     --light_seed $LIGHT_SEED \
     --n_images_per_part $N_IMAGES_PER_PART \
-    --scene_mode $SCENE_MODE \
     --camera_def_mode $CAMERA_DEF_MODE \
     --light_def_mode $LIGHT_DEF_MODE \
     --material_def_mode $MATERIAL_DEF_MODE \
