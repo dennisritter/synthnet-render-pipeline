@@ -11,7 +11,7 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
     raw_in = pd.read_excel(metadata_file)
 
     # Remove SolidWorks Toolbox parts
-    raw_in.drop(raw_in[raw_in["Benennung 2"] == "SolidWorks Toolbox"].index, inplace=True)
+    raw_in = raw_in.drop(raw_in[raw_in["Benennung 2"] == "SolidWorks Toolbox"].index).reset_index(drop=True)
 
     # PART_NUMBER
     part_number = raw_in.loc[:, 'Teilenummer'].astype(str)
@@ -27,21 +27,28 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
     part_names = raw_in.loc[:, 'Benennung']
     # PART_HIERARCHY
     part_hierarchy = raw_in.loc[:, 'Pos.-Nr.'].astype(str)
+    # PART_IS_SPARE (E = Ersatzteil)
+    part_is_spare = [p.lower() == 'e' for p in raw_in.loc[:, 'Bem.'].astype(str)]
+    # PART_IS_WEAR (V = Verschleißteil)
+    part_is_wear = [p.lower() == 'v' for p in raw_in.loc[:, 'Bem.'].astype(str)]
+
     # PART_MATERIAL
-    # 1. Replace NA values
-    # 2. Simplify material, surface_treatment and color
+    # 1. To lower case
+    # 2. Replace NA values
+    # 3. Simplify material, surface_treatment and color
     part_materials = raw_in.loc[:, 'Werkstoff'].astype(str)
+    part_materials = part_materials.str.lower()
     part_materials.fillna('-', inplace=True)
     part_materials = part_materials.replace('nan', '-')
     aluminium = ["AlMg4,5Mn", "Aluminium", "AlMgSi1"]
     steel = ["X5CrNi18-10", "X8CrNiS18-9", "X10CrNi188", "Federstahl", "Edelstahl", "115CrV3", "Stahl"]
     brass = ["CuZn37"]
-    plastic = ["Kunststoff", "PA12", "Trespa", "ABS"]
+    plastic = [
+        "Kunststoff", "kunststoff matt", "kunststoff glänzend", "polycord", "PA12", "Trespa", "ABS",
+        "Kunststoff u. Gewebe"
+    ]
     plexiglas = ["Acrylglas", "Polycarbonat"]
-    material_mapping = [(aluminium, 'aluminium'), (steel, 'steel'), (brass, 'brass'), (plastic, 'plastic'),
-                        (plexiglas, 'plexiglas')]
-    for mm in material_mapping:
-        part_materials = part_materials.replace(dict.fromkeys(mm[0], mm[1]))
+
     # PART SURFACE & COLOR
     # 1. to lower case
     # 2. Replace NA values
@@ -59,31 +66,70 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
     galvanized = ["verzinkt"]
     brushed = ["blank"]
     burnished = ["brüniert"]
-    glossy = ["glossy"]
-    matte = ["matte"]
-    undefined = ["grau", "grün", "neutralweiss", "schwarz", "schwarz eingefärbt", "transparent"]
-    surface_mapping = [(undefined, "-"), (anodized, "anodized"), (hardcoated, "hardcoated"),
-                       (sandblasted, "sandblasted"), (nickelcoated, "nickelcoated"), (galvanized, "galvanized"),
-                       (brushed, "brushed"), (burnished, "burnished"), (glossy, "glossy"), (matte, "matte")]
-    for sm in surface_mapping:
-        part_surface = part_surface.replace(dict.fromkeys(sm[0], sm[1]))
+    glossy = ["Kunststoff glänzend", "Trespa"]
+    matte = ["Kunststoff matt", "Polycord", "PA12", "ABS"]
     # COLOR
     black = ["schwarz", "schwarz eingefärbt", "schwarz eloxiert"]
     grey = ["grau"]
     ral7015 = ["ral 7015 eloxiert"]
     green = ["grün"]
+    yellow = ["gelb"]
+    orange = ["orange"]
     purple = ["topex-lila eloxiert"]
     white = ["neutralweiss"]
     natural = ["natur eloxiert", "sandgestrahlt", "hartcoatiert", "vernickelt", "verzinkt", "blank", "brüniert"]
     transparent = ["transparent"]
-    colors_mapping = [(black, "black"), (grey, "grey"), (ral7015, "ral7015"), (green, "green"), (purple, "purple"),
-                      (white, "white"), (natural, "natural"), (transparent, "transparent")]
+
+    # NOTE: Replace Add surface info matte/glossy for plastics depending on material (before remapping)
+    glossy = [x.lower() for x in ["Kunststoff glänzend", "Trespa"]]
+    matte = [x.lower() for x in ["Kunststoff", "Kunststoff matt", "Kunststoff u. Gewebe", "Polycord", "PA12", "ABS"]]
+    glossy_idx = part_materials[part_materials.isin(glossy)].index
+    matte_idx = part_materials[part_materials.isin(matte)].index
+    part_surface[glossy_idx] = "glossy"
+    part_surface[matte_idx] = "matte"
+
+    # material replace
+    material_mapping = [
+        [aluminium, 'aluminium'],
+        [steel, 'steel'],
+        [brass, 'brass'],
+        [plastic, 'plastic'],
+        [plexiglas, 'plexiglas'],
+    ]
+    for mm in material_mapping:
+        mm[0] = [x.lower() for x in mm[0]]
+        part_materials = part_materials.replace(dict.fromkeys(mm[0], mm[1]))
+    # surface replace
+    surface_mapping = [
+        [anodized, "anodized"],
+        [hardcoated, "hardcoated"],
+        [sandblasted, "sandblasted"],
+        [nickelcoated, "nickelcoated"],
+        [galvanized, "galvanized"],
+        [brushed, "brushed"],
+        [burnished, "burnished"],
+        [glossy, "glossy"],
+        [matte, "matte"],
+    ]
+    for sm in surface_mapping:
+        sm[0] = [x.lower() for x in sm[0]]
+        part_surface = part_surface.replace(dict.fromkeys(sm[0], sm[1]))
+    # color replace
+    colors_mapping = [
+        [black, "black"],
+        [grey, "grey"],
+        [ral7015, "ral7015"],
+        [green, "green"],
+        [yellow, "yellow"],
+        [orange, "orange"],
+        [purple, "purple"],
+        [white, "white"],
+        [natural, "natural"],
+        [transparent, "transparent"],
+    ]
     for cm in colors_mapping:
+        cm[0] = [x.lower() for x in cm[0]]
         part_color = part_color.replace(dict.fromkeys(cm[0], cm[1]))
-    # PART_IS_SPARE (E = Ersatzteil)
-    part_is_spare = [p.lower() == 'e' for p in raw_in.loc[:, 'Bem.'].astype(str)]
-    # PART_IS_WEAR (V = Verschleißteil)
-    part_is_wear = [p.lower() == 'v' for p in raw_in.loc[:, 'Bem.'].astype(str)]
 
     df = pd.DataFrame(
         data={
@@ -97,7 +143,6 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
             'part_is_spare': part_is_spare,
             'part_is_wear': part_is_wear
         })
-
     # Set defaults for material, surface, color
     DEFAULT_MATERIAL = "steel"
     DEFAULT_COLOR = "natural"
@@ -108,6 +153,7 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
         "plastic": "matte",
         "plexiglas": "glossy"
     }
+
     df["part_material"].replace('-', DEFAULT_MATERIAL, inplace=True)
     df["part_color"].replace('-', DEFAULT_COLOR, inplace=True)
     for material, surface in DEFAULT_SURFACE.items():
