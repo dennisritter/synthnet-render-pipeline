@@ -5,8 +5,8 @@ FROM nytimes/blender:3.1-gpu-ubuntu18.04
 ENV PATH="/root/miniconda3/bin:${PATH}"
 ARG PATH="/root/miniconda3/bin:${PATH}"
 
-RUN rm /etc/apt/sources.list.d/cuda.list
-RUN rm /etc/apt/sources.list.d/nvidia-ml.list
+# RUN rm /etc/apt/sources.list.d/cuda.list
+# RUN rm /etc/apt/sources.list.d/nvidia-ml.list
 
 RUN apt-get update
 RUN apt-get install curl -y
