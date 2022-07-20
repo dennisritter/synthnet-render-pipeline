@@ -23,7 +23,7 @@ spec:
         "-n",
         "py39-synthnet-rendering-pipeline",
         "bash",
-        "scripts/runs_synthnet/900841-00.00.00_drucker/900841-00.00.00_drucker_se_su_static_static_256_12.sh",
+        "scripts/runs_synthnet/900841-00.00.00_drucker/900841-00.00.00_drucker_se_su_st_st_256_12.sh",
         "3",
         "42",
         "43"
