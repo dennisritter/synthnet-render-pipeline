@@ -66,8 +66,6 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
     galvanized = ["verzinkt"]
     brushed = ["blank"]
     burnished = ["brüniert"]
-    glossy = ["Kunststoff glänzend", "Trespa"]
-    matte = ["Kunststoff matt", "Polycord", "PA12", "ABS"]
     # COLOR
     black = ["schwarz", "schwarz eingefärbt", "schwarz eloxiert"]
     grey = ["grau"]
@@ -81,7 +79,7 @@ def prepare_metadata(metadata_file: str) -> 'pd.DataFrame':
     transparent = ["transparent"]
 
     # NOTE: Replace Add surface info matte/glossy for plastics depending on material (before remapping)
-    glossy = [x.lower() for x in ["Kunststoff glänzend", "Trespa"]]
+    glossy = [x.lower() for x in ["Kunststoff glänzend", "Trespa", "Acrylglas", "Polycarbonat"]]
     matte = [x.lower() for x in ["Kunststoff", "Kunststoff matt", "Kunststoff u. Gewebe", "Polycord", "PA12", "ABS"]]
     glossy_idx = part_materials[part_materials.isin(glossy)].index
     matte_idx = part_materials[part_materials.isin(matte)].index
