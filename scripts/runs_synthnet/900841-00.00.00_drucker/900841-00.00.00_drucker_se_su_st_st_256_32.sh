@@ -53,7 +53,7 @@ ENVMAPS_DIR="${RESOURCE_DIR}/envmaps"
 ##### OUTPUTS
 # Specify output root directory and a run description to create a unique output directory
 OUT_ROOT_DIR="./out"
-RUN_DESCRIPTION="900841-00.00.00_drucker_se_su_static_static_256_32"
+RUN_DESCRIPTION="900841-00.00.00_drucker_se_su_st_st_256_32"
 # will return a dir path like '$OUT_ROOT_DIR/$ID-$RUN_DESCRIPTION -> ./out/1-my-run
 OUT_DIR=`python scripts/utils/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION"`
 echo "Created output directory: $OUT_DIR"
