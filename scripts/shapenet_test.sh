@@ -128,7 +128,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     RENDER_SECONDS_START=$SECONDS
     blender --background --python ./bpy_modules/render.py -- \
     --gltf_dir $GLTF_DIR \
-    --material_dir $MATERIALS_DIR \
+    # --material_dir $MATERIALS_DIR \
     --envmap_dir $ENVMAPS_DIR \
     --out_dir $OUT_DIR \
     --rcfg_file="$OUT_DIR/$RCFG_NAME" \
@@ -142,31 +142,31 @@ if [[ $RUN_MODE -ge 3 ]]; then
 fi
 ############################
 
-########## EXPORT DATASET INFO ##########
-if [[ $RUN_MODE -ge 3 ]]; then
-    # Run Export GLTFs
-    python scripts/utils/export_dataset_info.py \
-    --out_dir $OUT_DIR \
-    --run_description $RUN_DESCRIPTION \
-    --camera_seed $CAMERA_SEED \
-    --light_seed $LIGHT_SEED \
-    --n_images_per_part $N_IMAGES_PER_PART \
-    --camera_def_mode $CAMERA_DEF_MODE \
-    --light_def_mode $LIGHT_DEF_MODE \
-    --material_def_mode $MATERIAL_DEF_MODE \
-    --envmap_def_mode $ENVMAP_DEF_MODE \
-    --rcfg_version "v2" \
-    --rcfg_file $RCFG_FILE \
-    --render_dir $OUT_DIR/render \
-    --render_res_x $RES_X \
-    --render_res_y $RES_Y \
-    --render_quality $OUT_QUALITY \
-    --render_format $OUT_FORMAT \
-    --render_engine $ENGINE \
-    --render_device $DEVICE \
-    --comment "" 
-fi
-############################
+# ########## EXPORT DATASET INFO ##########
+# if [[ $RUN_MODE -ge 3 ]]; then
+#     # Run Export GLTFs
+#     python scripts/utils/export_dataset_info.py \
+#     --out_dir $OUT_DIR \
+#     --run_description $RUN_DESCRIPTION \
+#     --camera_seed $CAMERA_SEED \
+#     --light_seed $LIGHT_SEED \
+#     --n_images_per_part $N_IMAGES_PER_PART \
+#     --camera_def_mode $CAMERA_DEF_MODE \
+#     --light_def_mode $LIGHT_DEF_MODE \
+#     --material_def_mode $MATERIAL_DEF_MODE \
+#     --envmap_def_mode $ENVMAP_DEF_MODE \
+#     --rcfg_version "v2" \
+#     --rcfg_file $RCFG_FILE \
+#     --render_dir $OUT_DIR/render \
+#     --render_res_x $RES_X \
+#     --render_res_y $RES_Y \
+#     --render_quality $OUT_QUALITY \
+#     --render_format $OUT_FORMAT \
+#     --render_engine $ENGINE \
+#     --render_device $DEVICE \
+#     --comment "" 
+# fi
+# ############################
 
 echo "Time Measures:" 
 echo "Total time (s): $SECONDS"
