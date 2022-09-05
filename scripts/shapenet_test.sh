@@ -53,7 +53,7 @@ ENVMAPS_DIR="${RESOURCE_DIR}/envmaps"
 ##### OUTPUTS
 # Specify output root directory and a run description to create a unique output directory
 OUT_ROOT_DIR="./out"
-RUN_DESCRIPTION="shapenet-core-chairs"
+RUN_DESCRIPTION="shapenetcore-chair"
 # will return a dir path like '$OUT_ROOT_DIR/$ID-$RUN_DESCRIPTION -> ./out/1-my-run
 OUT_DIR=`python scripts/utils/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION"`
 echo "Created output directory: $OUT_DIR"
@@ -86,10 +86,8 @@ ENVMAP_DEF_MODE='static'
 # ###################################
 # Run Preprocessing
 PREPROCESSING_SECONDS_START=$SECONDS
-python preprocessing.py \
-# --metadata_file $TOPEX_METADATA_FILE \
-# --blend_file $TOPEX_BLENDER_FILE \
-# --materials_dir $MATERIALS_DIR \
+python preprocessing_shapenet.py \
+--in_dir $RESOURCE_DIR \
 --out_dir $OUT_DIR \
 --n_images_per_part $N_IMAGES_PER_PART \
 --camera_def_mode $CAMERA_DEF_MODE \
