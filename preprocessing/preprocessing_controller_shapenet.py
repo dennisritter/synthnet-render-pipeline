@@ -77,7 +77,7 @@ class PreprocessingControllerShapenet:
             for entity in os.listdir(f'{self.input_dir}/models/{label}'):
                 part = {
                     "id": entity,
-                    "path": f'{self.input_dir}/models/{label}/models/model_normalized.obj',
+                    "path": f'{self.input_dir}/models/{label}/{entity}/models/model_normalized.obj',
                     "scene": None,
                 }
                 self.parts.append(part)
