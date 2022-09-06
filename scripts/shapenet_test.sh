@@ -47,7 +47,7 @@ echo "- - - - - - - - - - - - - - - - - - - - "
 RESOURCE_DIR="./data/shapenetcore-chair"
 # TOPEX_METADATA_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.xlsx"
 # TOPEX_BLENDER_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.blend"
-# MATERIALS_DIR="${RESOURCE_DIR}/materials"
+MATERIALS_DIR="ble"
 ENVMAPS_DIR="${RESOURCE_DIR}/assets/envmaps"
 
 ##### OUTPUTS
@@ -126,7 +126,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     DEVICE="GPU"
     # Run Export GLTFs
     RENDER_SECONDS_START=$SECONDS
-    blender --background --python ./bpy_modules/render.py -- \
+    blender --background --python ./bpy_modules/render_shapenet.py -- \
     --gltf_dir $GLTF_DIR \
     --material_dir $MATERIALS_DIR \
     --envmap_dir $ENVMAPS_DIR \
