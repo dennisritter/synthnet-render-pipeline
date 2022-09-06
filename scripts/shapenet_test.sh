@@ -48,7 +48,7 @@ RESOURCE_DIR="./data/shapenetcore-chair"
 # TOPEX_METADATA_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.xlsx"
 # TOPEX_BLENDER_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.blend"
 # MATERIALS_DIR="${RESOURCE_DIR}/materials"
-ENVMAPS_DIR="${RESOURCE_DIR}/envmaps"
+ENVMAPS_DIR="${RESOURCE_DIR}/assets/envmaps"
 
 ##### OUTPUTS
 # Specify output root directory and a run description to create a unique output directory
@@ -128,7 +128,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     RENDER_SECONDS_START=$SECONDS
     blender --background --python ./bpy_modules/render.py -- \
     --gltf_dir $GLTF_DIR \
-    # --material_dir $MATERIALS_DIR \
+    --material_dir $MATERIALS_DIR \
     --envmap_dir $ENVMAPS_DIR \
     --out_dir $OUT_DIR \
     --rcfg_file="$OUT_DIR/$RCFG_NAME" \
