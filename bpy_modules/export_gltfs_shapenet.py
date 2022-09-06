@@ -159,7 +159,7 @@ def delete_objects(objects: list) -> None:
         bpy.data.objects.remove(obj, do_unlink=True)
 
 
-def create_scene(name: str) -> bpy.types.Scene:
+def create_scene(name: str) -> None:
     """Create new scene
 
     Args:
@@ -168,8 +168,7 @@ def create_scene(name: str) -> bpy.types.Scene:
     Returns:
         bpy.types.Scene: created scene
     """
-    scene = bpy.data.scenes.new(name)
-    return scene
+    bpy.ops.scene.new(type='EMPTY')
 
 
 def add_object_to_scene(scene: bpy.types.Scene, object_to_add: bpy.types.Object) -> None:
@@ -496,7 +495,6 @@ class SceneExporterShapenet():
         # -> See Part definition in Render Config (RCFG)
         self.parts = []
         self._set_parts(rcfg)
-
         self.out_dir = out_dir
 
     def _set_parts(self, rcfg) -> None:
@@ -505,20 +503,23 @@ class SceneExporterShapenet():
         for part in rcfg["parts"]:
             # load .obj into scene, name it after id
             # save render_part_obj
-            bpy.ops.import_scene.obj(part["path"])
+            bpy.ops.import_scene.obj(filepath=os.path.abspath(part["path"]))
+            obj = bpy.context.selected_objects[0]
+            part["blend_obj"] = obj
+            self.parts.append(part)
 
-        self.parts = []
-        part_ids = [part["id"] for part in rcfg["parts"]]
-        root_coll = get_collections_by_suffix(".hierarchy")[0]
-        # Get blender objects for all parts that can be matched with given part ids
-        render_parts = self._get_render_parts(part_ids, root_coll)
-        render_parts_ids = [part_id[0] for part_id in render_parts]
-        render_parts_obj = [part_id[1] for part_id in render_parts]
-        for part in rcfg["parts"]:
-            # Keep parts only if a matching blend_obj has been identified
-            if part["id"] in render_parts_ids:
-                part["blend_obj"] = render_parts_obj[render_parts_ids.index(part["id"])]
-                self.parts.append(part)
+        # self.parts = []
+        # part_ids = [part["id"] for part in rcfg["parts"]]
+        # root_coll = get_collections_by_suffix(".hierarchy")[0]
+        # # Get blender objects for all parts that can be matched with given part ids
+        # render_parts = self._get_render_parts(part_ids, root_coll)
+        # render_parts_ids = [part_id[0] for part_id in render_parts]
+        # render_parts_obj = [part_id[1] for part_id in render_parts]
+        # for part in rcfg["parts"]:
+        #     # Keep parts only if a matching blend_obj has been identified
+        #     if part["id"] in render_parts_ids:
+        #         part["blend_obj"] = render_parts_obj[render_parts_ids.index(part["id"])]
+        #         self.parts.append(part)
 
     def _get_render_parts(self, part_ids: list, root_collection) -> list[tuple]:
         """ returns a list of tuples.
@@ -565,7 +566,7 @@ class SceneExporterShapenet():
         """ Export gltf files based on scene descriptions parsed from a valid config file. """
         for part in self.parts:
             ### CREATE BPY SCENE COMPONENTS
-            bpy_single_parts = get_bpy_single_parts(part)
+            # bpy_single_parts = get_bpy_single_parts(part)
             bpy_cameras = get_bpy_cameras(part)
             bpy_lights = get_bpy_lights(part)
             # MATERIALS
@@ -576,23 +577,23 @@ class SceneExporterShapenet():
             # NOTE: Moved Envmap assignment to render.py as for now it's not possible to define envmaps in a gltf file from blender.
 
             ### TRANSLATE PART TO WORLD CENTER
-            # get the bounding sphere center
-            bsphere_center, _ = get_bounding_sphere(bpy_single_parts)
-            # unparent single parts from collections
-            original_parents = unparent(bpy_single_parts)
-            translate_objects_by(bpy_single_parts, -1 * bsphere_center)
+            # # get the bounding sphere center
+            # bsphere_center, _ = get_bounding_sphere(bpy_single_parts)
+            # # unparent single parts from collections
+            # original_parents = unparent(bpy_single_parts)
+            # translate_objects_by(bpy_single_parts, -1 * bsphere_center)
 
             ### COLLECT OBJS TO EXPORT
             bpy_objs_to_export = []
             # NOTE: Sometimes not all single part objects are exported by adding the collection, so we add all single parts instead
-            bpy_objs_to_export += bpy_single_parts
+            bpy_objs_to_export += [part["blend_obj"]]
             bpy_objs_to_export += bpy_cameras
             bpy_objs_to_export += bpy_lights
             export_gltf(bpy_objs_to_export=bpy_objs_to_export, file_path=f"{self.out_dir}/{part['id']}.glb")
 
-            # Reparent single parts
-            for p, c in zip(original_parents, bpy_single_parts):
-                parent([c], p)
+            # # Reparent single parts
+            # for p, c in zip(original_parents, bpy_single_parts):
+            #     parent([c], p)
 
             # delete cameras and lights that are not needed anymore
             delete_objects(bpy_cameras)
@@ -633,13 +634,14 @@ if __name__ == '__main__':
     os.makedirs(out_dir, exist_ok=True)
 
     # Get opened blender file path to reload scene when needed
-    blend_file = bpy.data.filepath
-    open_scene(blend_file)
+    # blend_file = bpy.data.filepath
+    # open_scene(blend_file)
+    create_scene(name="scene")
     # Load RCFG data
     with open(rcfg_file, "r") as rcfg_json:
         rcfg_data = json.load(rcfg_json)
 
-    scene_exporter = SceneExporterShapeNet(
+    scene_exporter = SceneExporterShapenet(
         rcfg=rcfg_data,
         out_dir=out_dir,
     )
