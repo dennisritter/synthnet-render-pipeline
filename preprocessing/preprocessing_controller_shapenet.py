@@ -82,9 +82,9 @@ class PreprocessingControllerShapenet:
 
         # Parse Parts SHAPENET
         self.parts = []
-        for label in os.listdir(f'{self.input_dir}/models'):
+        for label in os.listdir(f'{self.input_dir}'):
             if label in ILSVRC_SYNSETS:
-                render_samples = random.sample(os.listdir(f'{self.input_dir}/models/{label}'), k=50)
+                render_samples = random.sample(os.listdir(f'{self.input_dir}/{label}'), k=50)
                 for entity in render_samples:
                     part = {
                         "id": entity,

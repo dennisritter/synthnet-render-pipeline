@@ -44,7 +44,7 @@ echo "- - - - - - - - - - - - - - - - - - - - "
 ##### RESOURCES
 # Resource directory path. Contains Environment maps, materials, CAD data and metadata. 
 # (relative to project root)
-RESOURCE_DIR="./data/shapenet-pv/ShapeNetCoreV2"
+RESOURCE_DIR="./data/ShapeNetCoreV2"
 # TOPEX_METADATA_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.xlsx"
 # TOPEX_BLENDER_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.blend"
 MATERIALS_DIR="no"
@@ -57,8 +57,9 @@ RUN_DESCRIPTION="render_ilsvcr_sn18"
 # will return a dir path like '$OUT_ROOT_DIR/$ID-$RUN_DESCRIPTION -> ./out/1-my-run
 OUT_DIR=`python scripts/utils/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION"`
 echo "Created output directory: $OUT_DIR"
+
 # Copy input data into the out dir
-cp -R $RESOURCE_DIR "${OUT_DIR}/input_data"
+# cp -R $RESOURCE_DIR "${OUT_DIR}/input_data"
 
 ########## PREPROCESSING ##########
 # Set options
