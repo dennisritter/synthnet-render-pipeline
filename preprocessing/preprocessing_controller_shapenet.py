@@ -3,10 +3,13 @@ import os
 import logging
 import json
 import jsonschema
+import random
 
 from preprocessing import define_cameras, define_lights, define_materials
 from preprocessing.models.scene import Scene
 from utils import timer_utils
+
+random.seed(42)
 
 LOGGER = logging.getLogger(__name__)
 LOG_DELIM = '- ' * 20
@@ -71,16 +74,24 @@ class PreprocessingControllerShapenet:
         self.camera_seed = camera_seed
         self.light_seed = light_seed
 
+        # Only parse synsets/labels present in ILSVRC dataset
+        ILSVRC_SYNSETS = [
+            '02747177', '02808440', '02843684', '02992529', '03085013', '03207941', '03337140', '03642806', '03691459',
+            '03710193', '03759954', '03761084', '03938244', '03991062', '04074963', '04090263', '04330267', '04554684'
+        ]
+
         # Parse Parts SHAPENET
         self.parts = []
         for label in os.listdir(f'{self.input_dir}/models'):
-            for entity in os.listdir(f'{self.input_dir}/models/{label}'):
-                part = {
-                    "id": entity,
-                    "path": f'{self.input_dir}/models/{label}/{entity}/models/model_normalized.obj',
-                    "scene": None,
-                }
-                self.parts.append(part)
+            if label in ILSVRC_SYNSETS:
+                render_samples = random.sample(os.listdir(f'{self.input_dir}/models/{label}'), k=50)
+                for entity in render_samples:
+                    part = {
+                        "id": entity,
+                        "path": f'{self.input_dir}/{label}/{entity}/models/model_normalized.obj',
+                        "scene": None,
+                    }
+                    self.parts.append(part)
 
     def _sample_cameras(self, n_images: int):
         """ Assign Cameras to single parts depending on self.camera-def_mode. """
