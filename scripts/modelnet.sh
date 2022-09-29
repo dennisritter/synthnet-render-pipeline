@@ -44,7 +44,7 @@ echo "- - - - - - - - - - - - - - - - - - - - "
 ##### RESOURCES
 # Resource directory path. Contains Environment maps, materials, CAD data and metadata. 
 # (relative to project root)
-RESOURCE_DIR="./data/ModelNet10"
+RESOURCE_DIR="./data/ModelNet10_obj"
 # TOPEX_METADATA_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.xlsx"
 # TOPEX_BLENDER_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.blend"
 MATERIALS_DIR="no"
@@ -66,8 +66,8 @@ echo "Created output directory: $OUT_DIR"
 N_IMAGES_PER_PART=32
 CAMERA_DEF_MODE='sphere-equidistant'
 LIGHT_DEF_MODE='sphere-uniform'
-MATERIAL_DEF_MODE='static'
-ENVMAP_DEF_MODE='static'
+MATERIAL_DEF_MODE='disabled'
+ENVMAP_DEF_MODE='gray'
 
 # Run Preprocessing
 # PREPROCESSING_SECONDS_START=$SECONDS
@@ -109,7 +109,7 @@ if [[ $RUN_MODE -ge 2 ]]; then
 
     # Run Export GLTFs
     EXPORT_SECONDS_START=$SECONDS
-    blender --background --python ./bpy_modules/export_gltfs_shapenet.py -- \
+    blender --background --python ./bpy_modules/export_gltfs_modelnet.py -- \
     --rcfg_file $RCFG_FILE \
     --out_dir $GLTF_DIR 
     EXPORT_SECONDS_END=$(($SECONDS-$EXPORT_SECONDS_START))
@@ -127,7 +127,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     DEVICE="GPU"
     # Run Export GLTFs
     RENDER_SECONDS_START=$SECONDS
-    blender --background --python ./bpy_modules/render_shapenet.py -- \
+    blender --background --python ./bpy_modules/render_modelnet.py -- \
     --gltf_dir $GLTF_DIR \
     --material_dir $MATERIALS_DIR \
     --envmap_dir $ENVMAPS_DIR \

@@ -80,11 +80,11 @@ class PreprocessingControllerModelnet:
             if os.path.isdir(f'{self.input_dir}/{label}') and label != 'assets':
                 for split in os.listdir(f'{self.input_dir}/{label}'):
                     render_samples = os.listdir(f'{self.input_dir}/{label}/{split}')
-                    for off_file in render_samples:
-                        if off_file.endswith('.off'):
+                    for obj_file in render_samples:
+                        if obj_file.endswith('.obj'):
                             part = {
-                                "id": f'{split}_{off_file}',
-                                "path": f'{self.input_dir}/{label}/{split}/{off_file}',
+                                "id": f'{split}_{obj_file}',
+                                "path": f'{self.input_dir}/{label}/{split}/{obj_file}',
                                 "scene": None,
                             }
                             self.parts.append(part)
