@@ -67,7 +67,7 @@ N_IMAGES_PER_PART=32
 CAMERA_DEF_MODE='sphere-equidistant'
 LIGHT_DEF_MODE='sphere-uniform'
 MATERIAL_DEF_MODE='disabled'
-ENVMAP_DEF_MODE='gray'
+ENVMAP_DEF_MODE='static'
 
 # Run Preprocessing
 # PREPROCESSING_SECONDS_START=$SECONDS
