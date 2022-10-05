@@ -76,15 +76,15 @@ class PreprocessingControllerModelnet:
 
         # Parse Parts MODELNET
         self.parts = []
-        for label in os.listdir(f'{self.input_dir}'):
-            if os.path.isdir(f'{self.input_dir}/{label}') and label != 'assets':
-                for split in os.listdir(f'{self.input_dir}/{label}'):
-                    render_samples = os.listdir(f'{self.input_dir}/{label}/{split}')
+        for label in os.listdir(f'{self.input_dir}/models'):
+            if os.path.isdir(f'{self.input_dir}/models/{label}') and label != 'assets':
+                for split in os.listdir(f'{self.input_dir}/models/{label}'):
+                    render_samples = os.listdir(f'{self.input_dir}/models/{label}/{split}')
                     for obj_file in render_samples:
                         if obj_file.endswith('.obj'):
                             part = {
-                                "id": f'{split}_{obj_file}',
-                                "path": f'{self.input_dir}/{label}/{split}/{obj_file}',
+                                "id": f'{split}_{obj_file.split(".")[0]}',
+                                "path": f'{self.input_dir}/models/{label}/{split}/{obj_file}',
                                 "scene": None,
                             }
                             self.parts.append(part)
