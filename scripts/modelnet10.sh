@@ -16,13 +16,13 @@ if [ -z "$1" ]
 fi
 # Set camera seed by Args or set default
 CAMERA_SEED="${2}"
-if [ -z "$2"]
+if [ -z "$2" ]
     then
         CAMERA_SEED=42
 fi
 # Set light seed by Args or set default
 LIGHT_SEED="${3}"
-if [ -z "$3"]
+if [ -z "$3" ]
     then
         LIGHT_SEED=43
 fi
