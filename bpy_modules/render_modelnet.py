@@ -388,6 +388,11 @@ def render(
         render_camera = cameras[render_setup["camera_i"]]
         scene.camera = render_camera
         bpy.ops.object.select_by_type(extend=False, type='MESH')
+        xdim = bpy.context.selected_objects[0].dimensions.x
+        ydim = bpy.context.selected_objects[0].dimensions.y
+        zdim = bpy.context.selected_objects[0].dimensions.z
+        #NOTE: Added this to modelnet only
+        bpy.context.selected_objects[0].scale *= 1 / max(xdim, ydim, zdim)
         bpy.ops.view3d.camera_to_view_selected()
         # Zoom in/out from 100% ?
         # translate_objects_by([cam], mathutils.Vector((0, 0, 0.5)))
