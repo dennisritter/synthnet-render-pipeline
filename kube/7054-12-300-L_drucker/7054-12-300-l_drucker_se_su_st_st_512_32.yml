@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: synthnet-7054-12-300-L-se-su-st-st-512-32
+  name: synthnet-7054-12-300-l-se-su-st-st-512-32
 spec:
   restartPolicy: Never
   containers:
-  - name: synthnet-7054-12-300-L-se-su-st-st-512-32
+  - name: synthnet-7054-12-300-l-se-su-st-st-512-32
     image: registry.bht-berlin.de/iisy/synthnet/rendering-pipeline
     env:
       - name: GOOGLE_APPLICATION_CREDENTIALS
