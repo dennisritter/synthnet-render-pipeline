@@ -73,7 +73,7 @@ blender -b -P ./bpy_modules/render.py -- --gltf_dir /path/to/gltf_files --materi
 Data that are used as inputs for the rendering pipeline.
 
 ## Render Configuration (RCFG)
-The render configuration (RCFG) is a JSON file that determines the scene components and render setups for each machine part. besides the rendered objects this includes cameras, lights. The RCFG file must follow the [Config Schema](./validation/schemas/rcfg_schema_v2.json).
+The render configuration (RCFG) is a JSON file that determines the scene components and render setups for each machine part. besides the rendered objects this includes cameras, lights. The RCFG file must follow the [Config Schema](./validation/schemas/rcfg_schema_v3.json).
 
 ## GLTF
 .GLB files that are exported by the export_gltf.py script.
