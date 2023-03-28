@@ -46,10 +46,9 @@ spec:
       ]
     resources:
       requests:
-        memory: "16Gi"
+        memory: "8Gi"
       limits:
         nvidia.com/gpu: 1
-        memory: "64Gi"
   imagePullSecrets:
   - name: private-registry-auth
   nodeSelector:
