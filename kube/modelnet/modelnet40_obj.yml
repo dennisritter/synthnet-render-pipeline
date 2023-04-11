@@ -39,7 +39,7 @@ spec:
         "-n",
         "py39-synthnet-rendering-pipeline",
         "bash",
-        "scripts/modelnet40.sh",
+        "scripts/modelnet40_renderonly.sh",
         "3",
         "42",
         "43"

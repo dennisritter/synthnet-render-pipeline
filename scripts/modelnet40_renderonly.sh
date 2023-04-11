@@ -38,12 +38,12 @@ echo "  2 = Preprocessing and GLTF Export"
 echo "  3 = Preprocessing, GLTF Export and Rendering"
 echo "- - - - - - - - - - - - - - - - - - - - "
 
-##### RESOURCES
-# Resource directory path. Contains Environment maps, materials, CAD data and metadata.
-# (relative to project root)
+# ##### RESOURCES
+# # Resource directory path. Contains Environment maps, materials, CAD data and metadata.
+# # (relative to project root)
 RESOURCE_DIR="./data/ModelNet40_obj"
-# TOPEX_METADATA_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.xlsx"
-# TOPEX_BLENDER_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.blend"
+# # TOPEX_METADATA_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.xlsx"
+# # TOPEX_BLENDER_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.blend"
 MATERIALS_DIR="no"
 ENVMAPS_DIR="${RESOURCE_DIR}/assets/envmaps"
 
@@ -55,23 +55,37 @@ RUN_DESCRIPTION="render_modelnet40"
 OUT_DIR=$(python scripts/utils/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION")
 echo "Created output directory: $OUT_DIR"
 
-# Copy input data into the out dir
+# # Copy input data into the out dir
 # cp -R $RESOURCE_DIR "${OUT_DIR}/input_data"
 
-########## PREPROCESSING ##########
-# Set options
-N_IMAGES_PER_PART=32
-CAMERA_DEF_MODE='sphere-equidistant'
-LIGHT_DEF_MODE='sphere-uniform'
-MATERIAL_DEF_MODE='disabled'
-ENVMAP_DEF_MODE='static'
+# ########## PREPROCESSING ##########
+# # Set options
+# N_IMAGES_PER_PART=32
+# CAMERA_DEF_MODE='sphere-equidistant'
+# LIGHT_DEF_MODE='sphere-uniform'
+# MATERIAL_DEF_MODE='disabled'
+# ENVMAP_DEF_MODE='static'
 
-# Run Preprocessing
+# # Run Preprocessing
+# # PREPROCESSING_SECONDS_START=$SECONDS
+# # python preprocessing.py \
+# # --metadata_file $TOPEX_METADATA_FILE \
+# # --blend_file $TOPEX_BLENDER_FILE \
+# # --materials_dir $MATERIALS_DIR \
+# # --out_dir $OUT_DIR \
+# # --n_images_per_part $N_IMAGES_PER_PART \
+# # --camera_def_mode $CAMERA_DEF_MODE \
+# # --light_def_mode $LIGHT_DEF_MODE \
+# # --material_def_mode $MATERIAL_DEF_MODE \
+# # --envmap_def_mode $ENVMAP_DEF_MODE \
+# # --camera_seed $CAMERA_SEED \
+# # --light_seed $LIGHT_SEED
+# # PREPROCESSING_SECONDS_END=$(($SECONDS-$PREPROCESSING_SECONDS_START))
+# # ###################################
+# # Run Preprocessing
 # PREPROCESSING_SECONDS_START=$SECONDS
-# python preprocessing.py \
-# --metadata_file $TOPEX_METADATA_FILE \
-# --blend_file $TOPEX_BLENDER_FILE \
-# --materials_dir $MATERIALS_DIR \
+# python preprocessing_modelnet.py \
+# --in_dir $RESOURCE_DIR \
 # --out_dir $OUT_DIR \
 # --n_images_per_part $N_IMAGES_PER_PART \
 # --camera_def_mode $CAMERA_DEF_MODE \
@@ -82,36 +96,22 @@ ENVMAP_DEF_MODE='static'
 # --light_seed $LIGHT_SEED
 # PREPROCESSING_SECONDS_END=$(($SECONDS-$PREPROCESSING_SECONDS_START))
 # ###################################
-# Run Preprocessing
-PREPROCESSING_SECONDS_START=$SECONDS
-python preprocessing_modelnet.py \
-    --in_dir $RESOURCE_DIR \
-    --out_dir $OUT_DIR \
-    --n_images_per_part $N_IMAGES_PER_PART \
-    --camera_def_mode $CAMERA_DEF_MODE \
-    --light_def_mode $LIGHT_DEF_MODE \
-    --material_def_mode $MATERIAL_DEF_MODE \
-    --envmap_def_mode $ENVMAP_DEF_MODE \
-    --camera_seed $CAMERA_SEED \
-    --light_seed $LIGHT_SEED
-PREPROCESSING_SECONDS_END=$(($SECONDS - $PREPROCESSING_SECONDS_START))
-###################################
 
-########## EXPORT GLTFs ##########
-if [[ $RUN_MODE -ge 2 ]]; then
-    # Set options
-    RCFG_NAME="rcfg_v2.json"
-    RCFG_FILE="$OUT_DIR/$RCFG_NAME"
-    GLTF_DIR="$OUT_DIR/gltf"
+# ########## EXPORT GLTFs ##########
+# if [[ $RUN_MODE -ge 2 ]]; then
+#     # Set options
+#     RCFG_NAME="rcfg_v2.json"
+#     RCFG_FILE="$OUT_DIR/$RCFG_NAME"
+GLTF_DIR='./out/0-render_modelnet40/gltf'
 
-    # Run Export GLTFs
-    EXPORT_SECONDS_START=$SECONDS
-    blender --background --python ./bpy_modules/export_gltfs_modelnet.py -- \
-        --rcfg_file $RCFG_FILE \
-        --out_dir $GLTF_DIR
-    EXPORT_SECONDS_END=$(($SECONDS - $EXPORT_SECONDS_START))
-fi
-###################################
+#     # Run Export GLTFs
+#     EXPORT_SECONDS_START=$SECONDS
+#     blender --background --python ./bpy_modules/export_gltfs_modelnet.py -- \
+#     --rcfg_file $RCFG_FILE \
+#     --out_dir $GLTF_DIR
+#     EXPORT_SECONDS_END=$(($SECONDS-$EXPORT_SECONDS_START))
+# fi
+# ###################################
 
 ########## RENDER ##########
 if [[ $RUN_MODE -ge 3 ]]; then
@@ -129,7 +129,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
         --material_dir $MATERIALS_DIR \
         --envmap_dir $ENVMAPS_DIR \
         --out_dir $OUT_DIR \
-        --rcfg_file="$OUT_DIR/$RCFG_NAME" \
+        --rcfg_file='./out/0-render_modelnet40/rcfg_v2.json' \
         --res_x $RES_X \
         --res_y $RES_Y \
         --out_quality $OUT_QUALITY \
