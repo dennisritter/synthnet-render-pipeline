@@ -11,16 +11,24 @@ from preprocessing.models.scene import Scene
 from utils import timer_utils
 
 LOGGER = logging.getLogger(__name__)
-LOG_DELIM = '- ' * 20
+LOG_DELIM = "- " * 20
 
-RCFG_VAL_SCHEMA_FILE = './validation/schemas/rcfg_schema_v3.json'
+RCFG_VAL_SCHEMA_FILE = "./validation/schemas/rcfg_schema_v3.json"
 
 
 class PreprocessingController:
-    CAMERA_DEF_MODES = ['sphere-uniform', 'sphere-equidistant']
-    LIGHT_DEF_MODES = ['sphere-uniform', 'range-uniform']
-    MATERIAL_DEF_MODES = ['disabled', 'static', 'random']
-    ENVMAP_DEF_MODES = ['disabled', 'white', 'gray', 'static']
+    CAMERA_DEF_MODES = [
+        "sphere-uniform",
+        "sphere-equidistant",
+        "circular",
+        "isocahedral",
+        "dodecahedral",
+        "dodecahedral-16",
+        "n-gonal-antiprism",
+    ]
+    LIGHT_DEF_MODES = ["sphere-uniform", "range-uniform"]
+    MATERIAL_DEF_MODES = ["disabled", "static", "random"]
+    ENVMAP_DEF_MODES = ["disabled", "white", "gray", "static"]
 
     def __init__(
         self,
@@ -36,7 +44,6 @@ class PreprocessingController:
         camera_seed: int,
         light_seed: int,
     ):
-
         ## Validate parameters
         # validate metadata_file
         assert isinstance(metadata_file, str)
@@ -57,6 +64,30 @@ class PreprocessingController:
         # validate camera_def_mode
         assert isinstance(camera_def_mode, str)
         assert camera_def_mode.lower() in self.CAMERA_DEF_MODES
+        if camera_def_mode == "isocahedral":
+            if n_images != 12:
+                LOGGER.warn(
+                    f"{n_images=} were entered, but in {camera_def_mode=} n_images is fixed to 12. Setting n_images to 12."
+                )
+                n_images = 12
+        if camera_def_mode == "dodecahedral-16":
+            if n_images != 16:
+                LOGGER.warn(
+                    f"{n_images=} were entered, but in {camera_def_mode=} n_images is fixed to 16. Setting n_images to 16."
+                )
+                n_images = 16
+        if camera_def_mode == "dodecahedral":
+            if n_images != 20:
+                LOGGER.warn(
+                    f"{n_images=} were entered, but in {camera_def_mode=} n_images is fixed to 20. Setting n_images to 20."
+                )
+            n_images = 20
+        if camera_def_mode == "n-gonal-antiprism":
+            if n_images % 2 != 0:
+                LOGGER.warn(
+                    f"With camera_def_mode {camera_def_mode}, an even value is needed for the value of images per part {n_images}. n_images={n_images + 1} is set instead."
+                )
+                n_images += 1
         # validate light_def_mode
         assert isinstance(light_def_mode, str)
         assert light_def_mode.lower() in self.LIGHT_DEF_MODES
@@ -95,32 +126,32 @@ class PreprocessingController:
         # Parse Parts
         tstart = timer_utils.time_now()
         LOGGER.info(LOG_DELIM)
-        LOGGER.info(f'Parsing unique Parts and SingleParts from {metadata_file}')
+        LOGGER.info(f"Parsing unique Parts and SingleParts from {metadata_file}")
         # List of all Parts to render
         self.parts = parse_parts(self.metadata)
         tend = timer_utils.time_since(tstart)
-        LOGGER.info(f'Done in {tend}')
+        LOGGER.info(f"Done in {tend}")
 
     def assign_materials(self):
-        """ Assign materials to single parts depending on self.material_def_mode. """
+        """Assign materials to single parts depending on self.material_def_mode."""
 
         tstart = timer_utils.time_now()
         LOGGER.info(LOG_DELIM)
-        LOGGER.info(f'Assigning materials [mode={self.material_def_mode}]')
+        LOGGER.info(f"Assigning materials [mode={self.material_def_mode}]")
 
         # disabled: Do not add any materials (but 'none')
-        if self.material_def_mode == 'disabled':
+        if self.material_def_mode == "disabled":
             pass
         # static: Read metadata materials and apply our materials depending
         # on a static metadata_material:our_material map
-        if self.material_def_mode == 'static':
+        if self.material_def_mode == "static":
             self.parts = define_materials.assign_materials_static(
                 self.parts,
                 self.metadata,
                 self.materials_dir,
             )
         # random: Assign a random material to each part
-        if self.material_def_mode == 'random':
+        if self.material_def_mode == "random":
             self.parts = define_materials.assign_materials_random(
                 self.parts,
                 self.metadata,
@@ -128,52 +159,62 @@ class PreprocessingController:
             )
 
         tend = timer_utils.time_since(tstart)
-        LOGGER.info(f'Done in {tend}')
+        LOGGER.info(f"Done in {tend}")
 
     def _sample_cameras(self, n_images: int):
-        """ Assign Cameras to single parts depending on self.camera-def_mode. """
+        """Assign Cameras to single parts depending on self.camera-def_mode."""
         # Add cameras - sphere uniform
-        if self.camera_def_mode == 'sphere-uniform':
+        if self.camera_def_mode == "sphere-uniform":
             cameras = define_cameras.get_cameras_sphere_uniform(n=n_images, seed=self.camera_seed)
-        if self.camera_def_mode == 'sphere-equidistant':
+        if self.camera_def_mode == "sphere-equidistant":
             cameras = define_cameras.get_cameras_sphere_equidistant(n=n_images, seed=self.camera_seed)
+        if self.camera_def_mode == "circular":
+            cameras = define_cameras.get_cameras_circular(n=n_images)
+        if self.camera_def_mode == "isocahedral":
+            cameras = define_cameras.get_cameras_isocahedral()
+        if self.camera_def_mode == "dodecahedral":
+            cameras = define_cameras.get_cameras_dodecahedral()
+        if self.camera_def_mode == "dodecahedral-16":
+            cameras = define_cameras.get_cameras_dodecahedral_16()
+        if self.camera_def_mode == "n-gonal-antiprism":
+            cameras = define_cameras.get_cameras_n_agonal_antiprism(n_cameras=n_images)
 
         return cameras
 
     def _sample_lights(self, n_images: int):
-        """ Sample lightsetups depending on self.light_def_mode. """
+        """Sample lightsetups depending on self.light_def_mode."""
         # Add lights - sphere uniform
-        if self.light_def_mode == 'sphere-uniform':
+        if self.light_def_mode == "sphere-uniform":
             lights = define_lights.get_lights_sphere_uniform(n=n_images, seed=self.light_seed)
         # Add lights - random within range
-        if self.light_def_mode == 'range-uniform':
+        if self.light_def_mode == "range-uniform":
             lights = define_lights.get_lights_range_uniform(n=n_images, seed=self.light_seed)
         return lights
 
     def _assign_envmaps(self, n_images: int):
-        """ Assign Environment Maps to single parts depending on self.envmap_def_mode. """
+        """Assign Environment Maps to single parts depending on self.envmap_def_mode."""
         # No envmaps
-        if self.envmap_def_mode == 'disabled':
+        if self.envmap_def_mode == "disabled":
             envmaps = []
-        if self.envmap_def_mode == 'white':
-            envmaps = ['white.jpg' for _ in range(0, n_images)]
-        if self.envmap_def_mode == 'gray':
-            envmaps = ['gray.png' for _ in range(0, n_images)]
-        if self.envmap_def_mode == 'static':
-            envmaps = ['default.hdr' for _ in range(0, n_images)]
+        if self.envmap_def_mode == "white":
+            envmaps = ["white.jpg" for _ in range(0, n_images)]
+        if self.envmap_def_mode == "gray":
+            envmaps = ["gray.png" for _ in range(0, n_images)]
+        if self.envmap_def_mode == "static":
+            envmaps = ["default.hdr" for _ in range(0, n_images)]
         return envmaps
 
     def _compose_render_setups(self, cameras: list, lights: list, envmaps: list):
-        """ Compose Render Setups from lists of cameras, lights and envmaps.
+        """Compose Render Setups from lists of cameras, lights and envmaps.
 
-            Returns a dictionary that contains camera_i, lights_i and envmaps_fname keys, 
-            which reference an item in the respective list by its index (camera, lights) or filename (envmaps).
+        Returns a dictionary that contains camera_i, lights_i and envmaps_fname keys,
+        which reference an item in the respective list by its index (camera, lights) or filename (envmaps).
 
-            Args:
-                cameras (list): List of cameras 
-                lights (list): List of lights
-                envmaps (list): List of envmaps (filenames)
-        
+        Args:
+            cameras (list): List of cameras
+            lights (list): List of lights
+            envmaps (list): List of envmaps (filenames)
+
         """
         render_setups = []
         for i, _ in enumerate(cameras):
@@ -188,17 +229,14 @@ class PreprocessingController:
     def build_scenes(self):
         tstart = timer_utils.time_now()
         LOGGER.info(LOG_DELIM)
-        LOGGER.info(f'Define Scenes')
+        LOGGER.info(f"Define Scenes")
 
         # Build scenes of for each part exclusively
-        n_cameras = self.n_images
-        n_lights = self.n_images
-        n_envmaps = self.n_images
-
+        # self.n_images is equal to the number of cameras, lights and envmaps needed
         for part in self.parts:
-            cameras = self._sample_cameras(n_cameras)
-            lights = self._sample_lights(n_lights)
-            envmaps = self._assign_envmaps(n_envmaps)
+            cameras = self._sample_cameras(self.n_images)
+            lights = self._sample_lights(self.n_images)
+            envmaps = self._assign_envmaps(self.n_images)
             render_setups = self._compose_render_setups(
                 cameras=cameras,
                 lights=lights,
@@ -212,27 +250,27 @@ class PreprocessingController:
             part.scene = scene
 
         tend = timer_utils.time_since(tstart)
-        LOGGER.info(f'Done in {tend}')
+        LOGGER.info(f"Done in {tend}")
 
-    def export_augmented_metadata(self, filename: str = 'metadata', fileformats: list[str] = ['csv', 'xlsx']):
-        if 'csv' in fileformats:
+    def export_augmented_metadata(self, filename: str = "metadata", fileformats: list[str] = ["csv", "xlsx"]):
+        if "csv" in fileformats:
             self.metadata.to_csv(path_or_buf=f"{self.output_dir}/{filename}.csv")
-        if 'xlsx' in fileformats:
+        if "xlsx" in fileformats:
             self.metadata.to_excel(excel_writer=f"{self.output_dir}/{filename}.xlsx")
 
-    def export_rcfg_json(self, filename: str = 'rcfg.json'):
+    def export_rcfg_json(self, filename: str = "rcfg.json"):
         tstart = timer_utils.time_now()
-        rcfg_path = f'{self.output_dir}/{filename}'
+        rcfg_path = f"{self.output_dir}/{filename}"
 
         assert isinstance(filename, str)
-        assert filename.endswith('.json')
+        assert filename.endswith(".json")
 
         LOGGER.info(LOG_DELIM)
-        LOGGER.info(f'Exporting rcfg [path={rcfg_path}]')
+        LOGGER.info(f"Exporting rcfg [path={rcfg_path}]")
 
         self.val_rcfg_json()
         rcfg = json.loads(self.get_rcfg_json())
-        with open(f'{self.output_dir}/{filename}', 'w') as f:
+        with open(f"{self.output_dir}/{filename}", "w") as f:
             json.dump(
                 rcfg,
                 f,
@@ -241,10 +279,9 @@ class PreprocessingController:
                 sort_keys=True,
             )
         tend = timer_utils.time_since(tstart)
-        LOGGER.info(f'Done in {tend}')
+        LOGGER.info(f"Done in {tend}")
 
     def get_rcfg_json(self):
-
         return json.dumps(
             {"parts": self.parts},
             default=lambda o: o.__dict__,
@@ -253,7 +290,7 @@ class PreprocessingController:
         )
 
     def val_rcfg_json(self):
-        with open(RCFG_VAL_SCHEMA_FILE, 'r', encoding='UTF-8') as json_file:
+        with open(RCFG_VAL_SCHEMA_FILE, "r", encoding="UTF-8") as json_file:
             rcfg_schema = json.loads(json_file.read())
         rcfg = self.get_rcfg_json()
         try:
@@ -262,7 +299,7 @@ class PreprocessingController:
                 schema=rcfg_schema,
             )
         except jsonschema.exceptions.ValidationError as err:
-            LOGGER.error('Schema validation Error:', err)
+            LOGGER.error("Schema validation Error:", err)
 
         except jsonschema.exceptions.SchemaError as err:
-            LOGGER.error('Schema Error:', err)
+            LOGGER.error("Schema Error:", err)
