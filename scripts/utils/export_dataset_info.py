@@ -6,7 +6,12 @@ import click
 from types import SimpleNamespace
 
 
-@click.command()
+@click.command(
+    context_settings=dict(
+        ignore_unknown_options=True,
+        allow_extra_args=True,
+    ) # For ignoring n_images_per_part for compatability
+) 
 @click.option(
     '--out_dir',
     help='Output directory',
@@ -31,12 +36,12 @@ from types import SimpleNamespace
     type=int,
     required=True,
 )
-@click.option(
-    '--n_images_per_part',
-    help='How many images were rendered for each part/class',
-    type=int,
-    required=True,
-)
+# @click.option(
+#     '--n_images_per_part',
+#     help='How many images were rendered for each part/class',
+#     type=int,
+#     required=True,
+# )
 @click.option(
     '--camera_def_mode',
     help='How cameras were sampled/defined during preprocessing',
@@ -128,7 +133,7 @@ def main(**kwargs):
     run_description = args.run_description
     camera_seed = args.camera_seed
     light_seed = args.light_seed
-    n_images_per_part = args.n_images_per_part
+    # n_images_per_part = args.n_images_per_part
     camera_def_mode = args.camera_def_mode
     light_def_mode = args.light_def_mode
     material_def_mode = args.material_def_mode
@@ -149,16 +154,16 @@ def main(**kwargs):
 
     n_parts_total = len(rcfg["parts"])
     n_images_total = len(os.listdir(render_dir))
-    n_rendered_parts = int(n_images_total / n_images_per_part)
-    n_unidentified_parts = int(n_parts_total - n_rendered_parts)
+    # n_rendered_parts = int(n_images_total / n_images_per_part)
+    # n_unidentified_parts = int(n_parts_total - n_rendered_parts)
 
     dataset_info = {
         "run_description": run_description,
         "n_images_total": n_images_total,
         "n_parts_total": n_parts_total,
-        "n_images_per_part": n_images_per_part,
-        "n_rendered_parts": n_rendered_parts,
-        "n_unidentified_parts": n_unidentified_parts,
+        # "n_images_per_part": n_images_per_part,
+        # "n_rendered_parts": n_rendered_parts,
+        # "n_unidentified_parts": n_unidentified_parts,
         "comment": comment,
         "preprocessing": {
             "camera_seed": camera_seed,

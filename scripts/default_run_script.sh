@@ -1,5 +1,6 @@
 #!/bin/bash
 # IMPORTANT: Run this script from project root to function properly!
+# Replace values marked with # TODO <-------------------------
 SECONDS=0
 
 # NOTE: param $1 defines the RUN_MODE:
@@ -15,12 +16,12 @@ if [ -z "$1" ]; then
 fi
 # Set camera seed by Args or set default
 CAMERA_SEED="${2}"
-if [ -z "$2"]; then
+if [ -z "$2" ]; then
     CAMERA_SEED=42
 fi
 # Set light seed by Args or set default
 LIGHT_SEED="${3}"
-if [ -z "$3"]; then
+if [ -z "$3" ]; then
     LIGHT_SEED=43
 fi
 
@@ -41,51 +42,36 @@ echo "- - - - - - - - - - - - - - - - - - - - "
 ##### RESOURCES
 # Resource directory path. Contains Environment maps, materials, CAD data and metadata.
 # (relative to project root)
-RESOURCE_DIR="./data/ShapeNetCoreV2"
-# TOPEX_METADATA_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.xlsx"
-# TOPEX_BLENDER_FILE="${RESOURCE_DIR}/900841-00.00.00_drucker.blend"
-MATERIALS_DIR="no"
-ENVMAPS_DIR="${RESOURCE_DIR}/assets/envmaps"
+RESOURCE_DIR="./data/directory" # TODO <-------------------------
+TOPEX_METADATA_FILE="${RESOURCE_DIR}/drucker_min.xlsx"
+TOPEX_BLENDER_FILE="${RESOURCE_DIR}/drucker.blend"
+MATERIALS_DIR="${RESOURCE_DIR}/materials"
+ENVMAPS_DIR="${RESOURCE_DIR}/envmaps"
 
 ##### OUTPUTS
 # Specify output root directory and a run description to create a unique output directory
 OUT_ROOT_DIR="./out"
-RUN_DESCRIPTION="render_ilsvcr_sn17"
+RUN_DESCRIPTION="run_name_of_this_run" # TODO <-------------------------
 # will return a dir path like '$OUT_ROOT_DIR/$ID-$RUN_DESCRIPTION -> ./out/1-my-run
 OUT_DIR=$(python scripts/utils/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION")
 echo "Created output directory: $OUT_DIR"
-
 # Copy input data into the out dir
-# cp -R $RESOURCE_DIR "${OUT_DIR}/input_data"
+cp -R $RESOURCE_DIR "${OUT_DIR}/input_data"
 
 ########## PREPROCESSING ##########
 # Set options
-N_IMAGES_PER_PART=32
-CAMERA_DEF_MODE='sphere-equidistant'
-LIGHT_DEF_MODE='sphere-uniform'
-MATERIAL_DEF_MODE='static'
-ENVMAP_DEF_MODE='static'
+N_IMAGES_PER_PART=42             # TODO <-------------------------
+CAMERA_DEF_MODE='sphere-uniform' # 'sphere-uniform' 'sphere-equidistant' 'circular' 'isocahedral' 'dodecahedral' 'dodecahedral-16' 'n-gonal-antiprism' # TODO <-------------------------
+LIGHT_DEF_MODE='sphere-uniform'  # 'sphere-uniform' 'range-uniform' TODO <-------------------------
+MATERIAL_DEF_MODE='static'       # 'disabled' 'static' 'random' TODO <-------------------------
+ENVMAP_DEF_MODE='static'         # 'disabled' 'white' 'gray' 'static' TODO <-------------------------
 
 # Run Preprocessing
-# PREPROCESSING_SECONDS_START=$SECONDS
-# python preprocessing.py \
-# --metadata_file $TOPEX_METADATA_FILE \
-# --blend_file $TOPEX_BLENDER_FILE \
-# --materials_dir $MATERIALS_DIR \
-# --out_dir $OUT_DIR \
-# --n_images_per_part $N_IMAGES_PER_PART \
-# --camera_def_mode $CAMERA_DEF_MODE \
-# --light_def_mode $LIGHT_DEF_MODE \
-# --material_def_mode $MATERIAL_DEF_MODE \
-# --envmap_def_mode $ENVMAP_DEF_MODE \
-# --camera_seed $CAMERA_SEED \
-# --light_seed $LIGHT_SEED
-# PREPROCESSING_SECONDS_END=$(($SECONDS-$PREPROCESSING_SECONDS_START))
-# ###################################
-# Run Preprocessing
 PREPROCESSING_SECONDS_START=$SECONDS
-python preprocessing_shapenet.py \
-    --in_dir $RESOURCE_DIR \
+python preprocessing.py \
+    --metadata_file $TOPEX_METADATA_FILE \
+    --blend_file $TOPEX_BLENDER_FILE \
+    --materials_dir $MATERIALS_DIR \
     --out_dir $OUT_DIR \
     --n_images_per_part $N_IMAGES_PER_PART \
     --camera_def_mode $CAMERA_DEF_MODE \
@@ -106,7 +92,7 @@ if [[ $RUN_MODE -ge 2 ]]; then
 
     # Run Export GLTFs
     EXPORT_SECONDS_START=$SECONDS
-    blender --background --python ./bpy_modules/export_gltfs_shapenet.py -- \
+    blender $TOPEX_BLENDER_FILE --background --python ./bpy_modules/export_gltfs.py -- \
         --rcfg_file $RCFG_FILE \
         --out_dir $GLTF_DIR
     EXPORT_SECONDS_END=$(($SECONDS - $EXPORT_SECONDS_START))
@@ -124,7 +110,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
     DEVICE="GPU"
     # Run Export GLTFs
     RENDER_SECONDS_START=$SECONDS
-    blender --background --python ./bpy_modules/render_shapenet.py -- \
+    blender --background --python ./bpy_modules/render.py -- \
         --gltf_dir $GLTF_DIR \
         --material_dir $MATERIALS_DIR \
         --envmap_dir $ENVMAPS_DIR \
@@ -140,30 +126,30 @@ if [[ $RUN_MODE -ge 3 ]]; then
 fi
 ############################
 
-# ########## EXPORT DATASET INFO ##########
-# if [[ $RUN_MODE -ge 3 ]]; then
-#     # Run Export GLTFs
-#     python scripts/utils/export_dataset_info.py \
-#     --out_dir $OUT_DIR \
-#     --run_description $RUN_DESCRIPTION \
-#     --camera_seed $CAMERA_SEED \
-#     --light_seed $LIGHT_SEED \
-#     --camera_def_mode $CAMERA_DEF_MODE \
-#     --light_def_mode $LIGHT_DEF_MODE \
-#     --material_def_mode $MATERIAL_DEF_MODE \
-#     --envmap_def_mode $ENVMAP_DEF_MODE \
-#     --rcfg_version "v2" \
-#     --rcfg_file $RCFG_FILE \
-#     --render_dir $OUT_DIR/render \
-#     --render_res_x $RES_X \
-#     --render_res_y $RES_Y \
-#     --render_quality $OUT_QUALITY \
-#     --render_format $OUT_FORMAT \
-#     --render_engine $ENGINE \
-#     --render_device $DEVICE \
-#     --comment ""
-# fi
-# ############################
+########## EXPORT DATASET INFO ##########
+if [[ $RUN_MODE -ge 3 ]]; then
+    # Run Export GLTFs
+    python scripts/utils/export_dataset_info.py \
+        --out_dir $OUT_DIR \
+        --run_description $RUN_DESCRIPTION \
+        --camera_seed $CAMERA_SEED \
+        --light_seed $LIGHT_SEED \
+        --camera_def_mode $CAMERA_DEF_MODE \
+        --light_def_mode $LIGHT_DEF_MODE \
+        --material_def_mode $MATERIAL_DEF_MODE \
+        --envmap_def_mode $ENVMAP_DEF_MODE \
+        --rcfg_version "v2" \
+        --rcfg_file $RCFG_FILE \
+        --render_dir $OUT_DIR/render \
+        --render_res_x $RES_X \
+        --render_res_y $RES_Y \
+        --render_quality $OUT_QUALITY \
+        --render_format $OUT_FORMAT \
+        --render_engine $ENGINE \
+        --render_device $DEVICE \
+        --comment "No comment"
+fi
+############################
 
 echo "Time Measures:"
 echo "Total time (s): $SECONDS"

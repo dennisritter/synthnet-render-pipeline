@@ -148,7 +148,6 @@ fi
 #     --run_description $RUN_DESCRIPTION \
 #     --camera_seed $CAMERA_SEED \
 #     --light_seed $LIGHT_SEED \
-#     --n_images_per_part $N_IMAGES_PER_PART \
 #     --camera_def_mode $CAMERA_DEF_MODE \
 #     --light_def_mode $LIGHT_DEF_MODE \
 #     --material_def_mode $MATERIAL_DEF_MODE \
