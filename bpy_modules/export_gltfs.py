@@ -16,22 +16,22 @@ import builtins as __builtin__
 
 
 def console_print(*args, **kwargs) -> None:
-    """ Prints stuff to the console outside of blender. (to your terminal basically)"""
+    """Prints stuff to the console outside of blender. (to your terminal basically)"""
     for a in bpy.context.screen.areas:
-        if a.type == 'CONSOLE':
+        if a.type == "CONSOLE":
             c = {}
-            c['area'] = a
-            c['space_data'] = a.spaces.active
-            c['region'] = a.regions[-1]
-            c['window'] = bpy.context.window
-            c['screen'] = bpy.context.screen
+            c["area"] = a
+            c["space_data"] = a.spaces.active
+            c["region"] = a.regions[-1]
+            c["window"] = bpy.context.window
+            c["screen"] = bpy.context.screen
             s = " ".join([str(arg) for arg in args])
             for line in s.split("\n"):
                 bpy.ops.console.scrollback_append(c, text=line)
 
 
 def print(*args, **kwargs) -> None:
-    """ Override pythons print function to pass args to internal console_print."""
+    """Override pythons print function to pass args to internal console_print."""
     console_print(*args, **kwargs)  # to Python Console
     __builtin__.print(*args, **kwargs)  # to System Console
 
@@ -44,7 +44,7 @@ def print(*args, **kwargs) -> None:
 
 
 def parent(objects: list, parent: bpy.types.Object) -> None:
-    """ Parents objects to given parent
+    """Parents objects to given parent
 
     Args:
         objects (list): list of children to parent
@@ -136,13 +136,13 @@ def get_bounding_sphere(objects: list) -> list[mathutils.Vector, float]:
 
 
 def get_scene_collections(parent_coll: bpy.types.Collection) -> Generator:
-    """ Recursively walks through the bpy collections tree and.
-        Returns a generator for scene collections.
+    """Recursively walks through the bpy collections tree and.
+    Returns a generator for scene collections.
 
-        Args:
-            parent_coll (bpy.types.Collection): The bpy collection to get children from
-        Return:
-            Generator<bpy.types.Collection>
+    Args:
+        parent_coll (bpy.types.Collection): The bpy collection to get children from
+    Return:
+        Generator<bpy.types.Collection>
     """
     yield parent_coll
     for child_coll in parent_coll.children:
@@ -228,13 +228,15 @@ def export_gltf(bpy_objs_to_export: list, file_path: str) -> None:
         file_path (str): path to output gltf file
     """
     select(bpy_objs_to_export)
-    bpy.ops.export_scene.gltf(filepath=file_path,
-                              export_format="GLB",
-                              use_selection=True,
-                              export_image_format="JPEG",
-                              export_cameras=True,
-                              export_lights=True,
-                              export_extras=True)
+    bpy.ops.export_scene.gltf(
+        filepath=file_path,
+        export_format="GLB",
+        use_selection=True,
+        export_image_format="JPEG",
+        export_cameras=True,
+        export_lights=True,
+        export_extras=True,
+    )
 
 
 def get_objects_from_collection(collection: bpy.types.Collection) -> list:
@@ -263,7 +265,7 @@ def select(objects_to_select: list) -> None:
         objects_to_select (list): list of objects to select
     """
     selected_objects = []
-    bpy.ops.object.select_all(action='DESELECT')
+    bpy.ops.object.select_all(action="DESELECT")
     for ob in objects_to_select:
         if type(ob) == bpy.types.Collection:
             print(ob)
@@ -277,7 +279,7 @@ def select(objects_to_select: list) -> None:
 
 def new_scene() -> None:
     """Create new scene"""
-    bpy.ops.scene.new(type='EMPTY')
+    bpy.ops.scene.new(type="EMPTY")
 
 
 def open_scene(file_path: str) -> None:
@@ -309,7 +311,7 @@ def show(obj: bpy.types.Object, scene=None) -> None:
 
 
 def hide_all() -> None:
-    """ Hide all objects """
+    """Hide all objects"""
     for ob in bpy.data.objects:
         ob.hide_render = True
 
@@ -359,10 +361,9 @@ def add_image_to_blender(file_path: str) -> bpy.types.Image:
     return bpy.data.images.load(file_path, check_existing=True)
 
 
-def look_at(start: mathutils.Vector,
-            target: mathutils.Vector,
-            forward_vector: str = "-Z",
-            up_vector: str = "Y") -> mathutils.Euler:
+def look_at(
+    start: mathutils.Vector, target: mathutils.Vector, forward_vector: str = "-Z", up_vector: str = "Y"
+) -> mathutils.Euler:
     """Calculate rotation to look at target point from start point
 
     Args:
@@ -383,7 +384,7 @@ def look_at(start: mathutils.Vector,
 def create_light(name: str, data: dict, collection=None) -> bpy.types.Object:
     """
     Create Light with given data
-    
+
     Args:
         name (str): name of the light object
         data (dict): data containing [type, position, orientation/target, focal_length]
@@ -408,7 +409,7 @@ def create_light(name: str, data: dict, collection=None) -> bpy.types.Object:
 def create_camera(name: str, data: dict, collection=None) -> bpy.types.Object:
     """
     Create a camera in the scene with the given data
-    
+
     Args:
         name (str): name of the camera
         data (dict): data containing [type, position, orientation/target, focal_length]
@@ -419,7 +420,7 @@ def create_camera(name: str, data: dict, collection=None) -> bpy.types.Object:
     camera_data.type = data["type"] if "type" in data.keys() else "PERSP"
     camera_data.lens = data["focal_length"] if "focal_length" in data.keys() else 50
     # create camera object and link to scene collection
-    camera_object = bpy.data.objects.new('Camera', camera_data)
+    camera_object = bpy.data.objects.new("Camera", camera_data)
     if collection:
         collection.objects.link(camera_object)
     else:
@@ -431,7 +432,7 @@ def create_camera(name: str, data: dict, collection=None) -> bpy.types.Object:
         camera_object.rotation_euler = look_at(mathutils.Vector(camera_object.location), mathutils.Vector(target))
 
     # Roll camera around local Z-Axis by defined angle
-    bpy.context.scene.transform_orientation_slots[0].type = 'LOCAL'
+    bpy.context.scene.transform_orientation_slots[0].type = "LOCAL"
     if "local_rotation" in data.keys():
         camera_object.rotation_euler.rotate_axis("Z", data["local_rotation"][2])
 
@@ -449,10 +450,10 @@ def create_camera(name: str, data: dict, collection=None) -> bpy.types.Object:
 
 
 def get_bpy_single_parts(part: dict) -> list[bpy.types.Object]:
-    """ Returns a list of all single parts of the given part/assembly.
-    
-        Args:
-            part (dict): A machine part description from the render configuration (rcfg).
+    """Returns a list of all single parts of the given part/assembly.
+
+    Args:
+        part (dict): A machine part description from the render configuration (rcfg).
     """
     if isinstance(part["blend_obj"], bpy.types.Collection):
         bpy_single_parts = part["blend_obj"].all_objects
@@ -462,77 +463,86 @@ def get_bpy_single_parts(part: dict) -> list[bpy.types.Object]:
 
 
 def get_bpy_cameras(part: dict) -> list[bpy.types.Object]:
-    """ Returns a list of cameras for the given machine part.
-    
-        Args:
-            part (dict): A machine part description from the render configuration (rcfg).
+    """Returns a list of cameras for the given machine part.
+
+    Args:
+        part (dict): A machine part description from the render configuration (rcfg).
     """
     return [create_camera(f"camera_{i}", cam) for i, cam in enumerate(part["scene"]["cameras"])]
 
 
 def get_bpy_lights(part: dict) -> list[bpy.types.Object]:
-    """ Returns a list of lights for the given machine part.
-    
-        Args:
-            part (dict): A machine part description from the render configuration (rcfg).
+    """Returns a list of lights for the given machine part.
+
+    Args:
+        part (dict): A machine part description from the render configuration (rcfg).
     """
     return [create_light(f"light_{i}", light) for i, light in enumerate(part["scene"]["lights"])]
 
 
-class SceneExporter():
-    """ The Scene Exporter exports Blender scenes as GLTF (GLB) files.
-        It contains all single parts of an assembly/part, cameras and lights to render various images
-        of that part. 
+class SceneExporter:
+    """The Scene Exporter exports Blender scenes as GLTF (GLB) files.
+    It contains all single parts of an assembly/part, cameras and lights to render various images
+    of that part.
     """
 
     def __init__(self, rcfg: dict, out_dir: str):
-        """ Creates a new SceneExporter instance
-        
-            Args:
-                rcfg (dict): The render configuration. Contains machine parts along with their single parts, lights, cameras
-                out_dir (str): Path to the output directory.
+        """Creates a new SceneExporter instance
+
+        Args:
+            rcfg (dict): The render configuration. Contains machine parts along with their single parts, lights, cameras
+            out_dir (str): Path to the output directory.
         """
         # Set parts
         # -> See Part definition in Render Config (RCFG)
         self.parts = []
         self._set_parts(rcfg)
-
         self.out_dir = out_dir
 
     def _set_parts(self, rcfg) -> None:
-        """ Sets the self.parts attribute of the SceneExporter.
+        """Sets the self.parts attribute of the SceneExporter.
 
-            Takes all parts described in the Render Config and checks whether they are matched in the blender file.
-            If a part can not be matched, it is not added to the list of parts and subsequently not exported/rendered.
-            If it is matched, it is added to the SceneExporter.parts list with the respective blender object added to the part["blend_obj"] property.
+        Takes all parts described in the Render Config and checks whether they are matched in the blender file.
+        If a part can not be matched, it is not added to the list of parts and subsequently not exported/rendered.
+        If it is matched, it is added to the SceneExporter.parts list with the respective blender object added to the part["blend_obj"] property.
 
-            Args:
-                rcfg (dict): The render configuration. Contains machine parts along with their single parts, lights, cameras
+        Args:
+            rcfg (dict): The render configuration. Contains machine parts along with their single parts, lights, cameras
         """
-        # Create list of parts to render
-        # NOTE: Adds "blend_obj" property to each parts dictionary.
-        self.parts = []
-        part_ids = [part["id"] for part in rcfg["parts"]]
-        root_coll = get_collections_by_suffix(".hierarchy")[0]
-        # Get blender objects for all parts that can be matched with given part ids
-        render_parts = self._get_render_parts(part_ids, root_coll)
-        render_parts_ids = [part_id[0] for part_id in render_parts]
-        render_parts_obj = [part_id[1] for part_id in render_parts]
-        for part in rcfg["parts"]:
-            # Keep parts only if a matching blend_obj has been identified
-            if part["id"] in render_parts_ids:
-                part["blend_obj"] = render_parts_obj[render_parts_ids.index(part["id"])]
+
+        if bpy.data.filepath:
+            # Create list of parts to render
+            # NOTE: Adds "blend_obj" property to each parts dictionary.
+            self.parts = []
+            part_ids = [part["id"] for part in rcfg["parts"]]
+            root_coll = get_collections_by_suffix(".hierarchy")[0]
+            # Get blender objects for all parts that can be matched with given part ids
+            render_parts = self._get_render_parts(part_ids, root_coll)
+            render_parts_ids = [part_id[0] for part_id in render_parts]
+            render_parts_obj = [part_id[1] for part_id in render_parts]
+            for part in rcfg["parts"]:
+                # Keep parts only if a matching blend_obj has been identified
+                if part["id"] in render_parts_ids:
+                    part["blend_obj"] = render_parts_obj[render_parts_ids.index(part["id"])]
+                    self.parts.append(part)
+        else:
+            for part in rcfg["parts"]:
+                # load .obj into scene, name it after id
+                # save render_part_obj
+                bpy.ops.import_scene.obj(filepath=os.path.abspath(part["path"]))
+                obj = bpy.context.selected_objects[0]
+                part["blend_obj"] = obj
                 self.parts.append(part)
 
     def _get_render_parts(self, part_ids: list, root_collection) -> list[tuple]:
-        """ returns a list of tuples.
+        """returns a list of tuples.
 
-            Args:
-                part_ids (list<str>): A list of part IDs .
-                root_collection (bpy_types.Collection): A blender collection that should contain machine parts subcollections.
+        Args:
+            part_ids (list<str>): A list of part IDs .
+            root_collection (bpy_types.Collection): A blender collection that should contain machine parts subcollections.
         """
-        print(f'- ' * 20)
-        print(f'Matching (part_id, bpy_object) pairs')
+        print(f"- " * 20)
+        print(f"Matching (part_id, bpy_object) pairs")
 
         matches = []
         # validate whether part_ids match with first part of collection names
@@ -555,18 +565,18 @@ class SceneExporter():
         # assert no duplicates
         assert len(matched_part_ids) == len(set(matched_part_ids))
 
-        print('---')
-        print(f'root collection: {root_collection.name}')
-        print(f'part_ids: {len(part_ids)}')
-        print(f'matched: {len(matches)}')
-        print(f'unmatched: {len(unmatched_part_ids)}')
+        print("---")
+        print(f"root collection: {root_collection.name}")
+        print(f"part_ids: {len(part_ids)}")
+        print(f"matched: {len(matches)}")
+        print(f"unmatched: {len(unmatched_part_ids)}")
         for unmatched in unmatched_part_ids:
             print(unmatched)
-        print(f'- ' * 20)
+        print(f"- " * 20)
         return matches
 
     def export_gltfs(self) -> None:
-        """ Export gltf files based on scene descriptions parsed from a valid config file. """
+        """Export gltf files based on scene descriptions parsed from a valid config file."""
         for part in self.parts:
             ### CREATE BPY SCENE COMPONENTS
             bpy_single_parts = get_bpy_single_parts(part)
@@ -604,21 +614,21 @@ class SceneExporter():
 
 
 def get_args():
-    """ Returns script arguments as python variables."""
+    """Returns script arguments as python variables."""
     parser = argparse.ArgumentParser()
     # Only consider script args, ignore blender args
     _, all_arguments = parser.parse_known_args()
-    double_dash_index = all_arguments.index('--')
-    script_args = all_arguments[double_dash_index + 1:]
+    double_dash_index = all_arguments.index("--")
+    script_args = all_arguments[double_dash_index + 1 :]
 
     parser.add_argument(
-        '--rcfg_file',
+        "--rcfg_file",
         help="Render configuration file.",
         type=str,
         required=True,
     )
     parser.add_argument(
-        '--out_dir',
+        "--out_dir",
         help="Root directory to save outputs in.",
         type=str,
         required=True,
@@ -627,7 +637,7 @@ def get_args():
     return args
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tstart = time.time()
     args = get_args()
     print(f"Running GLTF export with args:\n{args}")
@@ -637,8 +647,11 @@ if __name__ == '__main__':
     os.makedirs(out_dir, exist_ok=True)
 
     # Get opened blender file path to reload scene when needed
-    blend_file = bpy.data.filepath
-    open_scene(blend_file)
+    if bpy.data.filepath:
+        blend_file = bpy.data.filepath
+        open_scene(blend_file)
+    else:
+        create_scene(name="scene")
     # Load RCFG data
     with open(rcfg_file, "r") as rcfg_json:
         rcfg_data = json.load(rcfg_json)
@@ -650,5 +663,5 @@ if __name__ == '__main__':
     scene_exporter.export_gltfs()
 
     tend = time.time() - tstart
-    print('-' * 20)
-    print(f'Done GLTF Export in {tend}')
+    print("-" * 20)
+    print(f"Done GLTF Export in {tend}")

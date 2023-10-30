@@ -15,9 +15,7 @@
                 "description": "A machine part",
                 "required": [
                     "id",
-                    "name",
-                    "hierarchy",
-                    "single_parts",
+                    "path",
                     "scene"
                 ],
                 "properties": {
@@ -25,20 +23,9 @@
                         "type": "string",
                         "description": "The identifier for this part"
                     },
-                    "name": {
+                    "path": {
                         "type": "string",
-                        "description": "The part's name"
-                    },
-                    "hierarchy": {
-                        "type": "string",
-                        "description": "The hierarchy of this part"
-                    },
-                    "single_parts": {
-                        "type": "array",
-                        "description": "The single parts this assembly is assembled of or the part itself if it's a single part",
-                        "items": {
-                            "$ref": "/schemas/single_part"
-                        }
+                        "description": "The path to the part's OBJ file"
                     },
                     "scene": {
                         "description": "Scene definition for this part",
@@ -214,30 +201,6 @@
                     },
                     "render_setups": {
                         "$ref": "/schemas/render_setups"
-                    }
-                }
-            },
-            "single_part": {
-                "$id": "/schemas/single_part",
-                "type": "object",
-                "description": "The single parts of of this assembly",
-                "required": [
-                    "id",
-                    "name",
-                    "material"
-                ],
-                "properties": {
-                    "id": {
-                        "type": "string",
-                        "description": "The part identifier"
-                    },
-                    "name": {
-                        "type": "string",
-                        "description": "The name of this part"
-                    },
-                    "material": {
-                        "type": "string",
-                        "description": "The material of this single part"
                     }
                 }
             }
