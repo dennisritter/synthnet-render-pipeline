@@ -13,7 +13,8 @@ from utils import timer_utils
 LOGGER = logging.getLogger(__name__)
 LOG_DELIM = "- " * 20
 
-RCFG_VAL_SCHEMA_FILE = "./validation/schemas/rcfg_schema_v3.json"
+RCFG_VAL_SCHEMA_FILE_TOPEX = "./validation/schemas/rcfg_schema_topex.json"
+RCFG_VAL_SCHEMA_FILE_OBJ = "./validation/schemas/rcfg_schema_obj.json"
 
 
 class PreprocessingController:
@@ -35,6 +36,7 @@ class PreprocessingController:
         metadata_file: str,
         blend_file: str,
         materials_dir: str,
+        obj_dir: str,
         output_dir: str,
         n_images: int,
         camera_def_mode: str,
@@ -45,16 +47,22 @@ class PreprocessingController:
         light_seed: int,
     ):
         ## Validate parameters
-        # validate metadata_file
-        assert isinstance(metadata_file, str)
-        assert os.path.isfile(metadata_file)
-        # validate blend_file
-        assert isinstance(blend_file, str)
-        assert os.path.isfile(blend_file)
-        # validate materials_dir
-        assert isinstance(materials_dir, str)
-        assert os.path.isdir(materials_dir)
-        # validate output_dir
+        assert (metadata_file and blend_file) or obj_dir, "Either metadata_file and blend_file or obj_dir must be set"
+        if metadata_file and blend_file:
+            # validate metadata_file
+            assert isinstance(metadata_file, str)
+            assert os.path.isfile(metadata_file)
+            # validate blend_file
+            assert isinstance(blend_file, str)
+            assert os.path.isfile(blend_file)
+        if materials_dir:
+            # validate materials_dir
+            assert isinstance(materials_dir, str)
+            assert os.path.isdir(materials_dir)
+        if obj_dir:
+            # validate output_dir
+            assert isinstance(obj_dir, str)
+            assert os.path.isdir(obj_dir)
         assert isinstance(output_dir, str)
         os.makedirs(output_dir, exist_ok=True)
         assert os.path.exists(output_dir)
@@ -105,6 +113,7 @@ class PreprocessingController:
         self.metadata_file = metadata_file
         self.blend_file = blend_file
         self.materials_dir = materials_dir
+        self.obj_dir = obj_dir
         self.output_dir = output_dir
         self.n_images = n_images
         self.camera_def_mode = camera_def_mode.lower()
@@ -114,23 +123,46 @@ class PreprocessingController:
         self.camera_seed = camera_seed
         self.light_seed = light_seed
 
-        # Prepared metadata.xlsx file as pandas DataFrame
-        # rows: parts
-        # cols: part_id, part_name, part_hierarchy, part_material, part_is_spare
-        self.metadata = prepare_metadata(metadata_file)
+        # Topex: Prepare Metadata and get Machine parts
+        if self.metadata_file and blend_file:
+            self.rcfg_val_schema_file = RCFG_VAL_SCHEMA_FILE_TOPEX
+            # Prepared metadata.xlsx file as pandas DataFrame
+            # rows: parts
+            # cols: part_id, part_name, part_hierarchy, part_material, part_is_spare
+            self.metadata = prepare_metadata(metadata_file)
 
-        # A scene described by Cameras, Lights and envmaps and render_setups, that is used for
-        # all parts
-        self.global_scene = None
+            # A scene described by Cameras, Lights and envmaps and render_setups, that is used for
+            # all parts
+            self.global_scene = None
 
-        # Parse Parts
-        tstart = timer_utils.time_now()
-        LOGGER.info(LOG_DELIM)
-        LOGGER.info(f"Parsing unique Parts and SingleParts from {metadata_file}")
-        # List of all Parts to render
-        self.parts = parse_parts(self.metadata)
-        tend = timer_utils.time_since(tstart)
-        LOGGER.info(f"Done in {tend}")
+            # Parse Parts
+            tstart = timer_utils.time_now()
+            LOGGER.info(LOG_DELIM)
+            LOGGER.info(f"Parsing unique Parts and SingleParts from {metadata_file}")
+            # List of all Parts to render
+            self.parts = parse_parts(self.metadata)
+            tend = timer_utils.time_since(tstart)
+            LOGGER.info(f"Done in {tend}")
+
+        # OBJ files: Parse directory structure
+        # Structure is expected to be:
+        #   - obj_dir/{split}/{label}/{obj_file}
+        elif obj_dir:
+            self.rcfg_val_schema_file = RCFG_VAL_SCHEMA_FILE_OBJ
+            LOGGER.info(LOG_DELIM)
+            LOGGER.info(f"Parsing OBJ files from directory: {self.obj_dir}")
+            self.parts = []
+            for split in os.listdir(f"{self.obj_dir}"):
+                for label in os.listdir(f"{self.obj_dir}/{split}"):
+                    render_samples = os.listdir(f"{self.obj_dir}/{split}/{label}")
+                    for obj_file in render_samples:
+                        if obj_file.endswith(".obj"):
+                            part = {
+                                "id": f'{split}_{obj_file.split(".")[0]}',
+                                "path": f"{self.obj_dir}/{split}/{label}/{obj_file}",
+                                "scene": None,
+                            }
+                            self.parts.append(part)
 
     def assign_materials(self):
         """Assign materials to single parts depending on self.material_def_mode."""
@@ -247,7 +279,10 @@ class PreprocessingController:
             scene.lights = lights
             scene.envmaps = envmaps
             scene.render_setups = render_setups
-            part.scene = scene
+            if type(part) is dict:
+                part["scene"] = scene
+            else:
+                part.scene = scene
 
         tend = timer_utils.time_since(tstart)
         LOGGER.info(f"Done in {tend}")
@@ -290,7 +325,7 @@ class PreprocessingController:
         )
 
     def val_rcfg_json(self):
-        with open(RCFG_VAL_SCHEMA_FILE, "r", encoding="UTF-8") as json_file:
+        with open(self.rcfg_val_schema_file, "r", encoding="UTF-8") as json_file:
             rcfg_schema = json.loads(json_file.read())
         rcfg = self.get_rcfg_json()
         try:
