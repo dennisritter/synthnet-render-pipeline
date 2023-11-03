@@ -88,7 +88,7 @@ PREPROCESSING_SECONDS_END=$(($SECONDS-$PREPROCESSING_SECONDS_START))
 ########## EXPORT GLTFs ##########
 if [[ $RUN_MODE -ge 2 ]]; then
     # Set options
-    RCFG_NAME="rcfg_schema_topex.json"
+    RCFG_NAME="rcfg.json"
     RCFG_FILE="$OUT_DIR/$RCFG_NAME"
     GLTF_DIR="$OUT_DIR/gltf"
 
