@@ -6,28 +6,39 @@ spec:
   restartPolicy: Never
   containers:
   - name: synthnet-7054-12-300-l-se-su-st-st-512-32
-    image: registry.bht-berlin.de/iisy/synthnet/rendering-pipeline
+    image: beuthdritter/synthnet-render-pipeline
     env:
+      - name: GIT_NAME
+        valueFrom:
+          secretKeyRef:
+            name: git-creds
+            key: username
+            optional: false
+      - name: GIT_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: git-creds
+            key: token
+            optional: false
       - name: GOOGLE_APPLICATION_CREDENTIALS
         value: /etc/gcp/synthnet-gcs.json
     volumeMounts:
             - name: output-volume
               mountPath: /workspace/out
+            - name: src-volume
+              mountPath: /src-pv
             - name: synthnet-gcs-key-volume
               mountPath: /etc/gcp
               readOnly: true
-    command:
-      [
-        "conda",
-        "run",
-        "-n",
-        "py39-synthnet-rendering-pipeline",
-        "bash",
-        "scripts/runs_synthnet/7054-12-300-L_drucker/7054-12-300-L_drucker_se_su_st_st_512_32.sh",
-        "3",
-        "42",
-        "43"
-      ]
+    command: ["/bin/bash", "-c"]
+    args:
+      - while true; do sleep 30; done;
+      # - cd /src-pv/rendering-pipeline;
+      #   git checkout develop;
+      #   git pull;
+      #   cd /workspace;
+      #   cp -r /src-pv/rendering-pipeline/* /workspace;
+      #   bash scripts/runs_synthnet/7054-12-300-L_drucker/7054-12-300-L_drucker_se_su_st_st_512_32.sh 3 42 43",
     resources:
       requests:
         memory: "16Gi"
@@ -42,6 +53,9 @@ spec:
   - name: output-volume
     persistentVolumeClaim:
       claimName: output-pvc
+  - name: src-volume
+    persistentVolumeClaim:
+      claimName: src-pvc
   - name: synthnet-gcs-key-volume
     secret:
       secretName: synthnet-gcs-key
