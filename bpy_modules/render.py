@@ -216,6 +216,43 @@ def objs_set_hide_render(objs: list[bpy.types.Object], hide_render: bool) -> Non
         obj.hide_render = hide_render
 
 
+def get_compositor_depthmap_node_tree():
+    """Returns a Blender Compositor node tree that renders a normalized depth map."""
+    bpy.context.scene.use_nodes = True
+    bpy.context.scene.render.use_compositing = True
+    bpy.context.scene.view_layers["ViewLayer"].use_pass_z = True
+    tree = bpy.context.scene.node_tree
+    links = tree.links
+    # clear default nodes
+    for n in tree.nodes:
+        tree.nodes.remove(n)
+    # create input render layer node
+    map = tree.nodes.new(type="CompositorNodeMapValue")
+    map.size = [1.0]
+    map.use_min = True
+    map.min = [0]
+    map.use_max = True
+    map.max = [255]
+    rl = tree.nodes.new("CompositorNodeRLayers")
+    normalize = tree.nodes.new("CompositorNodeNormalize")
+    invert = tree.nodes.new("CompositorNodeInvert")
+    links.new(rl.outputs[2], normalize.inputs[0])
+    links.new(normalize.outputs[0], map.inputs[0])
+    links.new(map.outputs[0], invert.inputs[1])
+
+    # Depth map as 1-Channel PNG
+    depth_file_output_png = tree.nodes.new(type="CompositorNodeOutputFile")
+    depth_file_output_png.format.color_mode = "BW"
+    depth_file_output_png.format.file_format = "PNG"
+    tree.links.new(invert.outputs[0], depth_file_output_png.inputs[0])
+    # Depth map as OPEN_EXR
+    depth_file_output_exr = tree.nodes.new(type="CompositorNodeOutputFile")
+    depth_file_output_exr.format.file_format = "OPEN_EXR"
+    tree.links.new(rl.outputs[2], depth_file_output_exr.inputs[0])
+
+    return tree, depth_file_output_png, depth_file_output_exr
+
+
 def setup_gpu_cycles() -> None:
     """Applies setup for GPU usage while rendering with Cycles render engine."""
     # Render settings CYCLES GPU rendering
@@ -383,32 +420,30 @@ def render(
     # Hide all lights
     objs_set_hide_render(lights, True)
 
+    # DEPTH MAP RENDER SETUP
+    depthmap_node_tree, depth_file_output_png, depth_file_output_exr = get_compositor_depthmap_node_tree()
+
+    bpy.ops.object.select_by_type(extend=False, type="MESH")
+
+    # scale all objects so largest dimension out of all objects equals 1
+    # 1. Add selected objects to empty parent object
+    parent_obj = bpy.data.objects.new("Empty", None)
+    for obj in bpy.context.selected_objects:
+        obj.parent = parent_obj
+    # 2. Rescale mesh objects so largest dimension out of all objects equals 1
+    max_xdim, max_ydim, max_zdim = 0, 0, 0
+    for obj in parent_obj.children:
+        max_xdim = obj.dimensions.x if obj.dimensions.x > max_xdim else max_xdim
+        max_ydim = obj.dimensions.y if obj.dimensions.y > max_ydim else max_ydim
+        max_zdim = obj.dimensions.z if obj.dimensions.z > max_zdim else max_zdim
+    max_dim = max(max_xdim, max_ydim, max_zdim)
+    parent_obj.scale = (1 / max_dim, 1 / max_dim, 1 / max_dim)
+
     # Render Loop
     for i, render_setup in enumerate(render_setups):
         # CAMERA: load, add to scene, zoom to object
         render_camera = cameras[render_setup["camera_i"]]
         scene.camera = render_camera
-        bpy.ops.object.select_by_type(extend=False, type="MESH")
-
-        # Rescale objects but keep relative positions
-        # 1. Add selected objects to empty parent object
-        parent_obj = bpy.data.objects.new("Empty", None)
-        for obj in bpy.context.selected_objects:
-            obj.parent = parent_obj
-        # 2. Rescale mesh objects so largest dimension out of all objects equals 1
-        max_xdim, max_ydim, max_zdim = 0, 0, 0
-        for obj in parent_obj.children:
-            max_xdim = obj.dimensions.x if obj.dimensions.x > max_xdim else max_xdim
-            max_ydim = obj.dimensions.y if obj.dimensions.x > max_ydim else max_ydim
-            max_zdim = obj.dimensions.z if obj.dimensions.x > max_zdim else max_zdim
-        max_dim = max(max_xdim, max_ydim, max_zdim)
-        parent_obj.scale = (1 / max_dim, 1 / max_dim, 1 / max_dim)
-        # 3. Unparent objects
-        for obj in parent_obj.children:
-            obj.parent = None
-        # 4. Remove parent object
-        bpy.data.objects.remove(parent_obj, do_unlink=True)
-
         bpy.ops.view3d.camera_to_view_selected()
         # Zoom in/out from 100% ?
         # translate_objects_by([cam], mathutils.Vector((0, 0, 0.5)))
@@ -423,9 +458,22 @@ def render(
         add_hdri_map(render_envmap_fn)
 
         # RENDER
-        scene.render.filepath = f"{out_dir}/render/{part_id}_{i}"
+        scene.render.filepath = f"{out_dir}/render/rgb/{part_id}/{part_id}_{i:03d}"
+
+        # Set up rendering of depth map files
+        depth_file_output_png.base_path = f"{out_dir}/render/depth_png/{part_id}"
+        depth_file_output_png.file_slots[0].path = f"{part_id}_{i:03d}_depth"
+
+        depth_file_output_exr.base_path = f"{out_dir}/render/depth_exr/{part_id}"
+        depth_file_output_exr.file_slots[0].path = f"{part_id}_{i:03d}_depth"
+
         bpy.ops.render.render(write_still=True)
 
+        ## fix depth map filename by removing frame number
+        os.rename(f"{depth_file_output_png.base_path}/{depth_file_output_png.file_slots[0].path}0001.png", f"{depth_file_output_png.base_path}/{depth_file_output_png.file_slots[0].path}.png")
+        os.rename(f"{depth_file_output_exr.base_path}/{depth_file_output_exr.file_slots[0].path}0001.exr", f"{depth_file_output_exr.base_path}/{depth_file_output_exr.file_slots[0].path}.exr")
+
+        ## CLEANUP
         # Hide lights again after rendered
         objs_set_hide_render(render_lights, True)
 
