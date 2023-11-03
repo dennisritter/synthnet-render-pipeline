@@ -3,6 +3,17 @@ FROM nytimes/blender:3.1-gpu-ubuntu18.04
 
 # Install dependencies
 RUN apt update && \
+    apt install curl
+# TODO: Continue to setup environment
+# curl https://pyenv.run | bash
+# echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+# echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+# echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+# source ~/.bashrc
+# pyenv install 3.9
+# pyenv virtualenv 3.9
+
+RUN apt update && \
     pip install numpy \
     pip install pandas \
     pip install openpyxl \
