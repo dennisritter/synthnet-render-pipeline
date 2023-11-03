@@ -31,7 +31,7 @@ fi
 #
 # 1. Preprocessing to generate a render config (rcfg)
 # 2. Export GLTF-scenes based on the RCFG from preprocessing and CAD data
-# 3. Render all GLTFs 
+# 3. Render all GLTFs
 
 echo "- - - - - - - - - - - - - - - - - - - - "
 echo "Starting SynthNet Rendering Pipeline run."
@@ -42,7 +42,7 @@ echo "  3 = Preprocessing, GLTF Export and Rendering"
 echo "- - - - - - - - - - - - - - - - - - - - "
 
 ##### RESOURCES
-# Resource directory path. Contains Environment maps, materials, CAD data and metadata. 
+# Resource directory path. Contains Environment maps, materials, CAD data and metadata.
 # (relative to project root)
 RESOURCE_DIR="./data/7054-12-300-L_drucker"
 TOPEX_METADATA_FILE="${RESOURCE_DIR}/7054-12-300-L_drucker.xlsx"
@@ -88,7 +88,7 @@ PREPROCESSING_SECONDS_END=$(($SECONDS-$PREPROCESSING_SECONDS_START))
 ########## EXPORT GLTFs ##########
 if [[ $RUN_MODE -ge 2 ]]; then
     # Set options
-    RCFG_NAME="rcfg_v2.json"
+    RCFG_NAME="rcfg_schema_topex.json"
     RCFG_FILE="$OUT_DIR/$RCFG_NAME"
     GLTF_DIR="$OUT_DIR/gltf"
 
@@ -96,7 +96,7 @@ if [[ $RUN_MODE -ge 2 ]]; then
     EXPORT_SECONDS_START=$SECONDS
     blender $TOPEX_BLENDER_FILE --background --python ./bpy_modules/export_gltfs.py -- \
     --rcfg_file $RCFG_FILE \
-    --out_dir $GLTF_DIR 
+    --out_dir $GLTF_DIR
     EXPORT_SECONDS_END=$(($SECONDS-$EXPORT_SECONDS_START))
 fi
 ###################################
@@ -128,33 +128,7 @@ if [[ $RUN_MODE -ge 3 ]]; then
 fi
 ############################
 
-########## EXPORT DATASET INFO ##########
-if [[ $RUN_MODE -ge 3 ]]; then
-    # Run Export GLTFs
-    python scripts/utils/export_dataset_info.py \
-    --out_dir $OUT_DIR \
-    --run_description $RUN_DESCRIPTION \
-    --camera_seed $CAMERA_SEED \
-    --light_seed $LIGHT_SEED \
-    --n_images_per_part $N_IMAGES_PER_PART \
-    --camera_def_mode $CAMERA_DEF_MODE \
-    --light_def_mode $LIGHT_DEF_MODE \
-    --material_def_mode $MATERIAL_DEF_MODE \
-    --envmap_def_mode $ENVMAP_DEF_MODE \
-    --rcfg_version "v2" \
-    --rcfg_file $RCFG_FILE \
-    --render_dir $OUT_DIR/render \
-    --render_res_x $RES_X \
-    --render_res_y $RES_Y \
-    --render_quality $OUT_QUALITY \
-    --render_format $OUT_FORMAT \
-    --render_engine $ENGINE \
-    --render_device $DEVICE \
-    --comment "" 
-fi
-############################
-
-echo "Time Measures:" 
+echo "Time Measures:"
 echo "Total time (s): $SECONDS"
 echo "Preprocessing time (s): $PREPROCESSING_SECONDS_END"
 echo "GLTF Export time (s): $EXPORT_SECONDS_END"
