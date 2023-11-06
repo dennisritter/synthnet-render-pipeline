@@ -37,7 +37,7 @@
                         "type": "array",
                         "description": "The single parts this assembly is assembled of or the part itself if it's a single part",
                         "items": {
-                            "$ref": "#/schemas/single_part"
+                            "$ref": "/schemas/single_part"
                         }
                     },
                     "scene": {
