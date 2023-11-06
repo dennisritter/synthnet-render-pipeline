@@ -23,4 +23,4 @@ RUN apt update \
     && pip install pandas \
     && pip install openpyxl \
     && pip install click \
-    && pip install jsonschema
+    && pip install jsonschema==4.0.*
