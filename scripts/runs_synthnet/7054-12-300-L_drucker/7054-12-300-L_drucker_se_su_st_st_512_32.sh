@@ -10,21 +10,18 @@ SECONDS=0
 
 # Set run mode by args or set default
 RUN_MODE="${1}"
-if [ -z "$1" ]
-    then
-        RUN_MODE=3
+if [ -z "$1" ]; then
+    RUN_MODE=3
 fi
 # Set camera seed by Args or set default
 CAMERA_SEED="${2}"
-if [ -z "$2"]
-    then
-        CAMERA_SEED=42
+if [ -z "$2" ]; then
+    CAMERA_SEED=42
 fi
 # Set light seed by Args or set default
 LIGHT_SEED="${3}"
-if [ -z "$3"]
-    then
-        LIGHT_SEED=43
+if [ -z "$3" ]; then
+    LIGHT_SEED=43
 fi
 
 # Shell script to trigger a SynthNet Rendering Pipeline run using a minimal example
@@ -55,7 +52,7 @@ ENVMAPS_DIR="${RESOURCE_DIR}/envmaps"
 OUT_ROOT_DIR="./out"
 RUN_DESCRIPTION="7054-12-300-L_drucker_se_su_st_st_512_32"
 # will return a dir path like '$OUT_ROOT_DIR/$ID-$RUN_DESCRIPTION -> ./out/1-my-run
-OUT_DIR=`python scripts/utils/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION"`
+OUT_DIR=$(python scripts/utils/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION")
 echo "Created output directory: $OUT_DIR"
 # Copy input data into the out dir
 cp -R $RESOURCE_DIR "${OUT_DIR}/input_data"
@@ -71,18 +68,18 @@ ENVMAP_DEF_MODE='static'
 # Run Preprocessing
 PREPROCESSING_SECONDS_START=$SECONDS
 python preprocessing.py \
---metadata_file $TOPEX_METADATA_FILE \
---blend_file $TOPEX_BLENDER_FILE \
---materials_dir $MATERIALS_DIR \
---out_dir $OUT_DIR \
---n_images_per_part $N_IMAGES_PER_PART \
---camera_def_mode $CAMERA_DEF_MODE \
---light_def_mode $LIGHT_DEF_MODE \
---material_def_mode $MATERIAL_DEF_MODE \
---envmap_def_mode $ENVMAP_DEF_MODE \
---camera_seed $CAMERA_SEED \
---light_seed $LIGHT_SEED
-PREPROCESSING_SECONDS_END=$(($SECONDS-$PREPROCESSING_SECONDS_START))
+    --metadata_file $TOPEX_METADATA_FILE \
+    --blend_file $TOPEX_BLENDER_FILE \
+    --materials_dir $MATERIALS_DIR \
+    --out_dir $OUT_DIR \
+    --n_images_per_part $N_IMAGES_PER_PART \
+    --camera_def_mode $CAMERA_DEF_MODE \
+    --light_def_mode $LIGHT_DEF_MODE \
+    --material_def_mode $MATERIAL_DEF_MODE \
+    --envmap_def_mode $ENVMAP_DEF_MODE \
+    --camera_seed $CAMERA_SEED \
+    --light_seed $LIGHT_SEED
+PREPROCESSING_SECONDS_END=$(($SECONDS - $PREPROCESSING_SECONDS_START))
 ###################################
 
 ########## EXPORT GLTFs ##########
@@ -95,9 +92,9 @@ if [[ $RUN_MODE -ge 2 ]]; then
     # Run Export GLTFs
     EXPORT_SECONDS_START=$SECONDS
     blender $TOPEX_BLENDER_FILE --background --python ./bpy_modules/export_gltfs.py -- \
-    --rcfg_file $RCFG_FILE \
-    --out_dir $GLTF_DIR
-    EXPORT_SECONDS_END=$(($SECONDS-$EXPORT_SECONDS_START))
+        --rcfg_file $RCFG_FILE \
+        --out_dir $GLTF_DIR
+    EXPORT_SECONDS_END=$(($SECONDS - $EXPORT_SECONDS_START))
 fi
 ###################################
 
@@ -113,18 +110,18 @@ if [[ $RUN_MODE -ge 3 ]]; then
     # Run Export GLTFs
     RENDER_SECONDS_START=$SECONDS
     blender --background --python ./bpy_modules/render.py -- \
-    --gltf_dir $GLTF_DIR \
-    --material_dir $MATERIALS_DIR \
-    --envmap_dir $ENVMAPS_DIR \
-    --out_dir $OUT_DIR \
-    --rcfg_file="$OUT_DIR/$RCFG_NAME" \
-    --res_x $RES_X \
-    --res_y $RES_Y \
-    --out_quality $OUT_QUALITY \
-    --out_format $OUT_FORMAT \
-    --engine $ENGINE \
-    --device $DEVICE
-    RENDER_SECONDS_END=$(($SECONDS-$RENDER_SECONDS_START))
+        --gltf_dir $GLTF_DIR \
+        --material_dir $MATERIALS_DIR \
+        --envmap_dir $ENVMAPS_DIR \
+        --out_dir $OUT_DIR \
+        --rcfg_file="$OUT_DIR/$RCFG_NAME" \
+        --res_x $RES_X \
+        --res_y $RES_Y \
+        --out_quality $OUT_QUALITY \
+        --out_format $OUT_FORMAT \
+        --engine $ENGINE \
+        --device $DEVICE
+    RENDER_SECONDS_END=$(($SECONDS - $RENDER_SECONDS_START))
 fi
 ############################
 

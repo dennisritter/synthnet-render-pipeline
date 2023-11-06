@@ -32,13 +32,13 @@ spec:
               readOnly: true
     command: ["/bin/bash", "-c"]
     args:
-      - while true; do sleep 30; done;
-      # - cd /src-pv/synthnet-render-pipeline;
-      #   git checkout develop;
-      #   git pull;
-      #   cd /workspace;
-      #   cp -r /src-pv/synthnet-render-pipeline/* /workspace;
-      #   bash scripts/runs_synthnet/7054-12-300-L_drucker/7054-12-300-L_drucker_se_su_st_st_512_32.sh 3 42 43;
+      # - while true; do sleep 30; done;
+      - cd /src-pv/synthnet-render-pipeline;
+        git checkout develop;
+        git pull;
+        cd /workspace;
+        cp -r /src-pv/synthnet-render-pipeline/* /workspace;
+        bash scripts/runs_synthnet/7054-12-300-L_drucker/7054-12-300-L_drucker_se_su_st_st_512_32.sh 3 42 43;
     resources:
       requests:
         memory: "16Gi"
