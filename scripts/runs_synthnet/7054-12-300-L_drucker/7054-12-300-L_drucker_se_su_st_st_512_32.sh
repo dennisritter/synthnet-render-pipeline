@@ -68,8 +68,8 @@ ENVMAP_DEF_MODE='static'
 # Run Preprocessing
 PREPROCESSING_SECONDS_START=$SECONDS
 python preprocessing.py \
-    --metadata_file $TOPEX_METADATA_FILE \
-    --blend_file $TOPEX_BLENDER_FILE \
+    --topex_metadata_file $TOPEX_METADATA_FILE \
+    --topex_blend_file $TOPEX_BLENDER_FILE \
     --materials_dir $MATERIALS_DIR \
     --out_dir $OUT_DIR \
     --n_images_per_part $N_IMAGES_PER_PART \
