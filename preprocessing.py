@@ -100,7 +100,7 @@ def main(**kwargs):
 
     metadata_file = args.topex_metadata_file
     blend_file = args.topex_blend_file
-    materials_dir = args.topex_materials_dir
+    materials_dir = args.materials_dir
     obj_dir = args.obj_dir
     out_dir = args.out_dir
     n_images_per_part = args.n_images_per_part
