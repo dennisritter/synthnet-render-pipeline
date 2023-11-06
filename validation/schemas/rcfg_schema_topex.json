@@ -1,5 +1,5 @@
 {
-    "title": "GLTF Rendering Configuration V2.",
+    "title": "GLTF Rendering Configuration V3.",
     "description": "Definition of scene- and object-configurations to build scenes that are exported as GLTF files",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
@@ -37,12 +37,12 @@
                         "type": "array",
                         "description": "The single parts this assembly is assembled of or the part itself if it's a single part",
                         "items": {
-                            "$ref": "#/schemas/single_part"
+                            "$ref": "/schemas/single_part"
                         }
                     },
                     "scene": {
                         "description": "Scene definition for this part",
-                        "$ref": "#/schemas/scene"
+                        "$ref": "/schemas/scene"
                     }
                 }
             }
@@ -71,7 +71,7 @@
                 "type": "array",
                 "description": "A list of camera definitions",
                 "items": {
-                    "$ref": "#/schemas/camera"
+                    "$ref": "/schemas/camera"
                 }
             },
             "camera": {
@@ -87,14 +87,14 @@
                 ],
                 "properties": {
                     "position": {
-                        "$ref": "#/schemas/point_3d"
+                        "$ref": "/schemas/point_3d"
                     },
                     "type_camera": {
                         "type": "string",
                         "description": "The camera type. CAMERA_TYPES = ['persp', 'ortho', 'pano']"
                     },
                     "target": {
-                        "$ref": "#/schemas/point_3d"
+                        "$ref": "/schemas/point_3d"
                     },
                     "focal_length": {
                         "type": "number",
@@ -114,7 +114,7 @@
                 "type": "array",
                 "description": "A list of light definitions",
                 "items": {
-                    "$ref": "#/schemas/light"
+                    "$ref": "/schemas/light"
                 }
             },
             "light": {
@@ -133,10 +133,10 @@
                         "description": "The light type"
                     },
                     "position": {
-                        "$ref": "#/schemas/point_3d"
+                        "$ref": "/schemas/point_3d"
                     },
                     "target": {
-                        "$ref": "#/schemas/point_3d"
+                        "$ref": "/schemas/point_3d"
                     },
                     "intensity": {
                         "type": "number",
@@ -149,7 +149,7 @@
                 "type": "array",
                 "description": "File path to an environment map",
                 "items": {
-                    "$ref": "#/schemas/envmap"
+                    "$ref": "/schemas/envmap"
                 }
             },
             "envmap": {
@@ -162,7 +162,7 @@
                 "type": "array",
                 "description": "List of render descriptins that contain references to cameras, lights and envmaps stored in respective lists.",
                 "items": {
-                    "$ref": "#/schemas/render_setup"
+                    "$ref": "/schemas/render_setup"
                 }
             },
             "render_setup": {
@@ -204,16 +204,16 @@
                 ],
                 "properties": {
                     "lights": {
-                        "$ref": "#/schemas/lights"
+                        "$ref": "/schemas/lights"
                     },
                     "cameras": {
-                        "$ref": "#/schemas/cameras"
+                        "$ref": "/schemas/cameras"
                     },
                     "envmaps": {
-                        "$ref": "#/schemas/envmaps"
+                        "$ref": "/schemas/envmaps"
                     },
                     "render_setups": {
-                        "$ref": "#/schemas/render_setups"
+                        "$ref": "/schemas/render_setups"
                     }
                 }
             },
