@@ -23,6 +23,8 @@ spec:
       - name: GOOGLE_APPLICATION_CREDENTIALS
         value: /etc/gcp/synthnet-gcs.json
     volumeMounts:
+            - name: synthnet-render-pipeline-volume
+              mountPath: /workspace/data
             - name: output-volume
               mountPath: /workspace/out
             - name: src-volume
@@ -50,6 +52,9 @@ spec:
   nodeSelector:
     gpu: v100
   volumes:
+  - name: synthnet-render-pipeline-volume
+    persistentVolumeClaim:
+      claimName: synthnet-render-pipeline-pvc
   - name: output-volume
     persistentVolumeClaim:
       claimName: output-pvc
