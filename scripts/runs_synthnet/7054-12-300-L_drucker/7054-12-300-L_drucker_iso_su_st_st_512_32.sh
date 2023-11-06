@@ -50,7 +50,7 @@ ENVMAPS_DIR="${RESOURCE_DIR}/envmaps"
 ##### OUTPUTS
 # Specify output root directory and a run description to create a unique output directory
 OUT_ROOT_DIR="./out/synthnet-render-pipeline-outputs"
-RUN_DESCRIPTION="7054-12-300-L_drucker_isogrid_su_st_st_512_32"
+RUN_DESCRIPTION="7054-12-300-L_drucker_iso_su_st_st_512_32"
 # will return a dir path like '$OUT_ROOT_DIR/$ID-$RUN_DESCRIPTION -> ./out/1-my-run
 OUT_DIR=$(python scripts/utils/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESCRIPTION")
 echo "Created output directory: $OUT_DIR"
