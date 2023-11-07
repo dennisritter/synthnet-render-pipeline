@@ -6,8 +6,20 @@ spec:
   restartPolicy: Never
   containers:
   - name: render-modelnet10
-    image: registry.bht-berlin.de/iisy/synthnet/rendering-pipeline
+    image: beuthdritter/synthnet-render-pipeline
     env:
+      - name: GIT_NAME
+        valueFrom:
+          secretKeyRef:
+            name: git-creds
+            key: username
+            optional: false
+      - name: GIT_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: git-creds
+            key: token
+            optional: false
       - name: GOOGLE_APPLICATION_CREDENTIALS
         value: /etc/gcp/synthnet-gcs.json
     volumeMounts:
@@ -15,36 +27,37 @@ spec:
               mountPath: /workspace/out
             - name: modelnet-volume
               mountPath: /workspace/data
+            - name: src-volume
+              mountPath: /src-pv
             - name: synthnet-gcs-key-volume
               mountPath: /etc/gcp
               readOnly: true
-    command:
-      [
-        "conda",
-        "run",
-        "-n",
-        "py39-synthnet-rendering-pipeline",
-        "bash",
-        "scripts/modelnet10.sh",
-        "3",
-        "42",
-        "43"
-      ]
+    command: ["/bin/bash", "-c"]
+    args:
+      # - while true; do sleep 30; done;
+      - cd /src-pv/synthnet-render-pipeline;
+        git checkout develop;
+        git pull;
+        cd /workspace;
+        cp -r /src-pv/synthnet-render-pipeline/* /workspace;
+        bash scripts/modelnet10.sh 3 42 43;
     resources:
       requests:
-        memory: "8Gi"
+        memory: "16Gi"
       limits:
         nvidia.com/gpu: 1
-        memory: "64Gi"
   imagePullSecrets:
   - name: private-registry-auth
   nodeSelector:
     gpu: v100
   volumes:
-  - name: output-volume 
+  - name: output-volume
     persistentVolumeClaim:
-      claimName: output-pvc
-  - name: modelnet-volume 
+      claimName: output-pvcW
+  - name: src-volume
+    persistentVolumeClaim:
+      claimName: src-pvc
+  - name: modelnet-volume
     persistentVolumeClaim:
       claimName: modelnet-pvc
   - name: synthnet-gcs-key-volume
