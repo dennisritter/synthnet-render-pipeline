@@ -1,0 +1,5 @@
+numpy==1.22.*
+pandas==1.4.*
+openpyxl==3.0.*
+click==8.0.*
+jsonschema==4.0.*
