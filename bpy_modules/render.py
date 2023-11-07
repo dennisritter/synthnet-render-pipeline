@@ -470,8 +470,14 @@ def render(
         bpy.ops.render.render(write_still=True)
 
         ## fix depth map filename by removing frame number
-        os.rename(f"{depth_file_output_png.base_path}/{depth_file_output_png.file_slots[0].path}0001.png", f"{depth_file_output_png.base_path}/{depth_file_output_png.file_slots[0].path}.png")
-        os.rename(f"{depth_file_output_exr.base_path}/{depth_file_output_exr.file_slots[0].path}0001.exr", f"{depth_file_output_exr.base_path}/{depth_file_output_exr.file_slots[0].path}.exr")
+        os.rename(
+            f"{depth_file_output_png.base_path}/{depth_file_output_png.file_slots[0].path}0001.png",
+            f"{depth_file_output_png.base_path}/{depth_file_output_png.file_slots[0].path}.png",
+        )
+        os.rename(
+            f"{depth_file_output_exr.base_path}/{depth_file_output_exr.file_slots[0].path}0001.exr",
+            f"{depth_file_output_exr.base_path}/{depth_file_output_exr.file_slots[0].path}.exr",
+        )
 
         ## CLEANUP
         # Hide lights again after rendered

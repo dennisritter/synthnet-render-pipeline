@@ -126,8 +126,8 @@ def get_bounding_sphere(objects: list) -> list[mathutils.Vector, float]:
     for obj in objects:
         points_co_global.extend([obj.matrix_world @ mathutils.Vector(bbox) for bbox in obj.bound_box])
 
-    def get_center(l):
-        return (max(l) + min(l)) / 2 if l else 0.0
+    def get_center(ax):
+        return (max(ax) + min(ax)) / 2 if ax else 0.0
 
     x, y, z = [[point_co[i] for point_co in points_co_global] for i in range(3)]
     b_sphere_center = mathutils.Vector([get_center(axis) for axis in [x, y, z]]) if (x and y and z) else None
@@ -251,7 +251,7 @@ def get_objects_from_collection(collection: bpy.types.Collection) -> list:
     children = []
     collection.name
     for ob in collection.objects:
-        if type(ob) == bpy.types.Collection:
+        if type(ob) is bpy.types.Collection:
             children += get_objects_from_collection()
             continue
         children.append(ob)
@@ -267,7 +267,7 @@ def select(objects_to_select: list) -> None:
     selected_objects = []
     bpy.ops.object.select_all(action="DESELECT")
     for ob in objects_to_select:
-        if type(ob) == bpy.types.Collection:
+        if type(ob) is bpy.types.Collection:
             print(ob)
             for c in get_objects_from_collection(ob):
                 c.select_set(True)
@@ -541,8 +541,8 @@ class SceneExporter:
             part_ids (list<str>): A list of part IDs .
             root_collection (bpy_types.Collection): A blender collection that should contain machine parts subcollections.
         """
-        print(f"- " * 20)
-        print(f"Matching (part_id, bpy_object) pairs")
+        print("- " * 20)
+        print("Matching (part_id, bpy_object) pairs")
 
         matches = []
         # validate whether part_ids match with first part of collection names
@@ -572,7 +572,7 @@ class SceneExporter:
         print(f"unmatched: {len(unmatched_part_ids)}")
         for unmatched in unmatched_part_ids:
             print(unmatched)
-        print(f"- " * 20)
+        print("- " * 20)
         return matches
 
     def export_gltfs(self) -> None:
