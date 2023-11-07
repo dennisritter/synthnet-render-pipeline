@@ -24,7 +24,7 @@ if [ -z "$3" ]; then
     LIGHT_SEED=43
 fi
 
-# Shell script to trigger a SynthNet Rendering Pipeline run using a minimal example
+# Shell script to trigger a SynthNet Render Pipeline run using a minimal example
 #
 # 1. Preprocessing to generate a render config (rcfg)
 # 2. Export GLTF-scenes based on the RCFG from preprocessing and CAD data
@@ -56,21 +56,20 @@ OUT_DIR=$(python scripts/utils/make_unique_out_dir.py "$OUT_ROOT_DIR" "$RUN_DESC
 echo "Created output directory: $OUT_DIR"
 # Copy input data into the out dir
 cp -R $RESOURCE_DIR "${OUT_DIR}/input_data"
+###################################
 
 ########## PREPROCESSING ##########
-# Set options
 N_IMAGES_PER_PART=3
 CAMERA_DEF_MODE='sphere-equidistant'
 LIGHT_DEF_MODE='sphere-uniform'
 MATERIAL_DEF_MODE='static'
 ENVMAP_DEF_MODE='static'
 
-# Run Preprocessing
 PREPROCESSING_SECONDS_START=$SECONDS
 python preprocessing.py \
     --topex_metadata_file $TOPEX_METADATA_FILE \
     --topex_blend_file $TOPEX_BLENDER_FILE \
-    --topex_materials_dir $MATERIALS_DIR \
+    --materials_dir $MATERIALS_DIR \
     --out_dir $OUT_DIR \
     --n_images_per_part $N_IMAGES_PER_PART \
     --camera_def_mode $CAMERA_DEF_MODE \
@@ -82,9 +81,8 @@ python preprocessing.py \
 PREPROCESSING_SECONDS_END=$(($SECONDS - $PREPROCESSING_SECONDS_START))
 ###################################
 
-########## EXPORT GLTFs ##########
+########## EXPORT GLTFs ###########
 if [[ $RUN_MODE -ge 2 ]]; then
-    # Set options
     RCFG_NAME="rcfg.json"
     RCFG_FILE="$OUT_DIR/$RCFG_NAME"
     GLTF_DIR="$OUT_DIR/gltf"
@@ -98,7 +96,7 @@ if [[ $RUN_MODE -ge 2 ]]; then
 fi
 ###################################
 
-########## RENDER ##########
+############# RENDER ##############
 if [[ $RUN_MODE -ge 3 ]]; then
     # Set options
     RES_X=256
@@ -107,7 +105,6 @@ if [[ $RUN_MODE -ge 3 ]]; then
     OUT_FORMAT="PNG"
     ENGINE="CYCLES"
     DEVICE="GPU"
-    # Run Export GLTFs
     RENDER_SECONDS_START=$SECONDS
     blender --background --python ./bpy_modules/render.py -- \
         --gltf_dir $GLTF_DIR \
@@ -123,7 +120,6 @@ if [[ $RUN_MODE -ge 3 ]]; then
         --device $DEVICE
     RENDER_SECONDS_END=$(($SECONDS - $RENDER_SECONDS_START))
 fi
-############################
 
 echo "Time Measures:"
 echo "Total time (s): $SECONDS"
